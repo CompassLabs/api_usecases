@@ -24,15 +24,19 @@ jobs:
         node-version: '20'
     
     - name: PWD
+      working-directory: smart_accounts
       run: pwd
     
     - name: Install dependencies
+      working-directory: smart_accounts
       run: npm install
     
     - name: Build TypeScript
+      working-directory: smart_accounts
       run: npm run build
     
     - name: Run application
+      working-directory: smart_accounts
       run: npm start
       env:
         # Add any required environment variables here
