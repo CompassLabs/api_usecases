@@ -15,22 +15,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
+    - name: Change directory
+      run: cd smart_accounts
+    
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-        cache: 'npm'
     
     - name: Install dependencies
-      working-directory: ./smart_accounts
       run: npm ci
     
     - name: Build TypeScript
-      working-directory: ./smart_accounts
       run: npm run build
     
     - name: Run application
-      working-directory: ./smart_accounts
       run: npm start
       env:
         # Add any required environment variables here
