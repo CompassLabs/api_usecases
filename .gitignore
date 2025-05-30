@@ -1,0 +1,8 @@
+**/.venv
+**/.idea
+**/.devcontainer
+**/node_modules
+**/*lock*
+**/.env
+
+.env`rm

@@ -4,3 +4,5 @@ dist/
 
 *.xml
 *.idea
+
+**/.env
