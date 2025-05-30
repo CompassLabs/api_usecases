@@ -11,7 +11,6 @@ jobs:
   run-smart-accounts:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: production
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
     
     steps:
@@ -40,7 +39,4 @@ jobs:
     
     - name: Run application
       working-directory: smart_accounts
-      run: npm start
-      env:
-        # Add any required environment variables here
-        NODE_ENV: production
+      run: npm run start
