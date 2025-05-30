@@ -11,9 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@compass-labs/api-sdk": "^0.1.9"
+    "@compass-labs/api-sdk": "^0.1.9",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
+    "@types/node": "^22.15.27",
     "typescript": "^5.0.0"
   }
 }
