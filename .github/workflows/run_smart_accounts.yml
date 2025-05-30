@@ -10,6 +10,9 @@ on:
 jobs:
   run-smart-accounts:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
     
     steps:
     - name: Checkout repository
