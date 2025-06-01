@@ -1,64 +1,134 @@
 'use client';
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { requestSupplyTransaction, SupplyApiResponse } from "@/lib/supplyApi";
+
+import { getAaveTokenBalance } from "@/lib/readAaveBalance";
+import { getTokenBalance } from "@/lib/readTokenBalance";
+
+import { parseSignature, SignedAuthorization, authorize } from "@/lib/authorize";
+import {
+  TokenEnum,
+} from "@compass-labs/api-sdk/models/components";
+
+import { ethers } from 'ethers';
+
+
 
 type Asset = {
-  symbol: string;
-  name: string;
+  symbol: TokenEnum;
   balance: number;
 };
 
 const mockAssets: Asset[] = [
-  { symbol: "BTC", name: "Bitcoin", balance: 0.523 },
-  { symbol: "ETH", name: "Ethereum", balance: 12.33 },
-  { symbol: "USDC", name: "USD Coin", balance: 1300 },
+  { symbol: TokenEnum.Wbtc, balance: 0.523 },
+  { symbol: TokenEnum.Weth, balance: 12.33 },
+  { symbol: TokenEnum.Usdc, balance: 1300 },
 ];
 
-// Type for the external API response
-type SupplyApiResponse = {
-  tx: {
-    to: string;
-    value: string;
-    data: string;
-    gas?: string;
-  };
+
+
+const getEthereumProvider = (): EthereumProvider => {
+  if (!window.ethereum) {
+    throw new Error("No wallet found");
+  }
+  return window.ethereum;
 };
 
 export default function Wallet() {
-  const totalBalanceUSD = 45000; // mock total balance
+  const [walletAddress, setWalletAddress] = useState<string>("");
+  const [balances, setBalances] = useState(() => new Map<TokenEnum, string>());
 
-  const handleSupply = async (asset: Asset) => {
+
+
+  // Load wallet address once on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const ethereum = getEthereumProvider();
+        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+        setWalletAddress(ethers.getAddress(accounts[0]));
+        console.log("Wallet connected:", accounts[0]);
+      } catch (err) {
+        alert("Could not connect to ethereum wallet");
+        throw new Error("Could not connect to ethereum wallet");
+      }
+    };
+
+    fetchAddress();
+  }, []);
+
+
+  useEffect(() => {
+
+    const fetchBalances = async () => {
+      const balancesMap = new Map<TokenEnum, string>();
+      for (const asset of mockAssets) {
+        try {
+          const balance = await getTokenBalance(asset.symbol, walletAddress);
+          balancesMap.set(asset.symbol, balance.toString());
+        } catch (err) {
+          console.error(`Failed to fetch balance for ${asset.symbol}:`, err);
+          balancesMap.set(asset.symbol, "Error");
+        }
+      }
+      setBalances(balancesMap);
+    }
+    if (walletAddress){
+      fetchBalances();
+    }
+    
+  }, [walletAddress]);
+
+  const handleSupply = async (asset: Asset, amount: number) => {
     try {
       console.log(`Calling external API for ${asset.symbol}`);
+      const ethereum = getEthereumProvider();
 
-      const response = await fetch("https://api.example.com/supply", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          asset: asset.symbol,
-          amount: asset.balance,
-          userAddress: await getWalletAddress(),
-        }),
+      const authorization = await authorize(walletAddress);
+
+      console.log(authorization);
+      // Convert object to string for signing
+      const message = JSON.stringify(authorization);
+
+      // Get the current wallet address
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts"
       });
+      const address = accounts[0];
+      // Call personal_sign
+      const signature = await ethereum.request({
+        method: "personal_sign",
+        params: [message, address]
+      });
+      console.log("singature from metamask:", signature);
 
-      if (!response.ok) {
-        throw new Error("API call failed");
-      }
+      const signedAuth = await parseSignature(
+        signature,
+        5,  // nonce
+        "0xcA11bde05977b3631167028862bE2a173976CA11",  // address of multicall contract
+        1   // chainId
+      );
 
-      const data: SupplyApiResponse = await response.json();
+      console.log(signedAuth);
+
+
+      const data = await requestSupplyTransaction(amount, asset.symbol, walletAddress, signedAuth);
+      console.log("data", data);
+
 
       // Send transaction request to wallet
       const txParams = {
-        from: await getWalletAddress(),
-        to: data.tx.to,
-        value: data.tx.value,
-        data: data.tx.data,
-        gas: data.tx.gas,
+        from: walletAddress,
+        to: data.to,
+        value: data.value,
+        data: data.data,
+        gas: data.gas,
       };
 
-      const txHash = await window.ethereum.request({
+
+
+      const txHash = await ethereum.request({
         method: "eth_sendTransaction",
         params: [txParams],
       });
@@ -69,18 +139,10 @@ export default function Wallet() {
     }
   };
 
-  const getWalletAddress = async (): Promise<string> => {
-    if (!window.ethereum) {
-      throw new Error("No wallet found");
-    }
-    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    return accounts[0];
-  };
-
   return (
     <div style={{ fontFamily: "Arial", maxWidth: 400, margin: "0 auto", padding: 20 }}>
       <h1>My Crypto Wallet</h1>
-      <h2>Total Balance: ${totalBalanceUSD.toLocaleString()}</h2>
+      <h2>Address: ${walletAddress}</h2>
 
       <div style={{ marginTop: 30 }}>
         <h3>Assets</h3>
@@ -88,14 +150,15 @@ export default function Wallet() {
           {mockAssets.map((asset) => (
             <li key={asset.symbol} style={{ marginBottom: 20 }}>
               <div>
-                <strong>{asset.symbol}</strong> ({asset.name}): {asset.balance}
+                <strong>{asset.symbol}</strong> {balances.get(asset.symbol)}
+                <button
+                  onClick={() => handleSupply(asset,Number(balances.get(asset.symbol)))  }
+                  style={{ padding: "5px 10px", marginTop: 5 }}
+                >
+                  Supply to AAVE
+                </button>
               </div>
-              <button
-                onClick={() => handleSupply(asset)}
-                style={{ padding: "5px 10px", marginTop: 5 }}
-              >
-                Supply
-              </button>
+
             </li>
           ))}
         </ul>
