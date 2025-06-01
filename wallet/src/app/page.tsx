@@ -4,10 +4,12 @@ import React, { useState, useEffect } from "react";
 import { requestSupplyTransaction, SupplyApiResponse } from "@/lib/supplyApi";
 import { getAaveTokenBalance } from "@/lib/readAaveBalance";
 import { getTokenBalance } from "@/lib/readTokenBalance";
+import { getAaveRates } from "@/lib/readAaveRates";
 import { parseSignature, SignedAuthorization, authorize } from "@/lib/authorize";
 import { TokenEnum } from "@compass-labs/api-sdk/models/components";
 import { ethers } from 'ethers';
 import { toBeHex } from 'ethers';
+import Link from 'next/link';
 
 type Asset = {
   symbol: TokenEnum;
@@ -31,6 +33,7 @@ export default function Wallet() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [balances, setBalances] = useState(() => new Map<TokenEnum, string>());
   const [balancesAAVE, setBalancesAAVE] = useState(() => new Map<TokenEnum, string>());
+  const [ratesAAVE, setRatesAAVE] = useState(() => new Map<TokenEnum, string>());
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -51,12 +54,15 @@ export default function Wallet() {
     const fetchBalances = async () => {
       const balancesMap = new Map<TokenEnum, string>();
       const balancesMapAAVE = new Map<TokenEnum, string>();
+      const ratesMapAAVE = new Map<TokenEnum, string>();
       for (const asset of mockAssets) {
         try {
           const balance = await getTokenBalance(asset.symbol, walletAddress);
           const balanceAAVE = await getAaveTokenBalance(asset.symbol, walletAddress);
+          const rateAAVE = await getAaveRates(asset.symbol);
           balancesMap.set(asset.symbol, balance.toString());
           balancesMapAAVE.set(asset.symbol, balanceAAVE.toString());
+          ratesMapAAVE.set(asset.symbol, rateAAVE.toString());
         } catch (err) {
           console.error(`Failed to fetch balance for ${asset.symbol}:`, err);
           balancesMap.set(asset.symbol, "Error");
@@ -64,6 +70,7 @@ export default function Wallet() {
       }
       setBalances(balancesMap);
       setBalancesAAVE(balancesMapAAVE);
+      setRatesAAVE(ratesMapAAVE);
     }
     if (walletAddress) {
       fetchBalances();
@@ -120,6 +127,11 @@ export default function Wallet() {
       <h2 className="text-sm text-gray-600 break-all mb-6">
         Address: {walletAddress ? walletAddress : "Not connected"}
       </h2>
+        <h2 className="text-sm text-gray-600 break-all mb-6">
+      <Link href="https://github.com/CompassLabs/api_usecases/tree/main/wallet">click to see full code</Link>
+        </h2>
+
+
 
       <div>
         <h3 className="text-lg font-semibold mb-3">Wallet</h3>
@@ -129,6 +141,7 @@ export default function Wallet() {
               <div>
                 <div className="font-medium">{asset.symbol}</div>
                 <div className="text-gray-500">{balances.get(asset.symbol)}</div>
+                <div className="text-gray-500">Current Rate {   (parseFloat(ratesAAVE.get(asset.symbol)) * 100).toFixed(2)   } %</div>
               </div>
               <button
                 onClick={() => handleSupply(asset, Number(balances.get(asset.symbol)))}
@@ -148,7 +161,7 @@ export default function Wallet() {
             <li key={asset.symbol} className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
               <div>
                 <div className="font-medium">{asset.symbol}</div>
-                <div className="text-gray-500">{balancesAAVE.get(asset.symbol)}</div>
+                <div className="text-gray-500">Balance {balancesAAVE.get(asset.symbol)}</div>
               </div>
             </li>
           ))}
