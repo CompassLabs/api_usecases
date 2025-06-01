@@ -28,6 +28,7 @@ console.log(result);
 // SmartAccount
 const request1: BatchedUserOperationsRequest = {
   chain: TokenPriceChain.EthereumMainnet,
+  additionalProperties: {},
   operations: [
   {
     actionType: MulticallActionType.AaveSupply,
