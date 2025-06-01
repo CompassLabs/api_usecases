@@ -4,5 +4,6 @@
 **/node_modules
 **/*lock*
 **/.env
+**/package-lock.json
 
 .env`rm
