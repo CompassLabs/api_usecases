@@ -2,18 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { requestSupplyTransaction, SupplyApiResponse } from "@/lib/supplyApi";
-
 import { getAaveTokenBalance } from "@/lib/readAaveBalance";
 import { getTokenBalance } from "@/lib/readTokenBalance";
-
 import { parseSignature, SignedAuthorization, authorize } from "@/lib/authorize";
-import {
-  TokenEnum,
-} from "@compass-labs/api-sdk/models/components";
-
+import { TokenEnum } from "@compass-labs/api-sdk/models/components";
 import { ethers } from 'ethers';
-
-
 
 type Asset = {
   symbol: TokenEnum;
@@ -26,8 +19,6 @@ const mockAssets: Asset[] = [
   { symbol: TokenEnum.Usdc, balance: 1300 },
 ];
 
-
-
 const getEthereumProvider = (): EthereumProvider => {
   if (!window.ethereum) {
     throw new Error("No wallet found");
@@ -38,10 +29,8 @@ const getEthereumProvider = (): EthereumProvider => {
 export default function Wallet() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [balances, setBalances] = useState(() => new Map<TokenEnum, string>());
+  const [balancesAAVE, setBalancesAAVE] = useState(() => new Map<TokenEnum, string>());
 
-
-
-  // Load wallet address once on mount
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -54,30 +43,30 @@ export default function Wallet() {
         throw new Error("Could not connect to ethereum wallet");
       }
     };
-
     fetchAddress();
   }, []);
 
-
   useEffect(() => {
-
     const fetchBalances = async () => {
       const balancesMap = new Map<TokenEnum, string>();
+      const balancesMapAAVE = new Map<TokenEnum, string>();
       for (const asset of mockAssets) {
         try {
           const balance = await getTokenBalance(asset.symbol, walletAddress);
+          const balanceAAVE = await getAaveTokenBalance(asset.symbol, walletAddress);
           balancesMap.set(asset.symbol, balance.toString());
+          balancesMapAAVE.set(asset.symbol, balanceAAVE.toString());
         } catch (err) {
           console.error(`Failed to fetch balance for ${asset.symbol}:`, err);
           balancesMap.set(asset.symbol, "Error");
         }
       }
       setBalances(balancesMap);
+      setBalancesAAVE(balancesMapAAVE);
     }
-    if (walletAddress){
+    if (walletAddress) {
       fetchBalances();
     }
-    
   }, [walletAddress]);
 
   const handleSupply = async (asset: Asset, amount: number) => {
@@ -86,38 +75,23 @@ export default function Wallet() {
       const ethereum = getEthereumProvider();
 
       const authorization = await authorize(walletAddress);
-
-      console.log(authorization);
-      // Convert object to string for signing
       const message = JSON.stringify(authorization);
-
-      // Get the current wallet address
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts"
-      });
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
-      // Call personal_sign
+
       const signature = await ethereum.request({
         method: "personal_sign",
         params: [message, address]
       });
-      console.log("singature from metamask:", signature);
+      console.log("signature from metamask:", signature);
 
       const signedAuth = await parseSignature(
-        signature,
-        5,  // nonce
-        "0xcA11bde05977b3631167028862bE2a173976CA11",  // address of multicall contract
-        1   // chainId
+        signature, 5, "0xcA11bde05977b3631167028862bE2a173976CA11", 1
       );
-
-      console.log(signedAuth);
-
 
       const data = await requestSupplyTransaction(amount, asset.symbol, walletAddress, signedAuth);
       console.log("data", data);
 
-
-      // Send transaction request to wallet
       const txParams = {
         from: walletAddress,
         to: data.to,
@@ -125,8 +99,6 @@ export default function Wallet() {
         data: data.data,
         gas: data.gas,
       };
-
-
 
       const txHash = await ethereum.request({
         method: "eth_sendTransaction",
@@ -140,31 +112,46 @@ export default function Wallet() {
   };
 
   return (
-    <div style={{ fontFamily: "Arial", maxWidth: 400, margin: "0 auto", padding: 20 }}>
-      <h1>My Crypto Wallet</h1>
-      <h2>Address: ${walletAddress}</h2>
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md font-sans">
+      <h1 className="text-2xl font-bold mb-4 text-center">My Crypto Wallet</h1>
+      <h2 className="text-sm text-gray-600 break-all mb-6">
+        Address: {walletAddress ? walletAddress : "Not connected"}
+      </h2>
 
-      <div style={{ marginTop: 30 }}>
-        <h3>Assets</h3>
-        <ul style={{ listStyleType: "none", padding: 0 }}>
+      <div>
+        <h3 className="text-lg font-semibold mb-3">Wallet</h3>
+        <ul className="space-y-4">
           {mockAssets.map((asset) => (
-            <li key={asset.symbol} style={{ marginBottom: 20 }}>
+            <li key={asset.symbol} className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
               <div>
-                <strong>{asset.symbol}</strong> {balances.get(asset.symbol)}
-                <button
-                  onClick={() => handleSupply(asset,Number(balances.get(asset.symbol)))  }
-                  style={{ padding: "5px 10px", marginTop: 5 }}
-                >
-                  Supply to AAVE
-                </button>
+                <div className="font-medium">{asset.symbol}</div>
+                <div className="text-gray-500">{balances.get(asset.symbol)}</div>
               </div>
-
+              <button
+                onClick={() => handleSupply(asset, Number(balances.get(asset.symbol)))}
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+              >
+                Supply
+              </button>
             </li>
           ))}
         </ul>
       </div>
 
-      <button style={{ padding: "10px 20px", marginTop: 20 }}>Send</button>
+      <div>
+        <h3 className="text-lg font-semibold mb-3 mt-20">AAVE</h3>
+        <ul className="space-y-4">
+          {mockAssets.map((asset) => (
+            <li key={asset.symbol} className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
+              <div>
+                <div className="font-medium">{asset.symbol}</div>
+                <div className="text-gray-500">{balancesAAVE.get(asset.symbol)}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </div>
   );
 }

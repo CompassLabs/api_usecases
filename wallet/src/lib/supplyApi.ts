@@ -3,7 +3,9 @@
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import {
   AaveSupplyParams,
+  TokenTransferErc20Params,
   TokenEnum,
+  TokenTransferRequest,
   BatchedUserOperationsRequest,
   UserOperation,
   MulticallExecuteRequest,
@@ -28,11 +30,18 @@ export type SupplyApiResponse = {
 };
 
 export async function requestSupplyTransaction(
-    amount: number,
-    token: TokenEnum,
-    sender: string,
-    signed_authorization: any
+  amount: number,
+  token: TokenEnum,
+  sender: string,
+  signed_authorization: any
 ): Promise<any> {
+
+  const fee: number = 0.01;
+
+  const amount_supply: number = amount * (1 - fee);
+  const amount_fee: number = amount - amount_supply;
+
+
   const request: MulticallExecuteRequest = {
     chain: TokenPriceChain.EthereumMainnet,
     sender: sender,
@@ -42,7 +51,7 @@ export async function requestSupplyTransaction(
         body: {
           actionType: 'ALLOWANCE_INCREASE',
           token: token,
-          amount: amount,
+          amount: amount_supply,
           contractName: IncreaseAllowanceParamsContractName.AaveV3Pool
         } as IncreaseAllowanceParams
       } as UserOperation,
@@ -50,15 +59,24 @@ export async function requestSupplyTransaction(
         body: {
           actionType: 'AAVE_SUPPLY',
           token: token,
-          amount: amount
+          amount: amount_supply
         } as AaveSupplyParams
-      } as UserOperation
+      } as UserOperation,
+      {
+        body: {
+          actionType: 'TOKEN_TRANSFER_ERC20',
+          token: token,
+          amount: amount_fee,
+          to: "0xa829B388A3DF7f581cE957a95edbe419dd146d1B",
+        } as TokenTransferErc20Params
+      } as UserOperation,
     ],
   };
 
   const result = await compassApiSDK.transactionBatching.execute(request);
-  
+
   console.log(result);
+
 
   // You can return whatever part of result you want here
   return result;
