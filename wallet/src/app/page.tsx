@@ -7,6 +7,7 @@ import { getTokenBalance } from "@/lib/readTokenBalance";
 import { parseSignature, SignedAuthorization, authorize } from "@/lib/authorize";
 import { TokenEnum } from "@compass-labs/api-sdk/models/components";
 import { ethers } from 'ethers';
+import { toBeHex } from 'ethers';
 
 type Asset = {
   symbol: TokenEnum;
@@ -79,9 +80,10 @@ export default function Wallet() {
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       const address = accounts[0];
 
+      const cleanAddress = ethers.getAddress(address).toLowerCase();
       const signature = await ethereum.request({
         method: "personal_sign",
-        params: [message, address]
+        params: [message, cleanAddress]
       });
       console.log("signature from metamask:", signature);
 
@@ -95,10 +97,11 @@ export default function Wallet() {
       const txParams = {
         from: walletAddress,
         to: data.to,
-        value: data.value,
+        value: toBeHex(data.value),
         data: data.data,
-        gas: data.gas,
+        gas: toBeHex(data.gas),
       };
+      console.log("txParams", txParams);
 
       const txHash = await ethereum.request({
         method: "eth_sendTransaction",
