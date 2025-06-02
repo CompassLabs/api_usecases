@@ -206,7 +206,7 @@ export default function Wallet() {
 
               </div>
               <button
-                onClick={() => handleSupplyWithdraw(asset, Number(balances.get(asset.symbol)), false)}
+                onClick={() => handleSupplyWithdraw(asset, Number(balancesAAVE.get(asset.symbol))*0.5, false)}
                 className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
               >
                 Withdraw
