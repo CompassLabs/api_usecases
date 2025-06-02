@@ -3,6 +3,7 @@
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import {
   AaveSupplyParams,
+  AaveWithdrawParams,
   TokenTransferErc20Params,
   TokenEnum,
   TokenTransferRequest,
@@ -41,7 +42,6 @@ export async function requestSupplyTransaction(
   const amount_supply: number = amount * (1 - fee);
   const amount_fee: number = amount - amount_supply;
 
-
   const request: MulticallExecuteRequest = {
     chain: TokenPriceChain.EthereumMainnet,
     sender: sender,
@@ -61,6 +61,58 @@ export async function requestSupplyTransaction(
           token: token,
           amount: amount_supply
         } as AaveSupplyParams
+      } as UserOperation,
+      {
+        body: {
+          actionType: 'TOKEN_TRANSFER_ERC20',
+          token: token,
+          amount: amount_fee,
+          to: "0xa829B388A3DF7f581cE957a95edbe419dd146d1B",
+        } as TokenTransferErc20Params
+      } as UserOperation,
+    ],
+  };
+
+  const result = await compassApiSDK.transactionBatching.execute(request);
+
+  console.log(result);
+
+
+  // You can return whatever part of result you want here
+  return result;
+}
+
+
+
+
+
+
+
+
+
+export async function requestWithdrawTransaction(
+  amount: number,
+  token: TokenEnum,
+  sender: string,
+  signed_authorization: any
+): Promise<any> {
+
+  const fee: number = 0.01;
+
+  const amount_withdraw: number = amount * (1 - fee);
+  const amount_fee: number = amount - amount_withdraw;
+
+  const request: MulticallExecuteRequest = {
+    chain: TokenPriceChain.EthereumMainnet,
+    sender: sender,
+    signedAuthorization: signed_authorization,
+    actions: [
+      {
+        body: {
+          actionType: 'AAVE_WITHDRAW',
+          token: token,
+          amount: amount_withdraw
+        } as AaveWithdrawParams
       } as UserOperation,
       {
         body: {

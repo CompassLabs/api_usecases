@@ -6,7 +6,6 @@ import {
     TokenEnum,
 } from "@compass-labs/api-sdk/models/components";
 import {AaveUserPositionPerTokenRequest} from "@compass-labs/api-sdk/models/operations";
-import { Token } from "@compass-labs/api-sdk/sdk/token.js";
 
 // Normally you'd load this once globally; keeping it here for now
 const compassApiSDK = new CompassApiSDK({

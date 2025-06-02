@@ -18,8 +18,6 @@ export async function authorize(sender: string): Promise<any> {
         sender: sender
     }
     const result0 = await compassApiSDK.transactionBatching.authorization(request0)
-    console.log(result0);
-
 
     // You can return whatever part of result you want here
     return result0;
