@@ -1,147 +1,93 @@
-import {  PredictedSafeProps, SafeAccountConfig } from '@safe-global/protocol-kit'
-import Safe from '@safe-global/protocol-kit'
-import { arbitrum } from 'viem/chains'
-import { Call, createPublicClient, http } from 'viem'
-import SafeApiKit from '@safe-global/api-kit'
-import {
-  MetaTransactionData,
-  OperationType
-} from '@safe-global/types-kit'
+import { createSafeClient } from '@safe-global/sdk-starter-kit';
+import dotenv from 'dotenv';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
+import { SafeProvider } from '@safe-global/protocol-kit';
 
+dotenv.config();
+
+const ARBITRUM_RPC_URL = process.env.ARBITRUM_RPC_URL as SafeProvider['provider'];
 const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY as string;
-const SIGNER_ADDRESS = process.env.SIGNER_ADDRESS as string;
-const SAFE_ADDRESS = process.env.SAFE_ADDRESS;
-const SAFE_TX_SERVICE_URL = process.env.SAFE_TX_SERVICE_URL;
-const COMPASS_API_KEY = process.env.COMPASS_API_KEY;
+// NOTE: if creating new safe, uncomment the `SIGNER_ADDRESS`
+// const SIGNER_ADDRESS = process.env.SIGNER_ADDRESS as string;
+const COMPASS_API_KEY = process.env.COMPASS_API_KEY as string;
+const SAFE_ADDRESS = process.env.SAFE_ADDRESS as string;
 
-async function deploySafe() {
-    const safeAccountConfig: SafeAccountConfig = {
-        owners: [SIGNER_ADDRESS],
-        threshold: 1
-    }
-    
-    const predictedSafe: PredictedSafeProps = {
-        safeAccountConfig
-    }
-    
-    const protocolKit = await Safe.init({
-        provider: arbitrum.rpcUrls.default.http[0],
+const main = async () => {
+
+    // NOTE: if we need to deploy a new safe, uncomment the following code
+    // const safeClient = await createSafeClient({
+    //     provider: ARBITRUM_RPC_URL,
+    //     signer: SIGNER_PRIVATE_KEY,
+    //     safeOptions: {
+    //         owners: [SIGNER_ADDRESS],
+    //         threshold: 1,
+    //     },
+    // });
+    // ELSE: use existing safe client:
+    const safeClient = await createSafeClient({
+        provider: ARBITRUM_RPC_URL,
         signer: SIGNER_PRIVATE_KEY,
-        predictedSafe
-    })
+        safeAddress: SAFE_ADDRESS,
+    });
 
-    const safeAddress = await protocolKit.getAddress()
-
-    const deploymentTransaction = await protocolKit.createSafeDeploymentTransaction()
-
-    const client = await protocolKit.getSafeProvider().getExternalSigner()
-
-    const publicClient = createPublicClient({
-        chain: arbitrum,
-        transport: http(arbitrum.rpcUrls.default.http[0])
-    })
-
-    const transactionHash = await client?.sendTransaction({
-        to: deploymentTransaction.to,
-        value: BigInt(deploymentTransaction.value),
-        data: deploymentTransaction.data as `0x${string}`,
-        chain: arbitrum
-    })
-
-    const transactionReceipt = await publicClient?.waitForTransactionReceipt({
-        hash: transactionHash as `0x${string}`
-    })
-
-    if (transactionReceipt?.status === 'success') {
-        console.log('Safe deployed successfully', safeAddress)
-    } else {
-        throw new Error('Safe deployment failed')
-    }
-
-    return safeAddress
-}
-
-async function executeSafeTransaction(safeAddress: string) {
-    const protocolKit = await Safe.init({
-        provider: arbitrum.rpcUrls.default.http[0],
-        signer: SIGNER_PRIVATE_KEY,
-        safeAddress
-    })
-
-    const newProtocolKit = await protocolKit.connect({
-        safeAddress
-    })
-
-    const isSafeDeployed = await newProtocolKit.isSafeDeployed()
-
-    if (!isSafeDeployed) {
-        throw new Error('Safe is not deployed')
-    }
-
-    const safeOwners = await newProtocolKit.getOwners()
-    const safeThreshold = await newProtocolKit.getThreshold()
-
-    console.log(safeOwners, safeThreshold)
-
-    const safeApiKit = new SafeApiKit(
-        {
-            chainId: BigInt(arbitrum.id),
-            txServiceUrl: SAFE_TX_SERVICE_URL
-        }
-    )
-
-    const safeServiceInfo = await safeApiKit.getServiceInfo()
-
-    console.log(safeServiceInfo)
+    console.log('Safe client created at:', await safeClient.getAddress());
 
     const compassApiSDK = new CompassApiSDK({
-		apiKeyAuth: COMPASS_API_KEY,
-	});
+        apiKeyAuth: COMPASS_API_KEY,
+    });
 
     const result = await compassApiSDK.smartAccount.accountBatchedUserOperations({
-		chain: 'arbitrum:mainnet',
-		operations: [
-			{
-				body: {
-					actionType: 'ALLOWANCE_INCREASE',
-					token: 'USDC',
-					contractName: 'AaveV3Pool',
-					amount: '10',
-				},
-			},
-			{
-				body: {
-					actionType: 'AAVE_SUPPLY',
-					token: 'USDC',
-					amount: '10',
-				},
-			},
-		],
-	});
+        chain: 'arbitrum:mainnet',
+        operations: [
+            {
+                body: {
+                    actionType: 'ALLOWANCE_INCREASE',
+                    token: 'USDC',
+                    contractName: 'AaveV3Pool',
+                    amount: '3',
+                },
+            },
+            // NOTE: if creating new safe, comment the `AAVE_SUPPLY` operation out
+            // the safe smart account will not have any USDC as it gets
+            // deployed only with the first transaction
+            // so the first transaction will be the allowance increase upon creation
+            // when reusing an existing contract, fund it with 10 USDC and uncomment this operation
+            {
+                body: {
+                    actionType: 'AAVE_SUPPLY',
+                    token: 'USDC',
+                    amount: '3',
+                },
+            },
+        ],
+    });
 
-	const safeTransactionData = result.operations.map((op) => ({
-		to: op.to as `0x${string}`,
-		data: op.data as `0x${string}`,
-		value: op.value ? String(op.value) : '0',
-        operation: OperationType.Call,
-	})) as MetaTransactionData[];
+    const operations = result.operations.map((op) => ({
+        to: op.to as `0x${string}`,
+        data: op.data as `0x${string}`,
+        value: op.value ? String(op.value) : '0',
+    }));
 
-    const safeTransaction = await newProtocolKit.createTransaction({
-        transactions: safeTransactionData
-    })
+    const txResult = await safeClient.send({ transactions: operations });
 
+    // NOTE: if there is more than one signer, we need to create a new safe client for each signer
+    // const safeTxHash = txResult.transactions?.safeTxHash
+    // const newSafeClient = await createSafeClient({
+    //     provider: RPC_URL,
+    //     signer: OTHER_SIGNER_PRIVATE_KEY,
+    //     safeAddress: safeTxHash,
+    // });
+    // const pendingTransactions = await newSafeClient.getPendingTransactions()
+    // for (const transaction of pendingTransactions.results) {
+    //     if (transaction.safeTxHash !== safeTxHash) {
+    //       return
+    //     }
 
-}
+    // const txResult2 = await newSafeClient.confirm({safeTxHash});
 
-async function main() {
-    let safeAddress: string | undefined;
-    if (SAFE_ADDRESS === undefined) {
-        safeAddress = await deploySafe()
-    } else {
-        safeAddress = SAFE_ADDRESS
-    }
-}
+    console.log('txResult', txResult);
+    console.log('txResult.status', txResult.status);
+    console.log(txResult.transactions?.ethereumTxHash);
+};
 
-main()
-
+main();
