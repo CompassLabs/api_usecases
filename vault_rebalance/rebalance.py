@@ -45,7 +45,7 @@ signed_auth = Account.sign_authorization(
 
 
 target_percentages = [0.3, 0.4, 0.3]
-# CODE START
+# SNIPPET START 1
 target_absolutes = [Decimal(p) * sum(deposits_arr) for p in target_percentages]
 actions = []
 for position in user_positions:
@@ -85,4 +85,4 @@ unsigned_transaction = compass.transaction_batching.execute(
 )
 
 print(unsigned_transaction)
-# CODE END
+# SNIPPET END 1
