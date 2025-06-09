@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "aave-looping-example"
+version = "0.1.0"
+description = "Example of Aave looping in Python"
+authors = ["Compass Labs"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+web3 = "^7.12.0"
+python-dotenv = "^1.1.0"
+compass-api-sdk = "^0.9.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
