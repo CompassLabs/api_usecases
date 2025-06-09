@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-smart-accounts:
+  run-zero-dev:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -26,17 +26,50 @@ jobs:
         node-version: '20'
     
     - name: PWD
-      working-directory: smart_accounts
+      working-directory: smart_accounts/zerodev
       run: pwd
     
     - name: Install dependencies
-      working-directory: smart_accounts
+      working-directory: smart_accounts/zerodev
       run: npm install
     
     - name: Build TypeScript
-      working-directory: smart_accounts
+      working-directory: smart_accounts/zerodev
       run: npm run build
     
     - name: Run application
-      working-directory: smart_accounts
+      working-directory: smart_accounts/zerodev
+      run: npm run start
+
+  run-safe:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Change directory
+      run: cd smart_accounts
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: PWD
+      working-directory: smart_accounts/safe
+      run: pwd
+
+    - name: Install dependencies
+      working-directory: smart_accounts/safe
+      run: npm install
+
+    - name: Build TypeScript
+      working-directory: smart_accounts/safe
+      run: npm run build
+
+    - name: Run application
+      working-directory: smart_accounts/safe
       run: npm run start
