@@ -8,7 +8,7 @@ import { createWalletClient } from 'viem';
 
 dotenv.config();
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY as string;
+const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const RPC_URL = process.env.RPC_URL as string;
 
 const main = async () => {
@@ -16,7 +16,7 @@ const main = async () => {
         apiKeyAuth: process.env.COMPASS_API_KEY,
     });
 
-    const account = privateKeyToAccount(`0x${PRIVATE_KEY}`);
+    const account = privateKeyToAccount(PRIVATE_KEY);
 
     const walletClient = createWalletClient({
         account,
@@ -31,7 +31,7 @@ const main = async () => {
 
     const signedAuth = await walletClient.signAuthorization({
         account,
-        address: auth.address as `0x${string}`,
+        contractAddress: auth.address as `0x${string}`,
     });
 
     const loopingTx = await compassApiSDK.transactionBatching.aaveLoop({
@@ -47,10 +47,10 @@ const main = async () => {
         },
         collateralToken: "USDC",
         borrowToken: "WETH",
-        initialCollateralAmount: 10,
-        multiplier: 2.0,
-        maxSlippagePercent: 1,
-        loanToValue: 80,
+        initialCollateralAmount: 5,
+        multiplier: 1.5,
+        maxSlippagePercent: 2.5,
+        loanToValue: 70,
     });
 
     const tx = await walletClient.sendTransaction(loopingTx as unknown as SendTransactionRequest);
