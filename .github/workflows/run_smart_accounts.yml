@@ -129,3 +129,14 @@ jobs:
           ./cypress/screenshots
           ./cypress/videos
         retention-days: 7
+
+  failure_alert:
+    if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
+    runs-on: ubuntu-latest
+    needs: [run-zero-dev, run-safe, run-wallet]
+    steps:
+      - name: Send failure notification
+        run: |
+          curl -X POST "https://allquiet.app/api/webhook/829f846c-4dfa-4a58-ab33-eafae34a57c9" \
+               -H "Content-Type: application/json" \
+               -d '{"status": "Open", "severity": "Critical", "message": "GitHub workflow failed", "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
