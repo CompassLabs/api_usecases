@@ -74,7 +74,8 @@ const main = async () => {
     console.log('txResult.status', txResult.status);
     console.log(txResult.transactions?.ethereumTxHash);
   }
-  catch {
+  catch (error) {
+    console.error("Ran into an error:", error);
     console.log("Ran into expected error. Wallet not funded");
   }
 
