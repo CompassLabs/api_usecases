@@ -44,8 +44,9 @@ export default function Wallet() {
         setWalletAddress(ethers.getAddress(accounts[0]));
         console.log("Wallet connected:", accounts[0]);
       } catch (err) {
-        alert("Could not connect to ethereum wallet");
-        throw new Error("Could not connect to ethereum wallet");
+        console.log("Could not connect to ethereum wallet")
+        // alert("Could not connect to ethereum wallet");
+        // throw new Error("Could not connect to ethereum wallet");
       }
     };
     fetchAddress();
