@@ -72,3 +72,60 @@ jobs:
     - name: Run application
       working-directory: smart_accounts/safe
       run: npm run start
+
+
+  run-wallet:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
+      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
+      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Change directory
+      run: cd smart_accounts
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: PWD
+      working-directory: wallet
+      run: pwd
+
+    - name: Install dependencies
+      working-directory: wallet
+      run: npm install
+
+    - name: Run application
+      working-directory: wallet
+      run: npm run build
+
+    - name: Start web application
+      working-directory: wallet
+      run: npm run start & # The '&' runs the command in the background
+      # Give the server some time to start up before running tests
+      # You might need to adjust this delay based on your application's startup time
+    - name: Wait for application to start
+      run: sleep 10 # Wait for 10 seconds. Adjust as needed.
+
+    - name: Run Tests
+      working-directory: wallet
+      run: npx cypress run
+
+    - name: Upload Cypress Artifacts
+      if: always()  # <-- important: runs even if previous step failed
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-artifacts
+        path: |
+          ./cypress/screenshots
+          ./cypress/videos
+        retention-days: 7
