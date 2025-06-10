@@ -95,17 +95,21 @@ const main = async () => {
     value: op.value ? BigInt(op.value) : undefined,
   })) as Call[];
 
-  const operationHash = await kernelClient.sendUserOperation({
-    callData: await kernelClient.account.encodeCalls(operations),
-  });
-  console.log('Submitted batched transaction:', operationHash);
 
-  const operationReceipt = await kernelClient.waitForUserOperationReceipt({
-    hash: operationHash,
-  });
-  console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
 
-  process.exit(0);
+  try {
+    const operationHash = await kernelClient.sendUserOperation({
+      callData: await kernelClient.account.encodeCalls(operations),
+    });
+    console.log('Submitted batched transaction:', operationHash);
+    const operationReceipt = await kernelClient.waitForUserOperationReceipt({
+      hash: operationHash,
+    });
+    console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
+  } catch (error) {
+    console.error("An error occurred while processing the batched transaction:", error);
+  }
+
 };
 
 main();
