@@ -95,12 +95,13 @@ const main = async () => {
     value: op.value ? BigInt(op.value) : undefined,
   })) as Call[];
 
-  const operationHash = await kernelClient.sendUserOperation({
-    callData: await kernelClient.account.encodeCalls(operations),
-  });
-  console.log('Submitted batched transaction:', operationHash);
+
 
   try {
+    const operationHash = await kernelClient.sendUserOperation({
+      callData: await kernelClient.account.encodeCalls(operations),
+    });
+    console.log('Submitted batched transaction:', operationHash);
     const operationReceipt = await kernelClient.waitForUserOperationReceipt({
       hash: operationHash,
     });
@@ -109,7 +110,6 @@ const main = async () => {
     console.log("Returned expected error. Wallet not funded.");
   }
 
-  process.exit(0);
 };
 
 main();
