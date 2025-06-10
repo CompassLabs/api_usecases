@@ -106,8 +106,8 @@ const main = async () => {
       hash: operationHash,
     });
     console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
-  } catch {
-    console.log("Returned expected error. Wallet not funded.");
+  } catch (error) {
+    console.error("An error occurred while processing the batched transaction:", error);
   }
 
 };
