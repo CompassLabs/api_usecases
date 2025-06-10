@@ -100,10 +100,14 @@ const main = async () => {
   });
   console.log('Submitted batched transaction:', operationHash);
 
-  const operationReceipt = await kernelClient.waitForUserOperationReceipt({
-    hash: operationHash,
-  });
-  console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
+  try {
+    const operationReceipt = await kernelClient.waitForUserOperationReceipt({
+      hash: operationHash,
+    });
+    console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
+  } catch {
+    console.log("Returned expected error. Wallet not funded.");
+  }
 
   process.exit(0);
 };

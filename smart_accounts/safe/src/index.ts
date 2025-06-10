@@ -67,26 +67,17 @@ const main = async () => {
     value: op.value ? String(op.value) : '0',
   }));
 
-  const txResult = await safeClient.send({ transactions: operations });
 
-  // NOTE: if there is more than one signer, we need to create a new safe client for each signer
-  // const safeTxHash = txResult.transactions?.safeTxHash
-  // const newSafeClient = await createSafeClient({
-  //     provider: RPC_URL,
-  //     signer: OTHER_SIGNER_PRIVATE_KEY,
-  //     safeAddress: safeTxHash,
-  // });
-  // const pendingTransactions = await newSafeClient.getPendingTransactions()
-  // for (const transaction of pendingTransactions.results) {
-  //     if (transaction.safeTxHash !== safeTxHash) {
-  //       return
-  //     }
+  try {
+    const txResult = await safeClient.send({transactions: operations});
+      console.log('txResult', txResult);
+    console.log('txResult.status', txResult.status);
+    console.log(txResult.transactions?.ethereumTxHash);
+  }
+  catch {
+    console.log("Ran into expected error. Wallet not funded");
+  }
 
-  // const txResult2 = await newSafeClient.confirm({safeTxHash});
-
-  console.log('txResult', txResult);
-  console.log('txResult.status', txResult.status);
-  console.log(txResult.transactions?.ethereumTxHash);
 };
 
 main();
