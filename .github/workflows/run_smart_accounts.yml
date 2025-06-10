@@ -43,11 +43,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      SIGNER_ADDRESS: 0xb8340945eBc917D2Aa0368a5e4E79C849c461511
+      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
       SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SAFE_ADDRESS: 0xd6C05083ebA87Cef07652f81b0c836c500c2db92
-      SAFE_TX_SERVICE_URL: https://safe-transaction-arbitrum.safe.global
+      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
+      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
 
     steps:
     - name: Checkout repository
