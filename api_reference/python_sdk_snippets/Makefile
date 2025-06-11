@@ -35,3 +35,8 @@ type-check:
 run:
 	@$(call print_bold,Running)
 	@.venv/bin/fastapi run --port 8000 compass/api_backend/app.py --reload
+
+test-snippet:
+	@$(call print_bold,Unit testing)
+	@sed 's|<YOUR_API_KEY_HERE>|$(API_KEY)|g' aave/rate.py > /tmp/rate_temp.py
+	@.venv/bin/python aave/rate.py

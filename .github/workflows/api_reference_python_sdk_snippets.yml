@@ -48,12 +48,14 @@ jobs:
 #    - name: Run application
 #      working-directory: api_reference/python_sdk_snippets
 #      run: npm run start
+    - name: Run make target
+      run: make test-snippet API_KEY=${{ secrets.COMPASS_API_KEY }}
 
-    - name: Run snippets
-      if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_tests == false }}
-      working-directory: api_reference/python_sdk_snippets§
-      run: |
-        make run-snippets
+#    - name: Run snippets
+#      if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_tests == false }}
+#      working-directory: api_reference/python_sdk_snippets§
+#      run: |
+#        make run-snippets
 
 
   failure_alert:
