@@ -1,0 +1,11 @@
+[project]
+name = "python_sdk_snippets"
+version = "0.1.0"
+description = "all the snippets involving the python sdk from the api reference"
+requires-python = ">=3.13"
+dependencies = [
+    "compass-api-sdk>=0.3.8",
+    "dotenv>=0.9.9",
+    "plotly>=6.1.0",
+    "ruff>=0.11.10"
+]
