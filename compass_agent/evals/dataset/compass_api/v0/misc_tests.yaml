@@ -1,0 +1,6 @@
+
+tests:
+  - question: what tokens do I have on arbitrum that i could swap into USDC. My address is 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B.
+    answer: ANSWER
+    trajectory:
+      - generic_portfolio_get_

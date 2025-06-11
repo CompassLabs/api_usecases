@@ -1,0 +1,6 @@
+tests:
+  - question: can you visualize the portfolio of vitalic.eth on Ethereum?
+    answer: ANSWER
+    trajectory:
+      - generic_ens_get_
+      - generic_visualize_portfolio_get_

@@ -1,4 +1,4 @@
-name: Run Smart Accounts
+name: test_usecases
 
 on:
   schedule:
@@ -129,3 +129,30 @@ jobs:
           ./cypress/screenshots
           ./cypress/videos
         retention-days: 7
+
+  run-compass_agent:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: PWD
+      working-directory: compass_agent
+      run: pwd
+
+    - name: Install uv
+      working-directory: compass_agent
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Run application
+      working-directory: compass_agent
+      run: uv sync
+
+    - name: Start web application
+      working-directory: compass_agent
+      run: |
+        ./venv/bin/python agent.py
