@@ -8,14 +8,11 @@ clean:
 	@rm -f uv.lock || true
 	@rm -rf .venv || true
 
-
-
 # Install python environment from scratch
 install:
 	@$(call print_bold,Installing)
 	@deactivate || true
 	uv sync
-
 
 # Run formatter
 format:
@@ -23,13 +20,6 @@ format:
 	@.venv/bin/ruff check --fix
 	@.venv/bin/ruff format
 	@.venv/bin/docformatter -ir --wrap-summaries=88 --wrap-descriptions=88 compass
-
-# Run pyright type checker
-type-check:
-	@$(call print_bold, Formatting)
-	@deactivate || true
-	@. .venv/bin/activate && pyright .
-
 
 # Start up developer version of API
 run:
