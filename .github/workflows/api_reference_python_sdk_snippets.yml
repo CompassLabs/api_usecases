@@ -1,11 +1,27 @@
 name: Run Python SDK Snippets from API Reference
 
+
 on:
-  schedule:
-    # Runs at 00:00 UTC every day
-    - cron: '0 0 * * *'
-  # Allow manual triggering
+  push:
+    branches:
+      - main
+    paths:
+      - api/**
+      - openapi.json
+  pull_request:
+    branches:
+      - main
+    paths:
+      - api/**
+      - openapi.json
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip tests (unit + integration)'
+        required: false
+        default: false
+        type: boolean
+
 
 jobs:
   run-python-sdk-snippets:
