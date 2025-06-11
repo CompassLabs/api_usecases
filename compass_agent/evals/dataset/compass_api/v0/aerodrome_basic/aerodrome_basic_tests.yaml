@@ -1,0 +1,57 @@
+# | num | path                                               | tool                                                  |
+# |-----|----------------------------------------------------|-------------------------------------------------------|
+# | 1   | aerodrome_basic/liquidity_provision/add_liquidity | aerodrome_basic_liquidity_provision_add_liquidity_   |
+# | 2   | aerodrome_basic/liquidity_provision/add_liquidity_eth | aerodrome_basic_liquidity_provision_add_liquidity_eth_ |
+# | 3   | aerodrome_basic/liquidity_provision/remove_liquidity | aerodrome_basic_liquidity_provision_remove_liquidity_ |
+# | 4   | aerodrome_basic/liquidity_provision/remove_liquidity_eth | aerodrome_basic_liquidity_provision_remove_liquidity_eth_ |
+# | 5   | aerodrome_basic/swap/tokens                        | aerodrome_basic_swap_tokens_                         |
+# | 6   | aerodrome_basic/swap/eth_for_token                 | aerodrome_basic_swap_eth_for_token_                  |
+# | 7   | aerodrome_basic/swap/token_for_eth                 | aerodrome_basic_swap_token_for_eth_                  |
+
+
+tests:
+
+# 1	aerodrome_basic/swap/tokens
+  - question: Please execute a token swap on the Aerodrome platform using the following details. Swap 1 USDC for USDT on the Base mainnet. The minimum amount of USDT I am willing to receive is 0. Ensure that the swap is conducted on a stable pool. The transaction should be sent from and the funds received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_basic_swap_tokens_
+
+# 2	aerodrome_basic/swap/eth_for_token
+  - question: PPlease execute a swap on the Aerodrome Basic dex using the following details... Swap 0.00047753 ETH for USDC on the Base mainnet. The minimum amount of USDC I am willing to receive is 0. Ensure that the swap is conducted on a stable pool. The transaction should be sent from and the funds received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_basic_swap_eth_for_token_
+
+# 3	aerodrome_basic/swap/token_for_eth
+  - question: Please execute a token swap for WETH on the Aerodrome Basic Dex (on the Base mainnet) using the following details; Swap 1 USDC for WETH . The minimum amount of WETH I am willing to receive is 0. Ensure that the swap is conducted on a stable pool. The transaction should be sent from and the funds received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_basic_swap_token_for_eth_
+
+# 4	aerodrome_basic/liquidity_provision/add_liquidity
+  - question: Please provide liquidity on Aerodrome BASIC (on base mainnet) using the following details... Add liquidity to a stable pool  using 1 USDC and 1 USDT. The minimum amounts I'm willing to provide are 0 USDC and 0 USDT. The transaction should be sent from and the LP tokens should be received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B. Ensure the transaction is completed before the deadline timestamp of 1630000000.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_basic_liquidity_provision_add_liquidity_
+
+# 5	aerodrome_basic/liquidity_provision/add_liquidity_eth
+  - question: Please provide liquidity on the Aerodrome Basic Dex platform using the following details... Add liquidity to a stable pool on the base mainnet using 1 USDC and 0.00048 WETH. The minimum amounts I'm willing to provide are 0 USDC and 0 WETH. The transaction should be sent from and the LP tokens should be received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B. Ensure the transaction is completed before the deadline timestamp of 1630000000.
+    answer: ANSWER
+    trajectory:
+    - aerodrome_basic_liquidity_provision_add_liquidity_eth_
+
+# 6	aerodrome_basic/liquidity_provision/remove_liquidity
+  - question: Please remove liquidity from the Aerodrome Basic Dex platform (on Base mainnet) using the following details; Withdraw 0.1 units of liquidity from a stable pool on the base mainnet, involving USDC and USDT. The minimum amounts I am willing to receive are 0 USDC and 0 USDT. The transaction should be sent from and the withdrawn tokens should be received by the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B. Ensure the transaction is completed before the deadline timestamp of 1630000000.
+    answer: ANSWER
+    trajectory:
+    - aerodrome_basic_liquidity_provision_remove_liquidity_
+
+# 7	aerodrome_basic/liquidity_provision/remove_liquidity_eth
+  - question: Please remove liquidity from the Aerodrome Basic Dex platform using the following details; Withdraw 0.1 units of liquidity from a stable pool on the base mainnet, involving USDC and WETH. The minimum amounts I am willing to receive are 0 USDC and 0 WETH. The transaction should be sent from, and the withdrawn tokens should be received by, the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B. Ensure the transaction is completed successfully as per current conditions (no specific deadline timestamp provided). Please use your aerodrome_basic_liquidity_provision_remove_liquidity_ tool.
+    answer: ANSWER
+    trajectory:
+    - aerodrome_basic_liquidity_provision_remove_liquidity_
+
+  
+

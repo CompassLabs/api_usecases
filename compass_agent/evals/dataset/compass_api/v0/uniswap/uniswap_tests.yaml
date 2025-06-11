@@ -1,0 +1,118 @@
+# | num | path                                             | tool                                             |
+# |-----|--------------------------------------------------|--------------------------------------------------|
+# | 1   | uniswap/swap/buy_exactly                         | uniswap_swap_buy_exactly_                        |
+# | 2   | uniswap/swap/sell_exactly                        | uniswap_swap_sell_exactly_                       |
+# | 3   | uniswap/liquidity_provision/increase             | uniswap_liquidity_provision_increase_            |
+# | 4   | uniswap/liquidity_provision/mint                 | uniswap_liquidity_provision_mint_                |
+# | 5   | uniswap/liquidity_provision/withdraw             | uniswap_liquidity_provision_withdraw_            |
+# | 6   | uniswap/quote/buy_exactly/get                    | uniswap_quote_buy_exactly_get_                   |
+# | 7   | uniswap/quote/sell_exactly/get                   | uniswap_quote_sell_exactly_get_                  |
+# | 8   | uniswap/pool_price/get                           | uniswap_pool_price_get_                          |
+# | 9   | uniswap/liquidity_provision/in_range/get         | uniswap_liquidity_provision_in_range_get_        |
+# | 10  | uniswap/liquidity_provision/positions/get        | uniswap_liquidity_provision_positions_get_       |
+
+tests:
+
+# | 1   | uniswap/swap/buy_exactly                         | uniswap_swap_buy_exactly_                        |
+  - question: Please execute a Uniswap swap on the Arbitrum chain to buy exactly 1 USDT using up to 1.1 USDC with a 0.01% fee. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address.
+    answer: ANSWER
+    trajectory:
+      - uniswap_swap_buy_exactly_
+# | 2   | uniswap/swap/sell_exactly                        | uniswap_swap_sell_exactly_                       |
+  - question: Please do a swap on Uniswap protocol to sell exactly 1 USDC for USDT on chain arbitrum. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Set the fee to 0.01 and ensure the minimum amount out is 0.5 USDT without wrapping ETH. Use your knowledge of your tools.
+    answer: ANSWER
+    trajectory:
+      - uniswap_swap_sell_exactly_
+# | 3   | uniswap/liquidity_provision/increase             | uniswap_liquidity_provision_increase_            |
+  - question: Please increase the liquidity provision on the Uniswap protocol on chain arbitrum. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Token ID is 4318185. Desired amount for token0 is 0.1 with minimum 0.05 and desired amount for token1 is 0.1 with minimum 0.05.
+    answer: ANSWER
+    trajectory:
+      - uniswap_liquidity_provision_increase_
+# | 4   | uniswap/liquidity_provision/mint                 | uniswap_liquidity_provision_mint_                |
+  - question: Please open a new Liquidity Provider (LP) position on Uniswap on the Arbitrum chain. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Use USDC as token0 and DAI as token1 with a fee of 0.01. Set the desired amount of token0 to 0.1 and the minimum amount to 0. Set the desired amount of token1 to 0.1 and the minimum amount to 0. Define the tick range with a lower tick of -1000 and an upper tick of 1000.
+    answer: ANSWER
+    trajectory:
+      - uniswap_liquidity_provision_mint_
+# | 5   | uniswap/liquidity_provision/withdraw             | uniswap_liquidity_provision_withdraw_            |
+  - question: Please withdraw liquidity from the Uniswap protocol on the Arbitrum chain. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Set the percentage for withdrawal to 1 and use token ID 4318185.
+    answer: ANSWER
+    trajectory:
+      - uniswap_liquidity_provision_withdraw_
+# | 6   | uniswap/quote/buy_exactly/get                    | uniswap_quote_buy_exactly_get_                   |
+  - question: 1. How many USDC must I spend to buy exactly 100 DAI in a 0.3% pool? My wallet is 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B on Ethereum.
+    answer: ANSWER
+    trajectory:
+      - uniswap_quote_buy_exactly_get_
+# | 7   | uniswap/quote/sell_exactly/get                   | uniswap_quote_sell_exactly_get_                  |
+  - question: If I sell 100 DAI, how many USDC do I get at 0.3% fee? My wallet is 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B on Ethereum.
+    answer: ANSWER
+    trajectory:
+      - uniswap_quote_sell_exactly_get_
+# | 8   | uniswap/pool_price/get                           | uniswap_pool_price_get_                          |
+  - question: What is the price of WBTC in USDC on Uniswap on Ethereum?
+    answer: ANSWER
+    trajectory:
+      - uniswap_pool_price_get_
+# | 9   | uniswap/liquidity_provision/in_range/get         | uniswap_liquidity_provision_in_range_get_        |
+  - question: Please check whether a specific liquidity provider position is within the active tick range on the Uniswap platform on chain arbitrum using token ID 4318185. Use your knowledge of your tools.
+    answer: ANSWER
+    trajectory:
+      - uniswap_liquidity_provision_in_range_get_
+# | 10  | uniswap/liquidity_provision/positions/get        | uniswap_liquidity_provision_positions_get_       |
+  - question: Please get the number of Liquidity Provider positions on Uniswap on chain arbitrum. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Use your knowledge of your tools.
+    answer: ANSWER
+    trajectory:
+      - uniswap_liquidity_provision_positions_get_
+
+
+# TODO: go through this and find other ones to add to above. The null results are useful too.
+# # 1	uniswap/swap/sell_exactly
+
+
+# # 2	uniswap/swap/buy_exactly
+
+
+# # 3	uniswap/liquidity_provision/positions/get
+#   - question: Retrieve the number of liquidity provider positions on Uniswap for the wallet address 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c on the Ethereum mainnet.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_liquidity_provision_positions_get_
+
+# # 4	uniswap/liquidity_provision/mint
+#   - question: Mint a new liquidity provider position on Uniswap on the Ethereum mainnet for the sender address 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c, using WETH for both tokens, with a fee tier of 0.3, specifying a tick range from -1000 to 1000. The desired amounts are 1.5 for the first token and 1.7 for the second token, ensuring minimum amounts of 1.4 and 1.6 respectively, with the recipient as 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_liquidity_provision_mint_
+
+#   - question: Mint a new liquidity provider position on Uniswap on the Arbitrum mainnet for the sender address 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c, using WETH and BTC for the tokens, with a fee tier of 0.3, specifying a tick range from -1000 to 1000. The desired amounts are 1.5 for the first token and 1.7 for the second token, ensuring minimum amounts of 1.4 and 1.6 respectively, with the recipient as 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_liquidity_provision_mint_
+
+# # 5	uniswap/liquidity_provision/increase
+#   - question: Increase the liquidity provision on the Uniswap platform on Ethereum mainnet for the sender address 0x8A2c9eD8F6B9aD09036Cc0F5AAcaE7E6708f3D0c, specifying token ID 0, with a desired addition of 1.5 units of the first token and 1.7 units of the second token, while ensuring minimum amounts of 1.4 and 1.6 respectively.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_liquidity_provision_increase_
+
+# # 6	uniswap/liquidity_provision/withdraw
+# # 7	uniswap/liquidity_provision/in_range/get
+# # 8	uniswap/liquidity_provision/impermanent_loss/get
+# # 9	uniswap/pool_price/get
+#   - question: What is the price of WBTC in USDC on Uniswap on Ethereum?
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_pool_price_get_
+
+# # 10	uniswap/quote/buy_exactly/get
+#   - question: 1. How many USDC must I spend to buy exactly 100 DAI in a 0.3% pool? My wallet is 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B on Ethereum.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_quote_buy_exactly_get_
+
+# # 11	uniswap/quote/sell_exactly/get
+#   - question: 1. If I sell 100 DAI, how many USDC do I get at 0.3% fee? My wallet is 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B on Ethereum.
+#     answer: ANSWER
+#     trajectory:
+#       - uniswap_quote_sell_exactly_get_
+

@@ -5,7 +5,6 @@ This Python project demonstrates how to perform Aave looping using the Compass L
 ## Requirements
 
 - Python 3.11+
-- Poetry for dependency management
 
 ## Dependencies
 
@@ -17,7 +16,7 @@ This Python project demonstrates how to perform Aave looping using the Compass L
 
 1. Install dependencies:
 ```bash
-poetry install
+uv sync
 ```
 
 2. Create a `.env` file with your configuration:

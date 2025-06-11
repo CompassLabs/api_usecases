@@ -1,0 +1,47 @@
+# | num | path                                                  | tool                                                  |
+# |-----|--------------------------------------------------------|--------------------------------------------------------|
+# | 1   | aerodrome_slipstream/swap/sell_exactly                | aerodrome_slipstream_swap_sell_exactly_               |
+# | 2   | aerodrome_slipstream/swap/buy_exactly                 | aerodrome_slipstream_swap_buy_exactly_                |
+# | 3   | aerodrome_slipstream/liquidity_provision/mint         | aerodrome_slipstream_liquidity_provision_mint_        |
+# | 4   | aerodrome_slipstream/liquidity_provision/increase     | aerodrome_slipstream_liquidity_provision_increase_    |
+# | 5   | aerodrome_slipstream/liquidity_provision/withdraw     | aerodrome_slipstream_liquidity_provision_withdraw_    |
+# | 6   | aerodrome_slipstream/liquidity_provision/positions/get| aerodrome_slipstream_liquidity_provision_positions_get_ |
+# | 7   | aerodrome_slipstream/pool_price/get                   | aerodrome_slipstream_pool_price_get_                  |
+
+
+tests:
+# | 1   | aerodrome_slipstream/swap/sell_exactly                | aerodrome_slipstream_swap_sell_exactly_     
+  - question: Please do a swap on base on on the Aerodrome Slipstream DEX to sell exactly 1 USDC for WETH with a minimum output of 0 WETH Use the address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address and set the tick spacing to 100.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_swap_sell_exactly_
+# | 2   | aerodrome_slipstream/swap/buy_exactly                 | aerodrome_slipstream_swap_buy_exactly_                |
+  - question: Please execute a swap on the Aerodrome Slipstream DEX on the base chain. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Swap USDC for WETH aiming to receive exactly 0.000048 WETH with a maximum input of 0.1 USDC and a tick spacing of 100.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_swap_buy_exactly_
+# | 3   | aerodrome_slipstream/liquidity_provision/mint         | aerodrome_slipstream_liquidity_provision_mint_        |
+  - question: Please mint a new liquidity provider position on chain base. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Use the tokens WETH and USDT with desired amounts 0.1 and 0.000048 respectively. Set the tick range between -300000 and 300000 with tick spacing of 100. Set the minimum amounts for the tokens to zero.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_liquidity_provision_mint_
+# | 4   | aerodrome_slipstream/liquidity_provision/increase     | aerodrome_slipstream_liquidity_provision_increase_    |
+  - question: Please increase the liquidity provision on aerodrome slipstream on base. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address. Set the amount0 desired to 0.1, amount0 minimum to 0, amount1 desired to 0.1, amount1 minimum to 0, and token ID to 10433247.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_liquidity_provision_increase_
+# | 5   | aerodrome_slipstream/liquidity_provision/withdraw     | aerodrome_slipstream_liquidity_provision_withdraw_    |
+  - question: Please withdraw 1% of liquidity provision from Aerodrome Slipstream on chain base. Use address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B for all fields that require an address and token ID 10433247.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_liquidity_provision_withdraw_
+# | 6   | aerodrome_slipstream/liquidity_provision/positions/get| aerodrome_slipstream_liquidity_provision_positions_get_ |
+  - question: Please retrieve the total number of Liquidity Provider (LP) positions associated with the user address 0x29F20a192328eF1aD35e1564aBFf4Be9C5ce5f7B on the Aerodrome Slipstream platform on chain base using your tools.
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_liquidity_provision_positions_get_
+# | 7   | aerodrome_slipstream/pool_price/get                   | aerodrome_slipstream_pool_price_get_                  |      
+  - question: What is the current price of the Aerodrome Slipstream pool on Base mainnet for exchanging USDC to WETH with a tick spacing of 100?
+    answer: ANSWER
+    trajectory:
+      - aerodrome_slipstream_pool_price_get_
