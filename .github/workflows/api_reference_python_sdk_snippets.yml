@@ -6,8 +6,8 @@ on:
     types: [opened, ready_for_review, synchronize]
     branches:
       - main
-#    paths:
-#      - api_reference/
+    paths:
+      - api_reference/python_sdk_snippets/*
   workflow_dispatch:
     inputs:
       skip_tests:
