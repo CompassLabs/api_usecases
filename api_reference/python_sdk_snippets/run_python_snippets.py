@@ -6,7 +6,7 @@ import os
 
 load_dotenv()
 
-api_key = os.environ.get("COMPASS_KEY")
+api_key = os.environ.get("COMPASS_API_KEY")
 print(api_key)
 
 url = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
