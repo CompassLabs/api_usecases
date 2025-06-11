@@ -6,16 +6,8 @@ on:
     types: [opened, ready_for_review, synchronize]
     branches:
       - main
-    paths:
-      - api/**
-      - openapi.json
-
-  push:
-    branches:
-      - main
-    paths:
-      - api/**
-      - openapi.json
+#    paths:
+#      - api_reference/
   workflow_dispatch:
     inputs:
       skip_tests:
