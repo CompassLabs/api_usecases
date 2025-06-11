@@ -50,6 +50,7 @@ jobs:
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
     - name: Install dependencies
+      working-directory: api_reference/python_sdk_snippets
       run: make install
     
 
@@ -65,6 +66,7 @@ jobs:
 #      working-directory: api_reference/python_sdk_snippets
 #      run: npm run start
     - name: Run make target
+      working-directory: api_reference/python_sdk_snippets
       run: make test-snippet API_KEY=${{ secrets.COMPASS_API_KEY }}
 
 #    - name: Run snippets
