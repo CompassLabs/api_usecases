@@ -155,7 +155,7 @@ jobs:
     - name: Start web application
       working-directory: compass_agent
       run: |
-        ./venv/bin/python agent.py
+        .venv/bin/python agent.py
 
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
