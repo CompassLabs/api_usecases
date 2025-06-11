@@ -26,7 +26,7 @@ run:
 	@$(call print_bold,Running)
 	@.venv/bin/fastapi run --port 8000 compass/api_backend/app.py --reload
 
-test-snippet:
+test-snippets:
 	@$(call print_bold,Unit testing)
 	#@sed 's|<YOUR_API_KEY_HERE>|$(API_KEY)|g' aave/rate.py > /tmp/rate_temp.py
-	@.venv/bin/python /tmp/rate_temp.py
+	@.venv/bin/python run_python_snippets.py
