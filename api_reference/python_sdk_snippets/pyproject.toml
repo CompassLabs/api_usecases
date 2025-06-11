@@ -7,5 +7,6 @@ dependencies = [
     "compass-api-sdk>=0.3.8",
     "dotenv>=0.9.9",
     "plotly>=6.1.0",
-    "ruff>=0.11.10"
+    "requests>=2.32.4",
+    "ruff>=0.11.10",
 ]
