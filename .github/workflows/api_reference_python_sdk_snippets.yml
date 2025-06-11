@@ -2,13 +2,15 @@ name: Run Python SDK Snippets from API Reference
 
 
 on:
-  push:
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
     branches:
       - main
     paths:
       - api/**
       - openapi.json
-  pull_request:
+
+  push:
     branches:
       - main
     paths:
