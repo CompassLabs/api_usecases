@@ -28,5 +28,5 @@ run:
 
 test-snippet:
 	@$(call print_bold,Unit testing)
-	@sed 's|<YOUR_API_KEY_HERE>|$(API_KEY)|g' aave/rate.py > /tmp/rate_temp.py
+	#@sed 's|<YOUR_API_KEY_HERE>|$(API_KEY)|g' aave/rate.py > /tmp/rate_temp.py
 	@.venv/bin/python /tmp/rate_temp.py
