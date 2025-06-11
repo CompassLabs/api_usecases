@@ -1,6 +1,5 @@
 name: Run Python SDK Snippets from API Reference
 
-
 on:
   pull_request:
     types: [opened, ready_for_review, synchronize]
@@ -16,7 +15,6 @@ on:
         default: false
         type: boolean
 
-
 jobs:
   run-python-sdk-snippets:
     runs-on: ubuntu-latest
@@ -28,23 +26,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    
-    - name: Change directory
-      run: cd api_reference/python_sdk_snippets/
-
-    - name: PWD
-      working-directory: api_reference/python_sdk_snippets
-      run: pwd
-
-
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
-
-
 
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -52,20 +33,8 @@ jobs:
     - name: Install dependencies
       working-directory: api_reference/python_sdk_snippets
       run: make install
-    
 
-
-
-
-
-#    - name: Install dependencies
-#      working-directory: api_reference/python_sdk_snippets
-#      run: npm install
-    
-#    - name: Run application
-#      working-directory: api_reference/python_sdk_snippets
-#      run: npm run start
-    - name: Run make target
+    - name: Run snippets
       working-directory: api_reference/python_sdk_snippets
       run: make test-snippet API_KEY=${{ secrets.COMPASS_API_KEY }}
 
