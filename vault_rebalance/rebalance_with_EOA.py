@@ -1,0 +1,161 @@
+from time import sleep
+
+from dotenv import load_dotenv
+from web3 import HTTPProvider, Web3
+from web3.types import RPCEndpoint
+
+load_dotenv()
+w3 = Web3(HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
+
+
+# Get account
+WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
+
+w3.provider.make_request(RPCEndpoint("anvil_impersonateAccount"), [WALLET])
+
+w3.provider.make_request(
+    RPCEndpoint("anvil_setBalance"),
+    [WALLET, "0x56BC75E2D63100000"],  # Equivalent to 100 ETH in wei
+)
+
+k = 'Zp69nDSOYw9P02FiVnhZBaJkvkRcz0Pg1U7cjnhr'
+
+
+from compass_api_sdk import CompassAPI, models
+
+
+compass_api = CompassAPI(api_key_auth=k)
+
+
+# address2vault: dict[str, MorphoVault] = {
+#     vault.address for vault in compass.morpho.vaults().vaults
+# }
+
+
+usdc_vaults = [
+    "0x341193ED21711472e71aECa4A942123452bd0ddA",  # Re7 USDC Core
+    "0x4F460bb11cf958606C69A963B4A17f9DaEEea8b6",  # f(x) Protocol Re7 USDC
+    "0x64964E162Aa18d32f91eA5B24a09529f811AEB8e", # Re7, USDC Prime
+]
+
+# with CompassAPI(
+#     api_key_auth=k,
+# ) as compass_api:
+
+print('GET USDC BALANCE ON ETHEREUM:')
+
+print(
+    compass_api.token.balance(
+    chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
+    user=WALLET,
+    token=models.TokenEnum.USDC,
+    server_url='http://0.0.0.0:80'
+))
+
+print('WITHDRAW 3 USDC FROM MORPHO:')
+
+
+res = compass_api.morpho.withdraw(
+    vault_address=usdc_vaults[0],
+    amount='ALL',
+    chain=models.MorphoWithdrawRequestChain.ETHEREUM_MAINNET,
+    sender=WALLET,
+    server_url='http://0.0.0.0:80'
+    )
+
+
+# Print Response
+
+# Get Unsigned Transaction from Response
+unsigned_transaction = res.model_dump(by_alias=True)
+
+
+
+
+#unsigned_transaction['nonce'] = 100
+
+txn_hash = w3.eth.send_transaction(unsigned_transaction)
+print(txn_hash.hex())
+
+print('GET USDC BALANCE AGAIN:')
+
+# wait for anvil to mine a block for the USDC balance to update
+sleep(1)
+
+
+print(
+    compass_api.token.balance(
+    chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
+    user=WALLET,
+    token=models.TokenEnum.USDC,
+    server_url='http://0.0.0.0:80'
+))
+
+
+
+print('SET ALLOWANCE ON MORPHO OF 1 USDC:')
+
+
+# wait for anvil to mine a block for the USDC balance to update
+sleep(1)
+
+
+
+res = compass_api.morpho.allowance(
+    vault_address=usdc_vaults[0],
+    amount=4,
+    chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
+    sender=WALLET,
+    server_url='http://0.0.0.0:80'
+)
+
+unsigned_transaction = res.model_dump(by_alias=True)
+print(unsigned_transaction)
+
+
+#unsigned_transaction['nonce'] = 200
+txn_hash = w3.eth.send_transaction(unsigned_transaction)
+print(txn_hash.hex())
+
+
+
+
+
+print('DEPOSIT ALL USDC INTO THIS VAULT:')
+
+# wait for anvil to mine a block for the USDC balance to update
+sleep(1)
+
+res = compass_api.morpho.deposit(
+    vault_address=usdc_vaults[0],#'0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1',
+    amount=4,
+    chain=models.MorphoDepositRequestChain.ETHEREUM_MAINNET,
+    sender=WALLET,
+    server_url='http://0.0.0.0:80'
+)
+
+unsigned_transaction = res.model_dump(by_alias=True)
+print(unsigned_transaction)
+print(unsigned_transaction['nonce'])
+
+#unsigned_transaction['nonce'] = 300
+txn_hash = w3.eth.send_transaction(unsigned_transaction)
+print(txn_hash.hex())
+
+print('GET BALANCE AGAIN')
+sleep(3)
+
+
+print(
+    compass_api.token.balance(
+    chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
+    user=WALLET,
+    token=models.TokenEnum.USDC,
+    server_url='http://0.0.0.0:80'
+))
+
+
+
+
+
+
