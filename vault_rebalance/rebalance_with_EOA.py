@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from web3 import HTTPProvider, Web3
 from web3.types import RPCEndpoint
 
-load_dotenv()
+#load_dotenv()
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
 
 
