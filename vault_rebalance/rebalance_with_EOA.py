@@ -69,7 +69,7 @@ def withdraw_tx(vault: str) -> dict:
 def set_allowance_tx(vault: str) -> dict:
     res = compass_api.morpho.allowance(
         vault_address=vault,
-        amount="ALL",
+        amount=1000,
         chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -78,10 +78,10 @@ def set_allowance_tx(vault: str) -> dict:
     print(unsigned_transaction)
     return unsigned_transaction
 
-def deposit_tx(vault: str) -> dict:
+def deposit_tx(vault: str, amount: float) -> dict:
     res = compass_api.morpho.deposit(
         vault_address=vault,#'0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1',
-        amount=4,
+        amount=amount,
         chain=models.MorphoDepositRequestChain.ETHEREUM_MAINNET,
         sender=WALLET,
         server_url='http://0.0.0.0:80'
@@ -127,7 +127,7 @@ print_balance()
 
 
 
-print('SET ALLOWANCE ON MORPHO OF 1 USDC:')
+print('SET ALLOWANCE ON MORPHO:')
 
 
 # wait for anvil to mine a block for the USDC balance to update
@@ -168,12 +168,13 @@ print('DEPOSIT ALL USDC INTO THIS VAULT:')
 # wait for anvil to mine a block for the USDC balance to update
 sleep(2)
 
+total = 8.53
 
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[0])).hex())
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[0], total*0.33)).hex())
 sleep(2)
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[1])).hex())
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[1], total*0.33)).hex())
 sleep(2)
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[2])).hex())
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[2], total*0.33)).hex())
 sleep(2)
 
 # res = compass_api.morpho.deposit(
