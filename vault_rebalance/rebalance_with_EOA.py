@@ -87,9 +87,9 @@ def deposit_tx(vault: str) -> dict:
         server_url='http://0.0.0.0:80'
     )
 
-unsigned_transaction = res.model_dump(by_alias=True)
-print(unsigned_transaction)
-print(unsigned_transaction['nonce'])
+    unsigned_transaction = res.model_dump(by_alias=True)
+    print(unsigned_transaction)
+    print(unsigned_transaction['nonce'])
 
 
 print_balance()
@@ -156,8 +156,8 @@ sleep(2)
 
 
 #unsigned_transaction['nonce'] = 200
-txn_hash = w3.eth.send_transaction(unsigned_transaction)
-print(txn_hash.hex())
+# txn_hash = w3.eth.send_transaction(unsigned_transaction)
+# print(txn_hash.hex())
 
 
 
@@ -168,21 +168,29 @@ print('DEPOSIT ALL USDC INTO THIS VAULT:')
 # wait for anvil to mine a block for the USDC balance to update
 sleep(2)
 
-res = compass_api.morpho.deposit(
-    vault_address=usdc_vaults[0],#'0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1',
-    amount=4,
-    chain=models.MorphoDepositRequestChain.ETHEREUM_MAINNET,
-    sender=WALLET,
-    server_url='http://0.0.0.0:80'
-)
 
-unsigned_transaction = res.model_dump(by_alias=True)
-print(unsigned_transaction)
-print(unsigned_transaction['nonce'])
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[0])).hex())
+sleep(2)
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[1])).hex())
+sleep(2)
+print(w3.eth.send_transaction(deposit_tx(usdc_vaults[2])).hex())
+sleep(2)
+
+# res = compass_api.morpho.deposit(
+#     vault_address=usdc_vaults[0],#'0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1',
+#     amount=4,
+#     chain=models.MorphoDepositRequestChain.ETHEREUM_MAINNET,
+#     sender=WALLET,
+#     server_url='http://0.0.0.0:80'
+# )
+# 
+# unsigned_transaction = res.model_dump(by_alias=True)
+# print(unsigned_transaction)
+# print(unsigned_transaction['nonce'])
 
 #unsigned_transaction['nonce'] = 300
-txn_hash = w3.eth.send_transaction(unsigned_transaction)
-print(txn_hash.hex())
+# txn_hash = w3.eth.send_transaction(unsigned_transaction)
+# print(txn_hash.hex())
 
 print('GET BALANCE AGAIN')
 sleep(2)
