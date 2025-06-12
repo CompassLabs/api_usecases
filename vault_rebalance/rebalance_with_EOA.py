@@ -89,7 +89,7 @@ def deposit_tx(vault: str, amount: float) -> dict:
 
     unsigned_transaction = res.model_dump(by_alias=True)
     print(unsigned_transaction)
-    print(unsigned_transaction['nonce'])
+    return unsigned_transaction
 
 
 print_balance()
@@ -170,11 +170,11 @@ sleep(2)
 
 total = 8.53
 
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[0], total*0.33)).hex())
+print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[0], amount= 1)).hex())
 sleep(2)
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[1], total*0.33)).hex())
+print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[1], amount=1)).hex())
 sleep(2)
-print(w3.eth.send_transaction(deposit_tx(usdc_vaults[2], total*0.33)).hex())
+print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[2], amount=1)).hex())
 sleep(2)
 
 # res = compass_api.morpho.deposit(
