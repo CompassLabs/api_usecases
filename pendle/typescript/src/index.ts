@@ -24,10 +24,10 @@ const walletClient = createWalletClient({
   transport: http(RPC_URL),
 });
 
-//   const publicClient = createPublicClient({
-//     chain: arbitrum,
-//     transport: http(RPC_URL),
-//   });
+const publicClient = createPublicClient({
+  chain: arbitrum,
+  transport: http(RPC_URL),
+});
 
 // SNIPPET START 1
 const { markets } = await compassApiSDK.pendle.markets({
@@ -36,22 +36,23 @@ const { markets } = await compassApiSDK.pendle.markets({
 
 const market = markets[0];
 
-console.log("market", market);
+const marketAddress = market.address;
+const underlyingAssetAddress = market.underlyingAsset.split("-")[1];
+const ptAddress = market.pt.split("-")[1];
+const ytAddress = market.yt.split("-")[1];
+// SNIPPET END 1
 
+// SNIPPET START 2
 let userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
 });
-// SNIPPET END 1
 
-console.log("1", userPosition);
-
-// SNIPPET START 2
 let underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
-  token: market.underlyingAsset,
+  token: underlyingAssetAddress,
   contractName: ContractName.PendleRouter,
 });
 
@@ -61,38 +62,46 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
     await compassApiSDK.universal.allowanceSet({
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
-      token: market.underlyingAsset,
+      token: underlyingAssetAddress,
       contractName: ContractName.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 
-  await walletClient.sendTransaction(setAllowanceForUnderlyingAssetTx as any);
+  const txHash = await walletClient.sendTransaction(
+    setAllowanceForUnderlyingAssetTx as any
+  );
+
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 }
 
 const buyPtTx = await compassApiSDK.pendle.buyPt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
   amount: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
-await walletClient.sendTransaction(buyPtTx as any);
+let txHash = await walletClient.sendTransaction(buyPtTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 2
 
 // SNIPPET START 3
 userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
 });
-
-console.log("2", userPosition);
 
 const pTAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
-  token: market.pt,
+  token: ptAddress,
   contractName: ContractName.PendleRouter,
 });
 
@@ -101,38 +110,44 @@ if (pTAllowance.amount < userPosition.ptBalance) {
   const setAllowanceForPtTx = await compassApiSDK.universal.allowanceSet({
     chain: "arbitrum:mainnet",
     sender: WALLET_ADDRESS,
-    token: market.pt,
+    token: ptAddress,
     contractName: ContractName.PendleRouter,
     amount: userPosition.ptBalance,
   });
 
-  await walletClient.sendTransaction(setAllowanceForPtTx as any);
+  const txHash = await walletClient.sendTransaction(setAllowanceForPtTx as any);
+
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 }
 
 const sellPtTx = await compassApiSDK.pendle.sellPt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
   amount: userPosition.ptBalance,
   maxSlippagePercent: 0.1,
 });
 
-await walletClient.sendTransaction(sellPtTx as any);
+txHash = await walletClient.sendTransaction(sellPtTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 3
 
 // SNIPPET START 4
 userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
-  marketAddress: market.address,
-  maxSlippagePercent: 0.1,
+  marketAddress,
 });
-console.log("3", userPosition);
 
 underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
-  token: market.underlyingAsset,
+  token: underlyingAssetAddress,
   contractName: ContractName.PendleRouter,
 });
 
@@ -142,45 +157,58 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
     await compassApiSDK.universal.allowanceSet({
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
-      token: market.underlyingAsset,
+      token: underlyingAssetAddress,
       contractName: ContractName.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 
-  await walletClient.sendTransaction(setAllowanceForUnderlyingAssetTx as any);
+  const txHash = await walletClient.sendTransaction(
+    setAllowanceForUnderlyingAssetTx as any
+  );
+
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 }
 
 const buyYtTx = await compassApiSDK.pendle.buyYt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
   amount: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
-await walletClient.sendTransaction(buyYtTx as any);
+txHash = await walletClient.sendTransaction(buyYtTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 4
 
 // SNIPPET START 5
 const redeemYieldTx = await compassApiSDK.pendle.redeemYield({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
 });
 
-await walletClient.sendTransaction(redeemYieldTx as any);
+txHash = await walletClient.sendTransaction(redeemYieldTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 
 userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
 });
-console.log("4", userPosition);
 
 const yTAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
-  token: market.yt,
+  token: ytAddress,
   contractName: ContractName.PendleRouter,
 });
 
@@ -189,37 +217,44 @@ if (yTAllowance.amount < userPosition.ytBalance) {
   const setAllowanceForPtTx = await compassApiSDK.universal.allowanceSet({
     chain: "arbitrum:mainnet",
     sender: WALLET_ADDRESS,
-    token: market.yt,
+    token: ytAddress,
     contractName: ContractName.PendleRouter,
     amount: userPosition.ytBalance,
   });
 
-  await walletClient.sendTransaction(setAllowanceForPtTx as any);
+  const txHash = await walletClient.sendTransaction(setAllowanceForPtTx as any);
+
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 }
 
 const sellYtTx = await compassApiSDK.pendle.sellYt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
   amount: userPosition.ytBalance,
   maxSlippagePercent: 0.1,
 });
 
-await walletClient.sendTransaction(sellYtTx as any);
+txHash = await walletClient.sendTransaction(sellYtTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 5
 
 // SNIPPET START 6
 userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
 });
-console.log("6", userPosition);
 
 underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
-  token: market.underlyingAsset,
+  token: underlyingAssetAddress,
   contractName: ContractName.PendleRouter,
 });
 
@@ -229,21 +264,31 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
     await compassApiSDK.universal.allowanceSet({
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
-      token: market.underlyingAsset,
+      token: underlyingAssetAddress,
       contractName: ContractName.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 
-  await walletClient.sendTransaction(setAllowanceForUnderlyingAssetTx as any);
+  const txHash = await walletClient.sendTransaction(
+    setAllowanceForUnderlyingAssetTx as any
+  );
+
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 }
 
 const addLiquidityTx = await compassApiSDK.pendle.addLiquidity({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
-  marketAddress: market.address,
+  marketAddress,
   amount: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
-await walletClient.sendTransaction(addLiquidityTx as any);
+txHash = await walletClient.sendTransaction(addLiquidityTx as any);
+
+await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 6

@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@compass-labs/api-sdk": "^0.5.18",
     "dotenv": "^16.5.0",
     "viem": "^2.31.0"
   },
