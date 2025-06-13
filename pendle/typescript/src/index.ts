@@ -40,15 +40,15 @@ const marketAddress = market.address;
 const underlyingAssetAddress = market.underlyingAsset.split("-")[1];
 const ptAddress = market.pt.split("-")[1];
 const ytAddress = market.yt.split("-")[1];
-// SNIPPET END 1
 
-// SNIPPET START 2
 let userPosition = await compassApiSDK.pendle.position({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
 });
+// SNIPPET END 1
 
+// SNIPPET START 2
 let underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
