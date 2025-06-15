@@ -1,3 +1,4 @@
+// SNIPPET START 1
 import { createSafeClient } from '@safe-global/sdk-starter-kit';
 import dotenv from 'dotenv';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
@@ -12,6 +13,9 @@ const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY as string;
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY as string;
 const SAFE_ADDRESS = process.env.SAFE_ADDRESS as string;
 
+// SNIPPET END 1
+
+// SNIPPET START 2
 const main = async () => {
   // NOTE: if we need to deploy a new safe, uncomment the following code
   // const safeClient = await createSafeClient({
@@ -35,6 +39,9 @@ const main = async () => {
     apiKeyAuth: COMPASS_API_KEY,
   });
 
+  // SNIPPET END 2
+
+  // SNIPPET START 3
   const result = await compassApiSDK.smartAccount.accountBatchedUserOperations({
     chain: 'arbitrum:mainnet',
     operations: [
@@ -67,7 +74,9 @@ const main = async () => {
     value: op.value ? String(op.value) : '0',
   }));
 
+  // SNIPPET END 3
 
+  // SNIPPET START 4
   try {
     const txResult = await safeClient.send({transactions: operations});
       console.log('txResult', txResult);
@@ -78,6 +87,8 @@ const main = async () => {
     console.error("Ran into an error:", error);
     console.log("Ran into expected error. Wallet not funded");
   }
+
+  // SNIPPET END 4
 
 };
 

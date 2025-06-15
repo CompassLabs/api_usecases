@@ -1,3 +1,4 @@
+// SNIPPET START 1
 import { Call, createPublicClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum } from 'viem/chains';
@@ -28,6 +29,9 @@ const publicClient = createPublicClient({
 });
 const entryPoint = getEntryPoint('0.7');
 
+// SNIPPET END 1
+
+// SNIPPET START 2
 const main = async () => {
   const signer = privateKeyToAccount(PRIVATE_KEY);
 
@@ -64,6 +68,9 @@ const main = async () => {
   const accountAddress = kernelClient.account.address;
   console.log('My account:', accountAddress);
 
+  // SNIPPET END 2
+
+  // SNIPPET START 3
   const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: COMPASS_API_KEY,
   });
@@ -95,8 +102,9 @@ const main = async () => {
     value: op.value ? BigInt(op.value) : undefined,
   })) as Call[];
 
+  // SNIPPET END 3
 
-
+  // SNIPPET START 4
   try {
     const operationHash = await kernelClient.sendUserOperation({
       callData: await kernelClient.account.encodeCalls(operations),
@@ -109,6 +117,8 @@ const main = async () => {
   } catch (error) {
     console.error("An error occurred while processing the batched transaction:", error);
   }
+
+  // SNIPPET END 4
 
 };
 
