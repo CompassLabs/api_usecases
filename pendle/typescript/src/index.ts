@@ -12,7 +12,6 @@ const RPC_URL = process.env.RPC_URL as string;
 
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
-  serverURL: "http://0.0.0.0:8000",
 });
 
 const account = privateKeyToAccount(PRIVATE_KEY);
