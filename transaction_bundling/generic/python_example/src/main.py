@@ -31,14 +31,13 @@ with CompassAPI(
     # Sign the authorization
     signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 
-    # SNIPPET END 2
-
-    # SNIPPET START 3
     chain = models.Chain.ETHEREUM_MAINNET
     sender = account.address
     signed_authorization = signed_auth.model_dump(by_alias=True)
 
-    # SNIPPET START 4
+    # SNIPPET END 2
+
+    # SNIPPET START 3
     res = compass_api.transaction_batching.execute(
         chain=chain,
         sender=sender,
@@ -68,11 +67,11 @@ with CompassAPI(
         ],
     )
 
-    # SNIPPET END 4
+    # SNIPPET END 3
 
-    # SNIPPET START 5
+    # SNIPPET START 4
     unsigned_transaction = res.model_dump(by_alias=True)
     signed_transaction = w3.eth.account.sign_transaction(unsigned_transaction, PRIVATE_KEY)
     txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
     print(txn_hash.hex())
-    # SNIPPET END 5
+    # SNIPPET END 4
