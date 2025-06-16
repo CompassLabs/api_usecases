@@ -39,6 +39,7 @@ const main = async () => {
     const signedAuth = await walletClient.signAuthorization({
         account,
         contractAddress: auth.address as `0x${string}`,
+        nonce: auth.nonce,
     });
 
     // SNIPPET END 3
@@ -57,7 +58,7 @@ const main = async () => {
         },
         collateralToken: "USDC",
         borrowToken: "WETH",
-        initialCollateralAmount: 5,
+        initialCollateralAmount: 4,
         multiplier: 1.5,
         maxSlippagePercent: 2.5,
         loanToValue: 70,

@@ -35,7 +35,8 @@ async function run() {
     // 2. Sign the authorization
     const signedAuth = await walletClient.signAuthorization({
         account,
-        address: auth.address as `0x${string}`
+        contractAddress: auth.address as `0x${string}`,
+        nonce: auth.nonce,
     });
 
     // SNIPPET END 3
