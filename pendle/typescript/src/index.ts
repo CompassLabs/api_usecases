@@ -1,3 +1,4 @@
+// SNIPPET START 21
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import dotenv from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
@@ -5,7 +6,6 @@ import { arbitrum } from "viem/chains";
 import { http, createWalletClient, createPublicClient } from "viem";
 import { ContractName } from "@compass-labs/api-sdk/models/operations";
 
-// SNIPPET START 21
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;

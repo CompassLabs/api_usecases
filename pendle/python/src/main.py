@@ -1,10 +1,10 @@
+# SNIPPET START 21
 from compass_api_sdk import CompassAPI
 import os
 import dotenv
 from web3 import Web3
 from eth_account import Account
 
-# SNIPPET START 21
 dotenv.load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
