@@ -7,15 +7,15 @@ import { ContractName } from "@compass-labs/api-sdk/models/operations";
 
 dotenv.config();
 
+// SNIPPET START 20
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const RPC_URL = process.env.RPC_URL as string;
+const account = privateKeyToAccount(PRIVATE_KEY);
+const WALLET_ADDRESS = account.address;
 
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
 });
-
-const account = privateKeyToAccount(PRIVATE_KEY);
-const WALLET_ADDRESS = account.address;
 
 const walletClient = createWalletClient({
   account,
@@ -27,6 +27,7 @@ const publicClient = createPublicClient({
   chain: arbitrum,
   transport: http(RPC_URL),
 });
+// SNIPPET END 20
 
 // SNIPPET START 1
 const { markets } = await compassApiSDK.pendle.markets({

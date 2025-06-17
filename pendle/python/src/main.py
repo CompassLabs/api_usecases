@@ -6,15 +6,16 @@ from eth_account import Account
 
 dotenv.load_dotenv()
 
+# SNIPPET START 20
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 RPC_URL = os.getenv("RPC_URL")
-COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
-
-compass_api_sdk = CompassAPI(api_key_auth=COMPASS_API_KEY)
-
-w3 = Web3(Web3.HTTPProvider(RPC_URL))
 account = Account.from_key(PRIVATE_KEY)
 WALLET_ADDRESS = account.address
+
+compass_api_sdk = CompassAPI(api_key_auth=os.getenv("COMPASS_API_KEY"))
+
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
+# SNIPPET END 20
 
 # SNIPPET START 1
 markets_response = compass_api_sdk.pendle.markets(
