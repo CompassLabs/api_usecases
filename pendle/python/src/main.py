@@ -4,14 +4,15 @@ import dotenv
 from web3 import Web3
 from eth_account import Account
 
+# SNIPPET START 21
 dotenv.load_dotenv()
 
-# SNIPPET START 20
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 RPC_URL = os.getenv("RPC_URL")
-account = Account.from_key(PRIVATE_KEY)
-WALLET_ADDRESS = account.address
+WALLET_ADDRESS = Account.from_key(PRIVATE_KEY).address
+# SNIPPET END 21
 
+# SNIPPET START 20
 compass_api_sdk = CompassAPI(api_key_auth=os.getenv("COMPASS_API_KEY"))
 
 w3 = Web3(Web3.HTTPProvider(RPC_URL))

@@ -5,14 +5,16 @@ import { arbitrum } from "viem/chains";
 import { http, createWalletClient, createPublicClient } from "viem";
 import { ContractName } from "@compass-labs/api-sdk/models/operations";
 
+// SNIPPET START 21
 dotenv.config();
 
-// SNIPPET START 20
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const RPC_URL = process.env.RPC_URL as string;
 const account = privateKeyToAccount(PRIVATE_KEY);
 const WALLET_ADDRESS = account.address;
+// SNIPPET END 21
 
+// SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
 });
