@@ -1,3 +1,5 @@
+https://api-usecases.vercel.app/
+
 This is a demo on how Compass API can be used within a wallet application.
 
 ## Getting Started
