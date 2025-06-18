@@ -9,6 +9,11 @@ import os
 from web3 import Web3
 import dotenv
 
+PRIVATE_KEY = os.getenv("PRIVATE_KEY")
+COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
+
+
+
 #load_dotenv()
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
 
