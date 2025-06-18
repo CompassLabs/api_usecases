@@ -5,6 +5,7 @@ import { mainnet } from "viem/chains";
 import { http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
+import { SendTransactionRequest } from "viem";
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ async function run() {
   // SNIPPET END 2
 
   // SNIPPET START 3
-  const auth = await compassApiSDK.transactionBatching.authorization({
+  const auth = await compassApiSDK.transactionBundler.bundlerAuthorization({
     chain: "ethereum:mainnet",
     sender: account.address,
   });
@@ -50,45 +51,45 @@ async function run() {
 
   // SNIPPET START 4
   // Then execute with the authorization
-  // const result = await compassApiSDK.transactionBatching.execute({
-  //     chain: "ethereum:mainnet",
-  //     sender: account.address,
-  //     signedAuthorization: {
-  //         nonce: signedAuth.nonce,
-  //         address: signedAuth.address,
-  //         chainId: signedAuth.chainId,
-  //         r: signedAuth.r,
-  //         s: signedAuth.s,
-  //         yParity: signedAuth.yParity as number
-  //     },
-  //     actions: [
-  //         {
-  //             body: {
-  //                 actionType: "ALLOWANCE_INCREASE",
-  //                 token: "WETH",
-  //                 contractName: "UniswapV3Router",
-  //                 amount: "1000",
-  //             },
-  //         },
-  //         {
-  //             body: {
-  //                 actionType: "UNISWAP_BUY_EXACTLY",
-  //                 amount: 1,
-  //                 fee: "0.01",
-  //                 maxSlippagePercent: 0.5,
-  //                 tokenIn: "WETH",
-  //                 tokenOut: "USDC",
-  //                 wrapEth: true,
-  //             }
-  //         }
-  //     ]
-  // });
+  const result = await compassApiSDK.transactionBundler.bundlerExecute({
+      chain: "ethereum:mainnet",
+      sender: account.address,
+      signedAuthorization: {
+          nonce: signedAuth.nonce,
+          address: signedAuth.address,
+          chainId: signedAuth.chainId,
+          r: signedAuth.r,
+          s: signedAuth.s,
+          yParity: signedAuth.yParity as number
+      },
+      actions: [
+          {
+              body: {
+                  actionType: "ALLOWANCE_INCREASE",
+                  token: "WETH",
+                  contractName: "UniswapV3Router",
+                  amount: "1000",
+              },
+          },
+          {
+              body: {
+                  actionType: "UNISWAP_BUY_EXACTLY",
+                  amount: 1,
+                  fee: "0.01",
+                  maxSlippagePercent: 0.5,
+                  tokenIn: "WETH",
+                  tokenOut: "USDC",
+                  wrapEth: true,
+              }
+          }
+      ]
+  });
 
   // SNIPPET END 4
 
   // SNIPPET START 5
-  // const tx = await walletClient.sendTransaction(result as unknown as SendTransactionRequest);
-  // console.log(tx);
+  const tx = await walletClient.sendTransaction(result as unknown as SendTransactionRequest);
+  console.log(tx);
 
   // SNIPPET END 5
 }
