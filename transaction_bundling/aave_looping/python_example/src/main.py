@@ -24,7 +24,7 @@ account = Account.from_key(private_key)
 
 
 # SNIPPET START 2
-auth = sdk.transaction_batching.authorization(
+auth = sdk.transaction_bundler.bundler_authorization(
     chain="ethereum:mainnet",
     sender=account.address
 )
@@ -34,7 +34,7 @@ signed_auth = Account.sign_authorization(auth.model_dump(by_alias=True), private
 # SNIPPET END 2
 
 # SNIPPET START 3
-looping_tx = sdk.transaction_batching.aave_loop(
+looping_tx = sdk.transaction_bundler.bundler_aave_loop(
     chain="ethereum:mainnet",
     sender=account.address,
     signed_authorization=signed_auth.model_dump(),

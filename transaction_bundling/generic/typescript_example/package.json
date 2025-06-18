@@ -15,7 +15,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@compass-labs/api-sdk": "^0.5.18",
+    "@compass-labs/api-sdk": "latest",
     "dotenv": "^16.5.0",
     "viem": "^2.31.2"
   }

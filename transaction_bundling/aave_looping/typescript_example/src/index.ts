@@ -31,7 +31,7 @@ const main = async () => {
     // SNIPPET END 2
 
     // SNIPPET START 3
-    const auth = await compassApiSDK.transactionBatching.authorization({
+    const auth = await compassApiSDK.transactionBundler.bundlerAuthorization({
         chain: "ethereum:mainnet",
         sender: account.address,
     });
@@ -45,7 +45,7 @@ const main = async () => {
     // SNIPPET END 3
 
     // SNIPPET START 4
-    const loopingTx = await compassApiSDK.transactionBatching.aaveLoop({
+    const loopingTx = await compassApiSDK.transactionBundler.bundlerAaveLoop({
         chain: "ethereum:mainnet",
         sender: account.address,
         signedAuthorization: {

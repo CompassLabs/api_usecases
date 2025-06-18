@@ -8,7 +8,7 @@ requires-python = ">=3.11"
 dependencies = [
     "web3~=7.12.0",
     "python-dotenv~=1.1.0",
-    "compass-api-sdk~=0.9.10",
+    "compass-api-sdk~=*",
 ]
 
 [project.optional-dependencies]

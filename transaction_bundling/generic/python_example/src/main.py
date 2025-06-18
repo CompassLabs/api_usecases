@@ -21,7 +21,7 @@ with CompassAPI(
     # SNIPPET END 1
 
     # SNIPPET START 2
-    auth = compass_api.transaction_batching.authorization(
+    auth = compass_api.transaction_bundler.bundler_authorization(
         chain=models.Chain.ETHEREUM_MAINNET,
         sender=account.address
     )
@@ -38,7 +38,7 @@ with CompassAPI(
     # SNIPPET END 2
 
     # SNIPPET START 3
-    res = compass_api.transaction_batching.execute(
+    res = compass_api.transaction_bundler.bundler_execute(
         chain=chain,
         sender=sender,
         signed_authorization=signed_authorization,

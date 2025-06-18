@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 web3 = "^7.12.0"
-compass-api-sdk = "^0.9.17"
+compass-api-sdk = "*"
 python-dotenv = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
