@@ -12,11 +12,8 @@ import dotenv
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 
-
-
 #load_dotenv()
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
-
 
 # Get account
 WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
