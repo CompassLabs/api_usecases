@@ -183,7 +183,7 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
                 st.markdown(bundle)
             with st.spinner("Adding transaction to Bundle"):
                 #w3.eth.send_transaction(tx)
-                time.sleep(0.5)
+                time.sleep(1)
 
     with cols[1]:
         st.markdown("# Allowances")
@@ -202,7 +202,7 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
                 #st.json(tx)
             with st.spinner("Adding transaction to Bundle"):
                 #w3.eth.send_transaction(tx)
-                time.sleep(0.5)
+                time.sleep(1)
 
     with cols[2]:
         st.markdown("# Re-depositing")
@@ -229,9 +229,9 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
                 # st.json(tx)
             with st.spinner("Adding transaction to Bundle"):
                 #w3.eth.send_transaction(tx)
-                time.sleep(0.5)
+                time.sleep(1)
     with cols[3]:
-        st.markdown("running multicall transaction")
+        st.markdown("# Running multicall transaction")
 
 
 
@@ -247,18 +247,18 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
         )
         unsigned_transaction = res.model_dump(by_alias=True)
 
-        st.markdown("SIGNING MULTICALL TRANSACTION")
+        st.markdown("- SIGNING MULTICALL TRANSACTION")
         signed_transaction = w3.eth.account.sign_transaction(
             unsigned_transaction, PRIVATE_KEY
         )
         time.sleep(1)
-        st.markdown("BROADCASTING MULTICALL TRANSACTION")
+        st.markdown("- BROADCASTING MULTICALL TRANSACTION")
         time.sleep(1)
 
         txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
         st.markdown(txn_hash.hex())
         time.sleep(1)
-        st.markdown(f"{get_balance()} USDC")
+        #st.markdown(f"{get_balance()} USDC")
 
     st.rerun()
 
@@ -294,7 +294,7 @@ with cols[1]:
         value = c.slider(
             key=f"slider_{vault.symbol}",
             label="Choose percentage",
-            value=33,
+            value=20,
         )
         sliders.append(value)
 
