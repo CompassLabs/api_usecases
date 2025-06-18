@@ -231,7 +231,7 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
                 #w3.eth.send_transaction(tx)
                 time.sleep(1)
     with cols[3]:
-        st.markdown("# Running multicall transaction")
+        st.markdown("# Running Compass Bundler transaction")
 
 
 
@@ -247,12 +247,12 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
         )
         unsigned_transaction = res.model_dump(by_alias=True)
 
-        st.markdown("- SIGNING MULTICALL TRANSACTION")
+        st.markdown("- SIGNING COMPASS BUNDLER TRANSACTION")
         signed_transaction = w3.eth.account.sign_transaction(
             unsigned_transaction, PRIVATE_KEY
         )
         time.sleep(1)
-        st.markdown("- BROADCASTING MULTICALL TRANSACTION")
+        st.markdown("- BROADCASTING COMPASS BUNDLER TRANSACTION")
         time.sleep(1)
 
         txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
@@ -318,7 +318,7 @@ with cols[2]:
     st.subheader("Compass SDK code")
     t=open('./main.py','r').read()
     code="""
-    res = compass.transaction_batching.execute(
+    single_transaction = compass.transaction_bundler.bundler_execute(
     chain=chain,
     sender=sender,
     signed_authorization=signed_authorization,
@@ -350,17 +350,17 @@ with cols[2]:
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[0], amount=2.817543
+                vault_address=usdc_vaults[0], amount=2.5
             )
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[1], amount=2.817543
+                vault_address=usdc_vaults[1], amount=2.5
             )
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[2], amount=2.902924
+                vault_address=usdc_vaults[2], amount=2.5
             )
         ),
     ],
