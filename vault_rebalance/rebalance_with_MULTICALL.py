@@ -28,13 +28,11 @@ w3.provider.make_request(
     [WALLET, "0x56BC75E2D63100000"],  # Equivalent to 100 ETH in wei
 )
 
-k = 'Zp69nDSOYw9P02FiVnhZBaJkvkRcz0Pg1U7cjnhr'
-
 
 from compass_api_sdk import CompassAPI, models
 
 
-compass = CompassAPI(api_key_auth=k)
+compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
 usdc_vaults = [
     "0x341193ED21711472e71aECa4A942123452bd0ddA",  # Re7 USDC Core
