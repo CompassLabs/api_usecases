@@ -143,7 +143,7 @@ PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 # First get the authorization
 account = Account.from_key(PRIVATE_KEY)
 
-auth = compass.transaction_batching.authorization(chain=models.Chain.ETHEREUM_MAINNET, sender=account.address)
+auth = compass.transaction_bundler.bundler_authorization(chain=models.Chain.ETHEREUM_MAINNET, sender=account.address)
 
 auth_dict = auth.model_dump(mode="json", by_alias=True)
 
@@ -154,7 +154,7 @@ chain = models.Chain.ETHEREUM_MAINNET
 sender = account.address
 signed_authorization = signed_auth.model_dump(by_alias=True)
 
-res = compass.transaction_batching.execute(
+res = compass.transaction_bundler.bundler_execute(
     chain=chain,
     sender=sender,
     signed_authorization=signed_authorization,
@@ -186,17 +186,17 @@ res = compass.transaction_batching.execute(
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[0], amount=8*0.33
+                vault_address=usdc_vaults[0], amount=1*0.33
             )
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[1], amount=8*0.33
+                vault_address=usdc_vaults[1], amount=1*0.33
             )
         ),
         models.UserOperation(
             body=models.MorphoDepositParams(
-                vault_address=usdc_vaults[2], amount=8*0.33
+                vault_address=usdc_vaults[2], amount=1*0.33
             )
         ),
     ],
