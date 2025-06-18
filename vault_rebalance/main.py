@@ -51,7 +51,7 @@ usdc_vaults = [
 # First get the authorization
 account = Account.from_key(PRIVATE_KEY)
 
-auth = compass.transaction_batching.authorization(
+auth = compass.transaction_bundler.bundler_authorization(
     chain=models.Chain.ETHEREUM_MAINNET, sender=account.address
 )
 
@@ -238,7 +238,7 @@ def submit(user_vaults, address2vault, user_positions, target_percentages: list[
 
 
 
-        res = compass.transaction_batching.execute(
+        res = compass.transaction_bundler.bundler_execute(
             chain=chain,
             sender=sender,
             signed_authorization=signed_authorization,
