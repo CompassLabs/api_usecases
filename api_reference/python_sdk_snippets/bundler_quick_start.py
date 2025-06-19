@@ -3,16 +3,16 @@ from eth_account import Account
 import os
 from web3 import Web3
 from dotenv import load_dotenv
-from web3 import HTTPProvider, Web3
 from web3.types import RPCEndpoint
+
 load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 RPC_URL = os.getenv("RPC_URL")
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 
-#w3 = Web3(Web3.HTTPProvider(RPC_URL))
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
+# w3 = Web3(Web3.HTTPProvider(RPC_URL))
+w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # ETHEREUM
 
 ## only used with anvil
 WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
@@ -24,18 +24,16 @@ w3.provider.make_request(
 ## only used with anvil
 
 
-print([PRIVATE_KEY, RPC_URL, COMPASS_API_KEY])
-from compass_api_sdk import CompassAPI, models
-
-
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
-PRIVATE_KEY = os.getenv("PRIVATE_KEY")
+PRIVATE_KEY = os.getenv("PRIVATE_KEY") # type: ignore[reportConstantRedefinition]
 
 # First get the authorization
 account = Account.from_key(PRIVATE_KEY)
 
-auth = compass.transaction_bundler.bundler_authorization(chain=models.Chain.ETHEREUM_MAINNET, sender=account.address)
+auth = compass.transaction_bundler.bundler_authorization(
+    chain=models.Chain.ETHEREUM_MAINNET, sender=account.address
+)
 
 auth_dict = auth.model_dump(mode="json", by_alias=True)
 
@@ -82,6 +80,6 @@ print(unsigned_transaction)
 # print("SIGNING MULTICALL TRANSACTION")
 # signed_transaction = w3.eth.account.sign_transaction(unsigned_transaction, PRIVATE_KEY)
 # print("BROADCASTING MULTICALL TRANSACTION")
-# 
+#
 # txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 # print(txn_hash.hex())
