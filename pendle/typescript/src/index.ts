@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
 import { arbitrum } from "viem/chains";
 import { http, createWalletClient, createPublicClient } from "viem";
-import { ContractName } from "@compass-labs/api-sdk/models/operations";
+import { Contract } from "@compass-labs/api-sdk/models/operations";
 
 dotenv.config();
 
@@ -61,7 +61,7 @@ let underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
   token: underlyingAssetAddress,
-  contractName: ContractName.PendleRouter,
+  contract: Contract.PendleRouter,
 });
 
 if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
@@ -71,7 +71,7 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
       token: underlyingAssetAddress,
-      contractName: ContractName.PendleRouter,
+      contract: Contract.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 
@@ -114,7 +114,7 @@ const pTAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
   token: ptAddress,
-  contractName: ContractName.PendleRouter,
+  contract: Contract.PendleRouter,
 });
 
 if (pTAllowance.amount < userPosition.ptBalance) {
@@ -123,7 +123,7 @@ if (pTAllowance.amount < userPosition.ptBalance) {
     chain: "arbitrum:mainnet",
     sender: WALLET_ADDRESS,
     token: ptAddress,
-    contractName: ContractName.PendleRouter,
+    contract: Contract.PendleRouter,
     amount: userPosition.ptBalance,
   });
 
@@ -164,7 +164,7 @@ underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
   token: underlyingAssetAddress,
-  contractName: ContractName.PendleRouter,
+  contract: Contract.PendleRouter,
 });
 
 if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
@@ -174,7 +174,7 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
       token: underlyingAssetAddress,
-      contractName: ContractName.PendleRouter,
+      contract: Contract.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 
@@ -231,7 +231,7 @@ const yTAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
   token: ytAddress,
-  contractName: ContractName.PendleRouter,
+  contract: Contract.PendleRouter,
 });
 
 if (yTAllowance.amount < userPosition.ytBalance) {
@@ -240,7 +240,7 @@ if (yTAllowance.amount < userPosition.ytBalance) {
     chain: "arbitrum:mainnet",
     sender: WALLET_ADDRESS,
     token: ytAddress,
-    contractName: ContractName.PendleRouter,
+    contract: Contract.PendleRouter,
     amount: userPosition.ytBalance,
   });
 
@@ -281,7 +281,7 @@ underlyingAssetAllowance = await compassApiSDK.universal.allowance({
   chain: "arbitrum:mainnet",
   user: WALLET_ADDRESS,
   token: underlyingAssetAddress,
-  contractName: ContractName.PendleRouter,
+  contract: Contract.PendleRouter,
 });
 
 if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
@@ -291,7 +291,7 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
       chain: "arbitrum:mainnet",
       sender: WALLET_ADDRESS,
       token: underlyingAssetAddress,
-      contractName: ContractName.PendleRouter,
+      contract: Contract.PendleRouter,
       amount: userPosition.underlyingTokenBalance,
     });
 

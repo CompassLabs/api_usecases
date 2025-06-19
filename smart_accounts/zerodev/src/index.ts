@@ -80,9 +80,9 @@ const main = async () => {
     operations: [
       {
         body: {
-          actionType: 'ALLOWANCE_INCREASE',
+          actionType: 'SET_ALLOWANCE',
           token: 'USDC',
-          contractName: 'AaveV3Pool',
+          contract: 'AaveV3Pool',
           amount: '10',
         },
       },

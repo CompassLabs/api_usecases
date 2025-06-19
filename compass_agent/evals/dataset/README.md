@@ -1,5 +1,7 @@
-# COMPASS API SCHEMA 
+# COMPASS API SCHEMA
+
 (sorted alphabetically)
+
 # aave
 
 1. `/v0/generic/allowance/get`
@@ -30,13 +32,12 @@
 
 1. `/v0/generic/allowance/get`
 2. `/v0/generic/allowance/set`
-3. `/v0/generic/allowance/set_any`
-4. `/v0/generic/balance/get`
-5. `/v0/generic/ens/get`
-6. `/v0/generic/portfolio/get`
-7. `/v0/generic/supported_tokens/get`
-8. `/v0/generic/visualize_portfolio/get`
-9. `/v0/generic/wrap_eth`
+3. `/v0/generic/balance/get`
+4. `/v0/generic/ens/get`
+5. `/v0/generic/portfolio/get`
+6. `/v0/generic/supported_tokens/get`
+7. `/v0/generic/visualize_portfolio/get`
+8. `/v0/generic/wrap_eth`
 
 # uniswap
 
@@ -49,4 +50,3 @@
 7. `/v0/uniswap/quote/sell_exactly/get`
 8. `/v0/uniswap/swap/buy_exactly`
 9. `/v0/uniswap/swap/sell_exactly`
-

@@ -149,7 +149,7 @@ async def _() -> list[ChatAnswer]:
     return [
         ChatAnswer(
             type=AnswerType.TEXT,
-            content="Sign the transaction to increase your allowance on AAVE.",
+            content="Sign the transaction to set your allowance on AAVE.",
         ),
         ChatAnswer(
             type=AnswerType.UNSIGNED_TRANSACTION,

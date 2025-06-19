@@ -48,7 +48,7 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     chain="arbitrum:mainnet",
     user=WALLET_ADDRESS,
     token=underlying_asset_address,
-    contract_name="PendleRouter",
+    contract="PendleRouter",
 )
 
 if underlying_asset_allowance.amount < user_position.underlying_token_balance:
@@ -56,7 +56,7 @@ if underlying_asset_allowance.amount < user_position.underlying_token_balance:
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
-        contract_name="PendleRouter",
+        contract="PendleRouter",
         amount=user_position.underlying_token_balance,
     )
 
@@ -92,7 +92,7 @@ pt_allowance = compass_api_sdk.universal.allowance(
     chain="arbitrum:mainnet",
     user=WALLET_ADDRESS,
     token=pt_address,
-    contract_name="PendleRouter",
+    contract="PendleRouter",
 )
 
 if pt_allowance.amount < user_position.pt_balance:
@@ -100,7 +100,7 @@ if pt_allowance.amount < user_position.pt_balance:
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=pt_address,
-        contract_name="PendleRouter",
+        contract="PendleRouter",
         amount=user_position.pt_balance,
     )
 
@@ -136,7 +136,7 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     chain="arbitrum:mainnet",
     user=WALLET_ADDRESS,
     token=underlying_asset_address,
-    contract_name="PendleRouter",
+    contract="PendleRouter",
 )
 
 if underlying_asset_allowance.amount < user_position.underlying_token_balance:
@@ -144,7 +144,7 @@ if underlying_asset_allowance.amount < user_position.underlying_token_balance:
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
-        contract_name="PendleRouter",
+        contract="PendleRouter",
         amount=user_position.underlying_token_balance,
     )
 
@@ -192,7 +192,7 @@ yt_allowance = compass_api_sdk.universal.allowance(
     chain="arbitrum:mainnet",
     user=WALLET_ADDRESS,
     token=yt_address,
-    contract_name="PendleRouter",
+    contract="PendleRouter",
 )
 
 if yt_allowance.amount < user_position.yt_balance:
@@ -200,7 +200,7 @@ if yt_allowance.amount < user_position.yt_balance:
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=yt_address,
-        contract_name="PendleRouter",
+        contract="PendleRouter",
         amount=user_position.yt_balance,
     )
 
@@ -236,7 +236,7 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     chain="arbitrum:mainnet",
     user=WALLET_ADDRESS,
     token=underlying_asset_address,
-    contract_name="PendleRouter",
+    contract="PendleRouter",
 )
 
 if underlying_asset_allowance.amount < user_position.underlying_token_balance:
@@ -244,7 +244,7 @@ if underlying_asset_allowance.amount < user_position.underlying_token_balance:
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
-        contract_name="PendleRouter",
+        contract="PendleRouter",
         amount=user_position.underlying_token_balance,
     )
 

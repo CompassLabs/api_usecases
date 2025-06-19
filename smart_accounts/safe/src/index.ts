@@ -47,16 +47,16 @@ const main = async () => {
     operations: [
       {
         body: {
-          actionType: 'ALLOWANCE_INCREASE',
+          actionType: 'SET_ALLOWANCE',
           token: 'USDC',
-          contractName: 'AaveV3Pool',
+          contract: 'AaveV3Pool',
           amount: '3',
         },
       },
       // NOTE: if creating new safe, comment the `AAVE_SUPPLY` operation out
       // the safe smart account will not have any USDC as it gets
       // deployed only with the first transaction
-      // so the first transaction will be the allowance increase upon creation
+      // so the first transaction will be the set allowance upon creation
       // when reusing an existing contract, fund it with 10 USDC and uncomment this operation
       {
         body: {
