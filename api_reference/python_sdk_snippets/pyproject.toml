@@ -1,0 +1,51 @@
+[project]
+name = "vault-rebalance"
+version = "0.1.0"
+description = "Rebalance vault positions using the Compass API"
+requires-python = ">=3.13"
+dependencies = [
+    "compass-api-sdk",
+    "dotenv>=0.9.9",
+    "plotly>=6.1.0",
+    "ruff>=0.11.10",
+    "streamlit>=1.45.1",
+    "web3>=7.11.1",
+]
+
+
+[tool.pyright]
+typeCheckingMode = "strict"
+
+reportMissingTypeStubs="none"
+reportMissingTypeArgument="none"
+#reportMissingParameterType="none"
+reportArgumentType="none"
+#reportIncompatibleMethodOverride="none"
+reportUntypedFunctionDecorator="none"
+reportUnknownArgumentType="none"
+#reportUnknownParameterType="none"
+reportUnknownVariableType="none"
+reportUnknownMemberType="none"
+#reportUnusedVariable="none"
+reportUnnecessaryComparison="none"
+reportUnnecessaryIsInstance="none"
+#reportDeprecated="none"
+reportPrivateUsage="none"
+
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+# to check for position arguments in function definitions
+# to ignore add: `noqa:PLR0917`
+[tool.ruff]
+preview = true        # <-- unlocks all “preview” rules, incl. PLR0917
+output-format = "pylint"
+
+[tool.ruff.lint]
+extend-select = ["PLR0917"]   # add the rule on top of Ruff’s defaults
+
+[tool.ruff.lint.pylint]
+max-positional-args = 2       # fail when > 2 positional parameters are possible
+
