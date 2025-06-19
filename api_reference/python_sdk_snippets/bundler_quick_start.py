@@ -3,7 +3,8 @@ from eth_account import Account
 import os
 from web3 import Web3
 from dotenv import load_dotenv
-
+from web3 import HTTPProvider, Web3
+from web3.types import RPCEndpoint
 load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
@@ -12,6 +13,17 @@ COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 
 #w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
+
+## only used with anvil
+WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
+w3.provider.make_request(RPCEndpoint("anvil_impersonateAccount"), [WALLET])
+w3.provider.make_request(
+    RPCEndpoint("anvil_setBalance"),
+    [WALLET, "0x56BC75E2D63100000"],  # Equivalent to 100 ETH in wei
+)
+## only used with anvil
+
+
 print([PRIVATE_KEY, RPC_URL, COMPASS_API_KEY])
 from compass_api_sdk import CompassAPI, models
 
