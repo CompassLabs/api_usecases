@@ -7,12 +7,12 @@ from compass_api_sdk import CompassAPI, models
 from eth_account import Account
 import os
 from web3 import Web3
-import dotenv
+from dotenv import load_dotenv
+load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 
-#load_dotenv()
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545")) #ETHEREUM
 
 # Get account
@@ -136,7 +136,6 @@ print_vault_position(usdc_vaults[2])
 
 
 
-dotenv.load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 
@@ -283,57 +282,7 @@ print('SET ALLOWANCE ON MORPHO:')
 
 # wait for anvil to mine a block for the USDC balance to update
 sleep(2)
-#
-# res = compass_api.morpho.allowance(
-#     vault_address=usdc_vaults[0],
-#     amount=4,
-#     chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
-#     sender=WALLET,
-#     server_url='http://0.0.0.0:80'
-# )
-# unsigned_transaction = res.model_dump(by_alias=True)
-# print(unsigned_transaction)
 
-
-
-
-
-# print(w3.eth.send_transaction(set_allowance_tx(usdc_vaults[0])).hex())
-# sleep(2)
-# print(w3.eth.send_transaction(set_allowance_tx(usdc_vaults[1])).hex())
-# sleep(2)
-# print(w3.eth.send_transaction(set_allowance_tx(usdc_vaults[2])).hex())
-# sleep(2)
-
-
-#unsigned_transaction['nonce'] = 200
-# txn_hash = w3.eth.send_transaction(unsigned_transaction)
-# print(txn_hash.hex())
-
-
-
-
-#
-# print('DEPOSIT ALL USDC INTO THIS VAULT:')
-#
-# # wait for anvil to mine a block for the USDC balance to update
-# sleep(2)
-#
-# total = 8.53
-#
-# print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[0], amount= total*0.33)).hex())
-# sleep(2)
-# print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[1], amount=total*0.33)).hex())
-# sleep(2)
-# print(w3.eth.send_transaction(deposit_tx(vault=usdc_vaults[2], amount=total*0.33)).hex())
-# sleep(2)
-#
-#
-#
-# print('GET BALANCE AGAIN')
-# sleep(2)
-# print_balance()
-# print_eth_balance()
 
 
 
