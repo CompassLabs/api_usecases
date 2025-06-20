@@ -44,6 +44,7 @@ const main = async () => {
   // SNIPPET START 3
   const result = await compassApiSDK.smartAccount.accountBatchedUserOperations({
     chain: 'arbitrum:mainnet',
+    sender: SAFE_ADDRESS,
     operations: [
       {
         body: {
