@@ -24,7 +24,7 @@ k = 'Zp69nDSOYw9P02FiVnhZBaJkvkRcz0Pg1U7cjnhr'
 from compass_api_sdk import CompassAPI, models
 
 
-compass_api = CompassAPI(api_key_auth=k)
+compass = CompassAPI(api_key_auth=k)
 
 usdc_vaults = [
     "0x341193ED21711472e71aECa4A942123452bd0ddA",  # Re7 USDC Core
@@ -32,8 +32,8 @@ usdc_vaults = [
     "0x64964E162Aa18d32f91eA5B24a09529f811AEB8e", # Re7, USDC Prime
 ]
 
-def print_balance() -> int:
-    res = compass_api.token.balance(
+def print_balance() -> float:
+    res = compass.token.balance(
             chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
             user=WALLET,
             token=models.TokenEnum.USDC,
@@ -42,8 +42,18 @@ def print_balance() -> int:
     print(f" USDC balance: {res.amount}")
     pass
 
+def print_eth_balance() -> float:
+    res = compass.token.balance(
+            chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
+            user=WALLET,
+            token="ETH",
+            server_url='http://0.0.0.0:80'
+        )
+    print(f" ETH balance: {res.amount}")
+    pass
+
 def print_vault_position(vault: str) -> dict:
-    res = compass_api.morpho.vault_position(
+    res = compass.morpho.vault_position(
         chain=models.MorphoVaultPositionChain.ETHEREUM_MAINNET,
         user_address="0xa829B388A3DF7f581cE957a95edbe419dd146d1B",
         vault_address=vault,
@@ -54,7 +64,7 @@ def print_vault_position(vault: str) -> dict:
     pass
 
 def withdraw_tx(vault: str) -> dict:
-    res = compass_api.morpho.withdraw(
+    res = compass.morpho.withdraw(
         vault_address=vault,
         amount='ALL',
         chain=models.MorphoWithdrawRequestChain.ETHEREUM_MAINNET,
@@ -67,7 +77,7 @@ def withdraw_tx(vault: str) -> dict:
 
 
 def set_allowance_tx(vault: str) -> dict:
-    res = compass_api.morpho.allowance(
+    res = compass.morpho.allowance(
         vault_address=vault,
         amount=1000,
         chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
@@ -79,7 +89,7 @@ def set_allowance_tx(vault: str) -> dict:
     return unsigned_transaction
 
 def deposit_tx(vault: str, amount: float) -> dict:
-    res = compass_api.morpho.deposit(
+    res = compass.morpho.deposit(
         vault_address=vault,#'0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1',
         amount=amount,
         chain=models.MorphoDepositRequestChain.ETHEREUM_MAINNET,
@@ -93,6 +103,7 @@ def deposit_tx(vault: str, amount: float) -> dict:
 
 
 print_balance()
+print_eth_balance()
 
 print('WITHDRAWING ALL USDC FROM MORPHO...')
 
@@ -133,7 +144,7 @@ print('SET ALLOWANCE ON MORPHO:')
 # wait for anvil to mine a block for the USDC balance to update
 sleep(2)
 # 
-# res = compass_api.morpho.allowance(
+# res = compass.morpho.allowance(
 #     vault_address=usdc_vaults[0],
 #     amount=4,
 #     chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
