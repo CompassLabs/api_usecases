@@ -77,6 +77,7 @@ const main = async () => {
 
   const result = await compassApiSDK.smartAccount.accountBatchedUserOperations({
     chain: 'arbitrum:mainnet',
+    sender: accountAddress,
     operations: [
       {
         body: {

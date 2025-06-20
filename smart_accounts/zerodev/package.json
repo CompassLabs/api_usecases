@@ -10,7 +10,7 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"@compass-labs/api-sdk": "latest",
+		"@compass-labs/api-sdk": "^0.5.21",
 		"@zerodev/ecdsa-validator": "latest",
 		"@zerodev/sdk": "latest",
 		"dotenv": "^16.5.0",
