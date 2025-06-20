@@ -105,7 +105,7 @@ def set_allowance_tx(vault: str) -> dict:
         amount=1000,
         chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
         sender=WALLET,
-        server_url="http://0.0.0.0:80",
+        # server_url="http://0.0.0.0:80",
     )
     unsigned_transaction = res.model_dump(by_alias=True)
     print(unsigned_transaction)

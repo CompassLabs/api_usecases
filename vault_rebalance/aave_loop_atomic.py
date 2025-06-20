@@ -69,19 +69,21 @@ def set_allowance_tx(contract: models.IncreaseAllowanceRequestContractName) -> d
         chain=models.Chain.ETHEREUM_MAINNET,
         token=models.TokenEnum.USDC,
         sender=WALLET,
-        server_url="http://0.0.0.0:80",
+        #server_url="http://0.0.0.0:80",
     )
     unsigned_transaction = res.model_dump(by_alias=True)
     print(unsigned_transaction)
     return unsigned_transaction
 
 print('here')
-print(set_allowance_tx(contract=models.IncreaseAllowanceRequestContractName.UNISWAP_V3_ROUTER))
 
 
 
 print_balance()
 print_eth_balance()
+
+print(set_allowance_tx(contract=models.IncreaseAllowanceRequestContractName.UNISWAP_V3_ROUTER))
+
 
 print('WITHDRAWING ALL USDC FROM MORPHO...')
 
