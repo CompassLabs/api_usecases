@@ -43,7 +43,7 @@ The project demonstrates how to:
 1. Create a Kernel Account with ECDSA validation
 2. Set up a ZeroDev paymaster for gas sponsorship
 3. Execute batched transactions using Compass Labs API
-4. Perform AAVE operations (allowance increase and supply)
+4. Perform AAVE operations (set allowance and supply)
 
 To run the example:
 

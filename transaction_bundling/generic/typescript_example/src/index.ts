@@ -52,43 +52,45 @@ async function run() {
   // SNIPPET START 4
   // Then execute with the authorization
   const result = await compassApiSDK.transactionBundler.bundlerExecute({
-      chain: "ethereum:mainnet",
-      sender: account.address,
-      signedAuthorization: {
-          nonce: signedAuth.nonce,
-          address: signedAuth.address,
-          chainId: signedAuth.chainId,
-          r: signedAuth.r,
-          s: signedAuth.s,
-          yParity: signedAuth.yParity as number
+    chain: "ethereum:mainnet",
+    sender: account.address,
+    signedAuthorization: {
+      nonce: signedAuth.nonce,
+      address: signedAuth.address,
+      chainId: signedAuth.chainId,
+      r: signedAuth.r,
+      s: signedAuth.s,
+      yParity: signedAuth.yParity as number,
+    },
+    actions: [
+      {
+        body: {
+          actionType: "SET_ALLOWANCE",
+          token: "WETH",
+          contract: "UniswapV3Router",
+          amount: "1000",
+        },
       },
-      actions: [
-          {
-              body: {
-                  actionType: "ALLOWANCE_INCREASE",
-                  token: "WETH",
-                  contractName: "UniswapV3Router",
-                  amount: "1000",
-              },
-          },
-          {
-              body: {
-                  actionType: "UNISWAP_BUY_EXACTLY",
-                  amount: 1,
-                  fee: "0.01",
-                  maxSlippagePercent: 0.5,
-                  tokenIn: "WETH",
-                  tokenOut: "USDC",
-                  wrapEth: true,
-              }
-          }
-      ]
+      {
+        body: {
+          actionType: "UNISWAP_BUY_EXACTLY",
+          amount: 1,
+          fee: "0.01",
+          maxSlippagePercent: 0.5,
+          tokenIn: "WETH",
+          tokenOut: "USDC",
+          wrapEth: true,
+        },
+      },
+    ],
   });
 
   // SNIPPET END 4
 
   // SNIPPET START 5
-  const tx = await walletClient.sendTransaction(result as unknown as SendTransactionRequest);
+  const tx = await walletClient.sendTransaction(
+    result as unknown as SendTransactionRequest
+  );
   console.log(tx);
 
   // SNIPPET END 5
