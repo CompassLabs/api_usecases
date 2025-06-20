@@ -17,7 +17,7 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
-        "@compass-labs/api-sdk": "latest",
+        "@compass-labs/api-sdk": "^0.5.21",
         "@safe-global/protocol-kit": "^6.0.4",
         "@safe-global/sdk-starter-kit": "^2.0.2",
         "dotenv": "^16.5.0",
