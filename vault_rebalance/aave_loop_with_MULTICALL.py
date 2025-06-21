@@ -105,7 +105,7 @@ def set_allowance_tx(vault: str) -> dict:
         amount=1000,
         chain=models.MorphoSetVaultAllowanceRequestChain.ETHEREUM_MAINNET,
         sender=WALLET,
-        # server_url="http://0.0.0.0:80",
+        server_url="http://0.0.0.0:80",
     )
     unsigned_transaction = res.model_dump(by_alias=True)
     print(unsigned_transaction)
@@ -154,10 +154,11 @@ def uniswap_buy_tx() -> dict:
 
 
 
-
+print("WRAPPING ETH")
 print(w3.eth.send_transaction(wrap_eth_tx()).hex())
 time.sleep(4)
 
+print("BUYING USDC")
 print(w3.eth.send_transaction(uniswap_buy_tx()).hex())
 
 time.sleep(4)
@@ -166,20 +167,6 @@ print_weth_balance()
 e0 = print_eth_balance()
 
 print('WITHDRAWING ALL USDC FROM MORPHO...')
-
-
-
-
-
-
-
-
-
-
-# print_vault_position(usdc_vaults[0])
-# print_vault_position(usdc_vaults[1])
-# print_vault_position(usdc_vaults[2])
-
 
 
 
@@ -209,10 +196,10 @@ res = compass.transaction_bundler.bundler_aave_loop(
     chain=chain,
     sender=account.address,
     signed_authorization=signed_auth.model_dump(),
-    collateral_token="USDC",
-    borrow_token="WETH",
+    collateral_token=models.TokenEnum.USDC,
+    borrow_token=models.TokenEnum.WETH,
     initial_collateral_amount=10,
-    multiplier=1.5,
+    multiplier=2.5,
     max_slippage_percent=2.5,
     loan_to_value=70,
     server_url="http://0.0.0.0:80"
