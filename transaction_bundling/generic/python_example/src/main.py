@@ -48,7 +48,7 @@ with CompassAPI(
                 body=models.SetAllowanceParams(
                     ACTION_TYPE="SET_ALLOWANCE",
                     token=models.TokenEnum.USDC,
-                    contract=models.SetAllowanceParamsContract.UNISWAP_V3_ROUTER,
+                    contract=models.SetAllowanceParamsContractEnum.UNISWAP_V3_ROUTER,
                     amount="1",
                 )
             ),
