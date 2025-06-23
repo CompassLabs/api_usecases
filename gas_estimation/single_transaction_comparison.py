@@ -132,6 +132,20 @@ print_weth_balance()
 
 print_eth_balance()
 
-
+def set_allowance_atomic():
+    res = compass.universal.allowance_set(
+        token=models.TokenEnum.WETH,
+        contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
+        amount="0.0001",
+        chain=chain,
+        sender=WALLET,
+        server_url="http://0.0.0.0:80",
+    )
+    unsigned_transaction = res.model_dump(by_alias=True)
+    gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
+    w3.eth.send_transaction(unsigned_transaction).hex()
+    time.sleep(2)
+    print(f"⛽️ GAS ESTIMATE: {gas_estimate} ⛽️ -- set allowance: weth uniswap")
 
 # doing simple atomic transaction: 
+set_allowance_atomic()
