@@ -28,6 +28,10 @@ compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 chain = models.TokenBalanceChain.ETHEREUM_MAINNET
 
 
+def round_5(x: Decimal) -> float:
+    return round(x, 5)
+
+
 def print_usdc_balance():
     res = compass.token.balance(
         chain=models.TokenBalanceChain.ETHEREUM_MAINNET,
@@ -115,7 +119,7 @@ def set_allowance_1():
     res = compass.universal.allowance_set(
         token=models.TokenEnum.USDC,
         contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
-        amount=100,
+        amount=round_5(100),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -131,7 +135,7 @@ def set_allowance_2():
     res = compass.universal.allowance_set(
         token=models.TokenEnum.WETH,
         contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
-        amount=1,
+        amount=round_5(1),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -146,7 +150,7 @@ def set_allowance_2():
 def aave_supply_1(amount: Decimal):
     res = compass.aave_v3.supply(
         token=models.TokenEnum.USDC,
-        amount=amount,
+        amount=round_5(amount),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -163,7 +167,7 @@ def aave_supply_1(amount: Decimal):
 def aave_borrow_1(amount: Decimal):
     res = compass.aave_v3.borrow(
         token=models.TokenEnum.WETH,
-        amount=amount,
+        amount=round_5(amount),
         interest_rate_mode=models.InterestRateMode.VARIABLE,
         chain=chain,
         sender=WALLET,
@@ -183,7 +187,7 @@ def uniswap_1(amount: Decimal):
         token_in=models.TokenEnum.WETH,
         token_out=models.TokenEnum.USDC,
         fee=models.FeeEnum.ZERO_DOT_05,
-        amount=amount,
+        amount=round_5(amount),
         max_slippage_percent=2.5,
         chain=chain,
         sender=WALLET,
@@ -194,13 +198,15 @@ def uniswap_1(amount: Decimal):
     gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
     w3.eth.send_transaction(unsigned_transaction).hex()
     time.sleep(2)
-    print(f"⛽️ GAS ESTIMATE: {gas_estimate} ⛽️ -- uniswap sell: WETH for USDC -- amount = {amount}")
+    print(
+        f"⛽️ GAS ESTIMATE: {gas_estimate} ⛽️ -- uniswap sell: WETH for USDC -- amount = {amount}"
+    )
 
 
 def aave_supply_2(amount: Decimal):
     res = compass.aave_v3.supply(
         token=models.TokenEnum.USDC,
-        amount=amount,
+        amount=round_5(amount),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -217,7 +223,7 @@ def aave_supply_2(amount: Decimal):
 def aave_borrow_2(amount: Decimal):
     res = compass.aave_v3.borrow(
         token=models.TokenEnum.WETH,
-        amount=amount,
+        amount=round_5(amount),
         interest_rate_mode=models.InterestRateMode.VARIABLE,
         chain=chain,
         sender=WALLET,
@@ -237,7 +243,7 @@ def uniswap_2(amount: Decimal):
         token_in=models.TokenEnum.WETH,
         token_out=models.TokenEnum.USDC,
         fee=models.FeeEnum.ZERO_DOT_05,
-        amount=amount,
+        amount=round_5(amount),
         max_slippage_percent=2.5,
         chain=chain,
         sender=WALLET,
@@ -256,7 +262,7 @@ def uniswap_2(amount: Decimal):
 def aave_supply_3(amount: Decimal):
     res = compass.aave_v3.supply(
         token=models.TokenEnum.USDC,
-        amount=amount,
+        amount=round_5(amount),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -273,7 +279,7 @@ def aave_supply_3(amount: Decimal):
 def aave_borrow_3(amount: Decimal):
     res = compass.aave_v3.borrow(
         token=models.TokenEnum.WETH,
-        amount=amount,
+        amount=round_5(amount),
         interest_rate_mode=models.InterestRateMode.VARIABLE,
         chain=chain,
         sender=WALLET,
@@ -293,7 +299,7 @@ def uniswap_3(amount: Decimal):
         token_in=models.TokenEnum.WETH,
         token_out=models.TokenEnum.USDC,
         fee=models.FeeEnum.ZERO_DOT_05,
-        amount=amount,
+        amount=round_5(amount),
         max_slippage_percent=2.5,
         chain=chain,
         sender=WALLET,
@@ -312,7 +318,7 @@ def uniswap_3(amount: Decimal):
 def aave_supply_4(amount: Decimal):
     res = compass.aave_v3.supply(
         token=models.TokenEnum.USDC,
-        amount=amount,
+        amount=round_5(amount),
         chain=chain,
         sender=WALLET,
         server_url="http://0.0.0.0:80",
@@ -329,7 +335,7 @@ def aave_supply_4(amount: Decimal):
 def aave_borrow_4(amount: Decimal):
     res = compass.aave_v3.borrow(
         token=models.TokenEnum.WETH,
-        amount=amount,
+        amount=round_5(amount),
         interest_rate_mode=models.InterestRateMode.VARIABLE,
         chain=chain,
         sender=WALLET,
@@ -344,17 +350,12 @@ def aave_borrow_4(amount: Decimal):
     )
 
 
-def round_5(x: Decimal):
-    return round(x, 5)
-
 set_allowance_1()
 set_allowance_2()
 aave_supply_1(
     amount=Decimal("10.0"),
 )
-aave_borrow_1(
-    amount=round_5(Decimal("0.003116921336955553576200231585")),
-)
+aave_borrow_1(amount=Decimal("0.003111308953511488850787730194"))
 uniswap_1(
     amount=round_5(Decimal("0.003116921336955553576200231585")),
 )
