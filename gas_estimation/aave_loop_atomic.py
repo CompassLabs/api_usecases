@@ -194,9 +194,7 @@ def uniswap_1(amount: Decimal):
     gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
     w3.eth.send_transaction(unsigned_transaction).hex()
     time.sleep(2)
-    print(
-        f"⛽️ GAS ESTIMATE: {gas_estimate} ⛽️ -- uniswap sell: WETH for USDC -- amount = {amount}"
-    )
+    print(f"⛽️ GAS ESTIMATE: {gas_estimate} ⛽️ -- uniswap sell: WETH for USDC -- amount = {amount}")
 
 
 def aave_supply_2(amount: Decimal):
@@ -348,7 +346,6 @@ def aave_borrow_4(amount: Decimal):
 
 def round_5(x: Decimal):
     return round(x, 5)
-
 
 set_allowance_1()
 set_allowance_2()
