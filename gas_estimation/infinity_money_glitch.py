@@ -158,6 +158,7 @@ request_list = [
             max_slippage_percent="0.2",
             chain=chain,
             sender=WALLET,
+            wrap_eth=False,
         ),
     ),
     # swapping back our USDT for USDC
@@ -171,6 +172,7 @@ request_list = [
             max_slippage_percent="0.2",
             chain=chain,
             sender=WALLET,
+            wrap_eth=False,
         ),
     ),
 ]
