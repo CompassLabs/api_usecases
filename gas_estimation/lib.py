@@ -5,11 +5,8 @@ from web3.types import RPCEndpoint
 import os
 from compass_api_sdk import CompassAPI, models
 from decimal import Decimal
+
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545"))  # ETHEREUM
-
-
-
-
 
 
 load_dotenv()
@@ -26,7 +23,6 @@ w3.provider.make_request(
     RPCEndpoint("anvil_setBalance"),
     [WALLET, "0x56BC75E2D63100000"],  # Equivalent to 100 ETH in wei
 )
-
 
 
 def wrap_eth_tx() -> dict:
@@ -59,53 +55,61 @@ def uniswap_buy_tx() -> dict:
     print(w3.eth.send_transaction(unsigned_transaction).hex())
     return unsigned_transaction
 
-requests= [
-    (compass.universal.allowance_set, models.SetAllowanceRequest(
-        token=models.TokenEnum.USDC,
-        contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
-        amount="100",
-        chain=chain,
-        sender=WALLET
-    )),
-    (compass.aave_v3.supply, models.AaveSupplyRequest(
-        token=models.TokenEnum.USDC,
-        amount="10",
-        chain=chain,
-        sender=WALLET
-    )),
-    (compass.aave_v3.borrow, models.AaveBorrowRequest(
-        token=models.TokenEnum.USDT,
-        interest_rate_mode='variable',
-        amount="5",
-        chain=chain,
-        sender=WALLET
-    )),
-    (compass.aave_v3.supply, models.AaveSupplyRequest(
-        token=models.TokenEnum.USDC,
-        amount="10",
-        chain=chain,
-        sender=WALLET
-    )),
-    (compass.aave_v3.borrow, models.AaveBorrowRequest(
-        token=models.TokenEnum.USDT,
-        interest_rate_mode='variable',
-        amount="5",
-        chain=chain,
-        sender=WALLET
-    )),
+
+requests = [
+    (
+        compass.universal.allowance_set,
+        models.SetAllowanceRequest(
+            token=models.TokenEnum.USDC,
+            contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
+            amount="100",
+            chain=chain,
+            sender=WALLET,
+        ),
+    ),
+    (
+        compass.aave_v3.supply,
+        models.AaveSupplyRequest(
+            token=models.TokenEnum.USDC, amount="10", chain=chain, sender=WALLET
+        ),
+    ),
+    (
+        compass.aave_v3.borrow,
+        models.AaveBorrowRequest(
+            token=models.TokenEnum.USDT,
+            interest_rate_mode="variable",
+            amount="5",
+            chain=chain,
+            sender=WALLET,
+        ),
+    ),
+    (
+        compass.aave_v3.supply,
+        models.AaveSupplyRequest(
+            token=models.TokenEnum.USDC, amount="10", chain=chain, sender=WALLET
+        ),
+    ),
+    (
+        compass.aave_v3.borrow,
+        models.AaveBorrowRequest(
+            token=models.TokenEnum.USDT,
+            interest_rate_mode="variable",
+            amount="5",
+            chain=chain,
+            sender=WALLET,
+        ),
+    ),
 ]
 
 
 def process_sequential():
     for function, request in requests:
-        d=request.model_dump()
-        if 'ACTION_TYPE' in d:
-            del d['ACTION_TYPE']
-        d['server_url']="http://0.0.0.0:80"
+        d = request.model_dump()
+        if "ACTION_TYPE" in d:
+            del d["ACTION_TYPE"]
+        d["server_url"] = "http://0.0.0.0:80"
 
-
-
-        tx=function(**d)
+        tx = function(**d)
         unsigned_transaction = tx.model_dump(by_alias=True)
         gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
 
@@ -115,8 +119,6 @@ def process_sequential():
         total_gas_trace_call1 = trace["result"]["gas"]
 
         print(function, gas_estimate, total_gas_trace_call1)
-
-
 
 
 if __name__ == "__main__":
