@@ -145,7 +145,7 @@ def wrap_eth_tx():
     # print(unsigned_transaction)
     #print(w3.eth.send_transaction(unsigned_transaction).hex())
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    print(f"wait_for_wrap_eth: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    #print(f"wait_for_wrap_eth: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
 
 def uniswap_buy_USDC_tx():
@@ -164,7 +164,7 @@ def uniswap_buy_USDC_tx():
     # print(unsigned_transaction)
     #print(w3.eth.send_transaction(unsigned_transaction).hex())
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    print(f"wait_for buy_usdc: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    #print(f"wait_for buy_usdc: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
 
 def uniswap_buy_USDT_tx():
@@ -182,7 +182,7 @@ def uniswap_buy_USDT_tx():
     unsigned_transaction = res.model_dump(by_alias=True)
     # print(unsigned_transaction)
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    print(f"wait_for buy_usdt: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    #print(f"wait_for buy_usdt: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
 
 non_multicall_request_list = [
@@ -378,7 +378,7 @@ def process_sequential():
         d["server_url"] = "http://0.0.0.0:80"
 
         tx = function(**d)
-        print(f"tx: {tx}")
+        #print(f"tx: {tx}")
         unsigned_transaction = tx.model_dump(by_alias=True)
         gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
         #gas_estimate = 0
@@ -391,7 +391,7 @@ def process_sequential():
         time.sleep(0)
         print("block number after:", w3.eth.block_number)
         trace = w3.provider.make_request("debug_traceCall", [tx, "latest", {}])
-        print(f"trace: {trace}")
+        #print(f"trace: {trace}")
         total_gas_trace_call1 = trace["result"]["gas"]
         iteration = iteration + 1
 
@@ -493,10 +493,11 @@ if __name__ == "__main__":
     # time.sleep(3)
 
 
-    # process_sequential()
+    #
     print_portfolio()
     print_aave_metrics()
-    multicalling_the_call(10)
+    #multicalling_the_call(2)
+    process_sequential()
     print_aave_metrics()
     print_allowances()
     #print_portfolio()
