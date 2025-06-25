@@ -70,7 +70,7 @@ def print_aave_metrics():
     )
 
     #print(f"💰 A Token Balance: {res1.token_balance}")
-    print(f"🌈 SUMMARY 🌈: 💰 Collateral: {res2.total_collateral}, 🧾 Debt: {res2.total_debt}, 💰 A Token Balance: {res1.token_balance}, Health Factor: {res2.health_factor} ")
+    print(f"🌈 SUMMARY 🌈: 💰 Collateral: {res2.total_collateral}, 🧾 Debt: {res2.total_debt}, 💰 A Token Balance: {res1.token_balance}, 🏥 Health Factor: {res2.health_factor} ")
 
 
 def print_USDC_balance():
