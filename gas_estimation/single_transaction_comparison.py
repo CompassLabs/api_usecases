@@ -11,10 +11,10 @@ from rich.console import Console
 console = Console()
 from decimal import Decimal
 
-#w3 = Web3(HTTPProvider("http://127.0.0.1:8545"))  # ETHEREUM
-w3 = Web3(HTTPProvider("http://127.0.0.1:8546"))  # BASE
-#CHAIN = models.Chain.ETHEREUM_MAINNET
-CHAIN = models.Chain.BASE_MAINNET
+w3 = Web3(HTTPProvider("http://127.0.0.1:8545"))  # ETHEREUM
+#w3 = Web3(HTTPProvider("http://127.0.0.1:8546"))  # BASE
+CHAIN = models.Chain.ETHEREUM_MAINNET
+#CHAIN = models.Chain.BASE_MAINNET
 #FEE = models.FeeEnum.ZERO_DOT_01 # DOESN'T work on base for buying USDT for some reason
 FEE = models.FeeEnum.ZERO_DOT_3
 
