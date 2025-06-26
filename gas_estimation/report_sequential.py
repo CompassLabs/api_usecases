@@ -156,7 +156,7 @@ def fund_account():
             server_url=SERVER_URL,
         )
         tx_hash, receipt = send_tx(response)
-        print(get_portfolio())
+        # print(get_portfolio())
 
 
 non_multicall_request_list = [
@@ -300,7 +300,6 @@ if __name__ == "__main__":
 
     # run experiment
     process_requests()
-    final_portfolio = get_portfolio()
 
     # process results of experiment
     results = output_data["process_requests"]
@@ -311,7 +310,8 @@ if __name__ == "__main__":
 
     gas_totals = {"TotalEstGas": total_est_gas, "TotalUsedGas": total_used_gas}
     print(f"did all transactions succeed: {all_success}")
-    print(f"portfolio afterwards: {final_portfolio}")
+    portfolio_afterwards = results[-1]["Portfolio"]
+    print(f"portfolio afterwards: {portfolio_afterwards}")
     print(gas_totals)
 
     # output report
