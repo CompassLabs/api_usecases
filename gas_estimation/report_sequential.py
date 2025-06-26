@@ -1,5 +1,6 @@
 import os
 import json
+import atexit
 from dotenv import load_dotenv
 from web3 import Web3, HTTPProvider
 from web3.types import RPCEndpoint
@@ -23,6 +24,8 @@ USDC = TOKENS["USDC"]
 USDT = TOKENS["USDT"]
 WETH = TOKENS["WETH"]
 ETH = TOKENS["ETH"]
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_PATH = os.path.join(SCRIPT_DIR, "gas_estimation_report.json")
 
 
 # Load environment variables
@@ -85,6 +88,7 @@ def setup_anvil():
         RPCEndpoint("anvil_setBalance"), [WALLET, hex(100 * 10**18)]
     )
     w3.provider.make_request(RPCEndpoint("evm_setAutomine"), [True])
+    return anvil_process
 
 
 # Data-gathering functions
@@ -286,7 +290,9 @@ def process_requests():
 
 
 if __name__ == "__main__":
-    setup_anvil()
+    subprocess.run(["pkill", "-9", "anvil"])
+    anvil_process = setup_anvil()
+    atexit.register(anvil_process.terminate)
     fund_account()
     process_requests()
     # finally, dump everything
@@ -294,14 +300,18 @@ if __name__ == "__main__":
     results = output_data["process_requests"]
 
     all_success = all(item["TxReceiptStatus"] == 1 for item in results)
-    print(
-        f"did all transactions succeed: {all_success}"
-    )  # True if all are 1, False otherwise
-    print(f"portfolio afterwards: {get_portfolio()}")
+    final_portfolio = get_portfolio()
 
     total_est_gas = sum(item["EstGas"] for item in results)
     total_used_gas = sum(item["UsedGas"] for item in results)
 
     gas_totals = {"TotalEstGas": total_est_gas, "TotalUsedGas": total_used_gas}
-
+    print(
+        f"did all transactions succeed: {all_success}"
+    )
+    print(f"portfolio afterwards: {final_portfolio}")
     print(gas_totals)
+
+    with open(OUTPUT_PATH, "w") as f:
+        json.dump(output_data, f, indent=2)
+    anvil_process.kill()
