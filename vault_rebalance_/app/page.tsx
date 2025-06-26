@@ -95,22 +95,22 @@ export default function Page() {
     return (
         <div
             className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100"
-            data-oid="7zvsfgw"
+            data-oid="-wuo:5z"
         >
             {/* Header */}
-            <header className="bg-white shadow-sm border-b" data-oid=".tvqrdj" key="olk-qaRq">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4" data-oid="75c_350">
-                    <div className="flex justify-between items-center" data-oid=".r.3:8w">
-                        <div className="flex items-center space-x-3" data-oid="zfisih3">
+            <header className="bg-white shadow-sm border-b" data-oid="to:uk42">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4" data-oid="dtedsk7">
+                    <div className="flex justify-between items-center" data-oid="k0d_nid">
+                        <div className="flex items-center space-x-3" data-oid="mm:581f">
                             <div
                                 className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center"
-                                data-oid="x3zff3w"
+                                data-oid="phuw.wc"
                             >
-                                <span className="text-white font-bold text-sm" data-oid="dcbytwt">
+                                <span className="text-white font-bold text-sm" data-oid="xp:n0yh">
                                     C
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-bold text-gray-900" data-oid="1gtwx:m">
+                            <h1 className="text-2xl font-bold text-gray-900" data-oid="ool4-ca">
                                 Vault rebalancing
                             </h1>
                         </div>
@@ -120,19 +120,19 @@ export default function Page() {
                                 onClick={connectWallet}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
-                                data-oid="sjb6wzm"
+                                data-oid="hs5u9ma"
                             >
                                 {loading ? 'Connecting...' : 'Connect Wallet'}
                             </button>
                         ) : (
-                            <div className="flex items-center space-x-3" data-oid="ek77n1y">
+                            <div className="flex items-center space-x-3" data-oid="akont.7">
                                 <div
                                     className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
-                                    data-oid="ol5sn9s"
+                                    data-oid="4wje2il"
                                 >
                                     Connected
                                 </div>
-                                <div className="text-sm text-gray-600" data-oid="m7wj08n">
+                                <div className="text-sm text-gray-600" data-oid="gb8ekfn">
                                     {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
                                 </div>
                             </div>
@@ -142,17 +142,13 @@ export default function Page() {
             </header>
 
             {/* Main Content */}
-            <main
-                className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-                data-oid="cdx3hif"
-                key="olk-pnxQ"
-            >
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="b.md7tf">
                 {/* Hero Section */}
-                <div className="text-center mb-12" data-oid="o4f0kk8">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid="ox657y:">
+                <div className="text-center mb-12" data-oid="qyv8lcf">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid=".g5-dof">
                         ERC4626 Vault Rebalancing
                     </h2>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="9d8_ah_">
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="8f35c47">
                         Showcase the power of Compass API for automated vault rebalancing. Connect
                         your wallet to view positions and execute rebalancing strategies.
                     </p>
@@ -162,410 +158,111 @@ export default function Page() {
                     /* Welcome State */
                     <div
                         className="bg-white rounded-xl shadow-lg p-8 text-center"
-                        data-oid="xammrc0"
+                        data-oid="-uij95r"
                     >
                         <div
                             className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                            data-oid="-zlw779"
+                            data-oid="hjholfm"
                         >
                             <svg
                                 className="w-8 h-8 text-blue-600"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                data-oid="h:o_q:2"
+                                data-oid="hwwzi1k"
                             >
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    data-oid="4xzm7pu"
+                                    data-oid="3prcwxa"
                                 />
                             </svg>
                         </div>
                         <h3
                             className="text-2xl font-semibold text-gray-900 mb-2"
-                            data-oid="u2.558o"
+                            data-oid="nik6wbg"
                         >
                             Connect Your Wallet
                         </h3>
-                        <p className="text-gray-600 mb-6" data-oid="be:m855">
+                        <p className="text-gray-600 mb-6" data-oid="umqu8nb">
                             Connect your MetaMask wallet to view your vault positions and start
                             rebalancing
                         </p>
                         <button
                             onClick={connectWallet}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-                            data-oid="1n_f25i"
+                            data-oid="gngtxtm"
                         >
                             Connect MetaMask
                         </button>
                     </div>
                 ) : (
                     /* Connected State */
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" data-oid="k7t1-06">
-                        {/* Market Positions */}
-                        <div className="bg-white rounded-xl shadow-lg p-6" data-oid="s:vbnly">
-                            <h3
-                                className="text-xl font-semibold text-gray-900 mb-4"
-                                data-oid="g3hvhjt"
-                            >
-                                Market Positions
-                            </h3>
-                            {loading && marketPositions.length === 0 ? (
-                                <div
-                                    className="flex items-center justify-center py-8"
-                                    data-oid="mio_083"
-                                >
-                                    <div
-                                        className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
-                                        data-oid="4qn832v"
-                                    ></div>
-                                    <span className="ml-2 text-gray-600" data-oid="pqt07oy">
-                                        Loading market positions...
-                                    </span>
-                                </div>
-                            ) : marketPositions.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500" data-oid="dy.u2ui">
-                                    <p data-oid="h.q3uw_">No market positions found</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-4" data-oid="_chgpg5">
-                                    {marketPositions.map((position, index) => (
-                                        <div
-                                            key={index}
-                                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                            data-oid="s1zi506"
-                                        >
-                                            <div
-                                                className="flex justify-between items-start mb-3"
-                                                data-oid=":qt4:z2"
-                                            >
-                                                <div data-oid="ll43el9">
-                                                    <div
-                                                        className="font-medium text-gray-900 text-lg"
-                                                        data-oid="yri5n6x"
-                                                    >
-                                                        {position.market.uniqueKey}
-                                                    </div>
-                                                    <div
-                                                        className="flex items-center space-x-4 mt-2"
-                                                        data-oid="d:0:_6-"
-                                                    >
-                                                        {position.healthFactor && (
-                                                            <div
-                                                                className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded"
-                                                                data-oid="9cf40am"
-                                                            >
-                                                                Health:{' '}
-                                                                {parseFloat(
-                                                                    position.healthFactor,
-                                                                ).toFixed(2)}
-                                                            </div>
-                                                        )}
-                                                        {position.priceVariationToLiquidationPrice && (
-                                                            <div
-                                                                className="text-sm text-orange-600 bg-orange-50 px-2 py-1 rounded"
-                                                                data-oid="liquidation-price"
-                                                            >
-                                                                Liquidation:{' '}
-                                                                {parseFloat(
-                                                                    position.priceVariationToLiquidationPrice,
-                                                                ).toFixed(2)}
-                                                                %
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right" data-oid="o1yxqs.">
-                                                    <div
-                                                        className={`font-semibold text-lg ${
-                                                            parseFloat(position.state.pnlUsd) >= 0
-                                                                ? 'text-green-600'
-                                                                : 'text-red-600'
-                                                        }`}
-                                                        data-oid="52x:19i"
-                                                    >
-                                                        $
-                                                        {parseFloat(position.state.pnlUsd).toFixed(
-                                                            2,
-                                                        )}
-                                                    </div>
-                                                    <div
-                                                        className="text-sm text-gray-500"
-                                                        data-oid="df8ufc9"
-                                                    >
-                                                        PnL USD
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Supply and Borrow Information */}
-                                            <div
-                                                className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-100"
-                                                data-oid="mgconj4"
-                                            >
-                                                {/* Supply Section */}
-                                                <div data-oid="plsp3.w">
-                                                    <h4
-                                                        className="font-medium text-gray-700 mb-2 text-sm"
-                                                        data-oid="weyim66"
-                                                    >
-                                                        Supply
-                                                    </h4>
-                                                    <div className="space-y-1" data-oid="r-_..1z">
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="g9.gxpv"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="hhcofii"
-                                                            >
-                                                                Assets:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="tc6ymhh"
-                                                            >
-                                                                {parseFloat(
-                                                                    position.state.supplyAssets,
-                                                                ).toFixed(4)}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="a-v9vt-"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="buw9n9a"
-                                                            >
-                                                                Shares:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="-_g6xux"
-                                                            >
-                                                                {parseFloat(
-                                                                    position.state.supplyShares,
-                                                                ).toFixed(4)}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="xtmntf7"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="8g.5895"
-                                                            >
-                                                                USD Value:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="-_l57sj"
-                                                            >
-                                                                $
-                                                                {parseFloat(
-                                                                    position.state.supplyAssetsUsd,
-                                                                ).toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Borrow Section */}
-                                                <div data-oid="uzmk9ei">
-                                                    <h4
-                                                        className="font-medium text-gray-700 mb-2 text-sm"
-                                                        data-oid="2rx9ck7"
-                                                    >
-                                                        Borrow
-                                                    </h4>
-                                                    <div className="space-y-1" data-oid="ovmqon_">
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="hyeqy8b"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="1tujw6s"
-                                                            >
-                                                                Assets:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="n95otfy"
-                                                            >
-                                                                {parseFloat(
-                                                                    position.state.borrowAssets,
-                                                                ).toFixed(4)}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="46fkanu"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="fohlc:h"
-                                                            >
-                                                                Shares:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="2mm6oyj"
-                                                            >
-                                                                {parseFloat(
-                                                                    position.state.borrowShares,
-                                                                ).toFixed(4)}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="flex justify-between text-sm"
-                                                            data-oid="17.fdmf"
-                                                        >
-                                                            <span
-                                                                className="text-gray-600"
-                                                                data-oid="_99rfuk"
-                                                            >
-                                                                USD Value:
-                                                            </span>
-                                                            <span
-                                                                className="font-medium"
-                                                                data-oid="35-lw1_"
-                                                            >
-                                                                $
-                                                                {parseFloat(
-                                                                    position.state.borrowAssetsUsd,
-                                                                ).toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Collateral Information */}
-                                            <div
-                                                className="mt-4 pt-4 border-t border-gray-100"
-                                                data-oid="pfful_t"
-                                            >
-                                                <h4
-                                                    className="font-medium text-gray-700 mb-2 text-sm"
-                                                    data-oid="8iacrcc"
-                                                >
-                                                    Collateral
-                                                </h4>
-                                                <div
-                                                    className="flex justify-between text-sm"
-                                                    data-oid="bff5tvq"
-                                                >
-                                                    <span
-                                                        className="text-gray-600"
-                                                        data-oid="syo5e:e"
-                                                    >
-                                                        Amount:
-                                                    </span>
-                                                    <span
-                                                        className="font-medium"
-                                                        data-oid="dzmeb4y"
-                                                    >
-                                                        {parseFloat(
-                                                            position.state.collateral,
-                                                        ).toFixed(4)}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    className="flex justify-between text-sm"
-                                                    data-oid=":fkhp60"
-                                                >
-                                                    <span
-                                                        className="text-gray-600"
-                                                        data-oid="hekm43e"
-                                                    >
-                                                        USD Value:
-                                                    </span>
-                                                    <span
-                                                        className="font-medium"
-                                                        data-oid="c76n-t6"
-                                                    >
-                                                        $
-                                                        {parseFloat(
-                                                            position.state.collateralUsd,
-                                                        ).toFixed(2)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" data-oid="euo03fm">
                         {/* Vault Positions */}
-                        <div className="bg-white rounded-xl shadow-lg p-6" data-oid="ne_5sra">
+                        <div className="bg-white rounded-xl shadow-lg p-6" data-oid="rty7tmm">
                             <h3
                                 className="text-xl font-semibold text-gray-900 mb-4"
-                                data-oid="jfsbagp"
+                                data-oid="6nos7m2"
                             >
                                 Vault Positions
                             </h3>
                             {loading && vaultPositions.length === 0 ? (
                                 <div
                                     className="flex items-center justify-center py-8"
-                                    data-oid="i3wn-gx"
+                                    data-oid="m07csrz"
                                 >
                                     <div
                                         className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"
-                                        data-oid=":sv2-ac"
+                                        data-oid="67:yyde"
                                     ></div>
-                                    <span className="ml-2 text-gray-600" data-oid="47vsb5x">
+                                    <span className="ml-2 text-gray-600" data-oid="g2fiwa5">
                                         Loading vault positions...
                                     </span>
                                 </div>
                             ) : vaultPositions.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500" data-oid="_ktd44k">
-                                    <p data-oid="_7.u1u8">No vault positions found</p>
+                                <div className="text-center py-8 text-gray-500" data-oid="q7p2wlq">
+                                    <p data-oid="7.4e9n3">No vault positions found</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4" data-oid="t95rh2e">
+                                <div className="space-y-4" data-oid="di84i5:">
                                     {vaultPositions.map((position, index) => (
                                         <div
                                             key={position.id}
                                             className="border border-gray-200 rounded-lg p-4"
-                                            data-oid="-j:91el"
+                                            data-oid="vfcwsdv"
                                         >
                                             <div
                                                 className="flex justify-between items-start mb-2"
-                                                data-oid="-xui97c"
+                                                data-oid="dafctl8"
                                             >
-                                                <div data-oid="81s2c7s">
+                                                <div data-oid="89b-h-1">
                                                     <div
                                                         className="font-medium text-gray-900"
-                                                        data-oid="so0j_in"
+                                                        data-oid="6s4plxc"
                                                     >
                                                         {position.vault.name}
                                                     </div>
                                                     <div
                                                         className="text-sm text-gray-500"
-                                                        data-oid="poqpux5"
+                                                        data-oid="68t4_35"
                                                     >
                                                         {position.vault.address.slice(0, 6)}...
                                                         {position.vault.address.slice(-4)}
                                                     </div>
                                                 </div>
-                                                <div className="text-right" data-oid="1m..:2f">
+                                                <div className="text-right" data-oid="gxlelo-">
                                                     <div
                                                         className="font-semibold text-gray-900"
-                                                        data-oid="dkbs0q2"
+                                                        data-oid="4ks4.r_"
                                                     >
                                                         ${position.state.assetsUsd}
                                                     </div>
                                                     <div
                                                         className="text-sm text-purple-600"
-                                                        data-oid="3xrgpku"
+                                                        data-oid=":5v8sse"
                                                     >
                                                         Assets USD
                                                     </div>
@@ -581,77 +278,77 @@ export default function Page() {
 
                 {/* Rebalancing Interface - Full Width */}
                 {isConnected && (
-                    <div className="mt-8 bg-white rounded-xl shadow-lg p-6" data-oid="-w8i2eq">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4" data-oid="b5yb8yw">
+                    <div className="mt-8 bg-white rounded-xl shadow-lg p-6" data-oid="znfx01:">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-4" data-oid="19_7-zc">
                             Rebalance Vaults
                         </h3>
 
-                        <div className="space-y-6" data-oid="7jz9k1m">
+                        <div className="space-y-6" data-oid="j753.wi">
                             {/* Vault Positions List */}
-                            <div data-oid="un50c81">
+                            <div data-oid="atzz7_4">
                                 <h4
                                     className="text-lg font-medium text-gray-900 mb-4"
-                                    data-oid="j0ac-dr"
+                                    data-oid="fev7n8:"
                                 >
                                     Your Vault Positions
                                 </h4>
                                 {loading && vaultPositions.length === 0 ? (
                                     <div
                                         className="flex items-center justify-center py-8"
-                                        data-oid="b.ohx0h"
+                                        data-oid="7qhubn:"
                                     >
                                         <div
                                             className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
-                                            data-oid="8d59i4_"
+                                            data-oid="4hzwp9w"
                                         ></div>
-                                        <span className="ml-2 text-gray-600" data-oid="ci62gke">
+                                        <span className="ml-2 text-gray-600" data-oid="vrgmoh_">
                                             Loading vault positions...
                                         </span>
                                     </div>
                                 ) : vaultPositions.length === 0 ? (
                                     <div
                                         className="text-center py-8 text-gray-500"
-                                        data-oid="n55jpuu"
+                                        data-oid="qw2s2_."
                                     >
-                                        <p data-oid="mo5wc1z">No vault positions found</p>
+                                        <p data-oid="cysnl5y">No vault positions found</p>
                                     </div>
                                 ) : (
                                     <div
                                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                                        data-oid="yzcd.57"
+                                        data-oid="q:ewd8t"
                                     >
                                         {vaultPositions.map((position, index) => (
                                             <div
                                                 key={position.id}
                                                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                                data-oid="pt5pmrs"
+                                                data-oid="lq9a5c9"
                                             >
-                                                <div className="mb-3" data-oid="9y0sxzb">
+                                                <div className="mb-3" data-oid="c0w8c0-">
                                                     <h5
                                                         className="font-medium text-gray-900 text-sm mb-1"
-                                                        data-oid="kysrwc3"
+                                                        data-oid="._xr774"
                                                     >
                                                         {position.vault.name}
                                                     </h5>
                                                     <div
                                                         className="text-xs text-gray-500 mb-2"
-                                                        data-oid="bouyr8t"
+                                                        data-oid="0l9n-rp"
                                                     >
                                                         {position.vault.address.slice(0, 6)}...
                                                         {position.vault.address.slice(-4)}
                                                     </div>
                                                     <div
                                                         className="text-xs text-gray-600"
-                                                        data-oid="d3i43-3"
+                                                        data-oid="x8fqwmg"
                                                     >
                                                         Current Assets: ${position.state.assetsUsd}
                                                     </div>
                                                 </div>
 
-                                                <div data-oid="26c1k1d">
+                                                <div data-oid="arvb1ep">
                                                     <label
                                                         className="block text-xs font-medium text-gray-700 mb-1"
-                                                        data-oid="62xk9mk"
+                                                        data-oid="-49ljmt"
                                                     >
                                                         Rebalance Amount (USD)
                                                     </label>
@@ -670,7 +367,7 @@ export default function Page() {
                                                         }
                                                         placeholder="0.00"
                                                         className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                        data-oid="af3.czx"
+                                                        data-oid="a4y0rgi"
                                                     />
                                                 </div>
                                             </div>
@@ -680,19 +377,19 @@ export default function Page() {
                             </div>
 
                             {/* Summary and Execute Button */}
-                            <div className="border-t border-gray-200 pt-4" data-oid="k3r6bjn">
+                            <div className="border-t border-gray-200 pt-4" data-oid="a_bef-4">
                                 <div
                                     className="flex justify-between items-center mb-4"
-                                    data-oid="m1eit3o"
+                                    data-oid="39vpnva"
                                 >
-                                    <div data-oid="rf6o9nu">
+                                    <div data-oid="h5bfq6o">
                                         <h4
                                             className="font-medium text-gray-900"
-                                            data-oid="5byd3jf"
+                                            data-oid=".jc0qp3"
                                         >
                                             Rebalance Summary
                                         </h4>
-                                        <p className="text-sm text-gray-600" data-oid="2fft-ur">
+                                        <p className="text-sm text-gray-600" data-oid="fo7svur">
                                             Vaults with amounts:{' '}
                                             {
                                                 Object.entries(vaultRebalanceAmounts).filter(
@@ -702,13 +399,13 @@ export default function Page() {
                                             }
                                         </p>
                                     </div>
-                                    <div className="text-right" data-oid="gn-9g6l">
-                                        <div className="text-sm text-gray-600" data-oid="03d1rhh">
+                                    <div className="text-right" data-oid="m_vg2d4">
+                                        <div className="text-sm text-gray-600" data-oid="gv2u:i0">
                                             Total Amount
                                         </div>
                                         <div
                                             className="font-semibold text-gray-900"
-                                            data-oid="di1t20q"
+                                            data-oid="b2qa.4d"
                                         >
                                             $
                                             {Object.values(vaultRebalanceAmounts)
@@ -731,7 +428,7 @@ export default function Page() {
                                         ).length === 0
                                     }
                                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    data-oid="wxqglct"
+                                    data-oid="rps2ms2"
                                 >
                                     {loading ? 'Processing...' : 'Execute Rebalance'}
                                 </button>
@@ -739,9 +436,9 @@ export default function Page() {
                                 {transactionStatus && (
                                     <div
                                         className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4"
-                                        data-oid=".xb.dq:"
+                                        data-oid="7t2ets_"
                                     >
-                                        <div className="text-green-800 text-sm" data-oid="9-fml.6">
+                                        <div className="text-green-800 text-sm" data-oid="l2ynbam">
                                             {transactionStatus}
                                         </div>
                                     </div>
@@ -752,42 +449,42 @@ export default function Page() {
                 )}
 
                 {/* API Endpoints Section */}
-                <div className="mt-12 bg-white rounded-xl shadow-lg p-8" data-oid="x0o835b">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-6" data-oid="pe3mjz0">
+                <div className="mt-12 bg-white rounded-xl shadow-lg p-8" data-oid="p2:87ls">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-6" data-oid="ms2-213">
                         Compass API Endpoints
                     </h3>
                     <div
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        data-oid="vjsod_p"
+                        data-oid="d_.htho"
                     >
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="f0.xw5.">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="91qj7xa">
+                        <div className="border border-gray-200 rounded-lg p-4" data-oid="kz1leu7">
+                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="yhzbnjw">
                                 Vault Operations
                             </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="39xpa21">
-                                <li data-oid="zs568i:">• Deposit to Vault</li>
-                                <li data-oid="s5:yl.8">• Withdraw from Vault</li>
-                                <li data-oid="tin620v">• Transaction Bundling</li>
+                            <ul className="text-sm text-gray-600 space-y-1" data-oid="so8r4zq">
+                                <li data-oid="p9k5ya2">• Deposit to Vault</li>
+                                <li data-oid="00sso:w">• Withdraw from Vault</li>
+                                <li data-oid="lkx:lby">• Transaction Bundling</li>
                             </ul>
                         </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="lrsljky">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="-lk37tx">
+                        <div className="border border-gray-200 rounded-lg p-4" data-oid="vns5by9">
+                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="hj6inbv">
                                 Morpho Integration
                             </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="t86_7v8">
-                                <li data-oid="6n.l16j">• Check Vault Position</li>
-                                <li data-oid="va90esw">• Check Market Position</li>
-                                <li data-oid="8j2q0z2">• Check User Position</li>
+                            <ul className="text-sm text-gray-600 space-y-1" data-oid="na_ei6v">
+                                <li data-oid="v95p_a0">• Check Vault Position</li>
+                                <li data-oid="d7ofh4c">• Check Market Position</li>
+                                <li data-oid=":qdb4ox">• Check User Position</li>
                             </ul>
                         </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="eaw36rl">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="iq7mq6w">
+                        <div className="border border-gray-200 rounded-lg p-4" data-oid=".r9:77o">
+                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="lbbl1hm">
                                 Features
                             </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="glle.70">
-                                <li data-oid="u2_lhfv">• Real-time Data</li>
-                                <li data-oid="o5gg9th">• Automated Rebalancing</li>
-                                <li data-oid="-po0slu">• Gas Optimization</li>
+                            <ul className="text-sm text-gray-600 space-y-1" data-oid="wl_vc:q">
+                                <li data-oid="xo22qg1">• Real-time Data</li>
+                                <li data-oid="0g1gwsy">• Automated Rebalancing</li>
+                                <li data-oid="oykuype">• Gas Optimization</li>
                             </ul>
                         </div>
                     </div>
@@ -795,15 +492,15 @@ export default function Page() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-white border-t mt-16" data-oid="k-agqtz" key="olk-7o4M">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="kn3t3d1">
-                    <div className="text-center text-gray-600" data-oid="5vfio0d">
-                        <p data-oid="__ry0:.">
+            <footer className="bg-white border-t mt-16" data-oid="fohfb-l">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="76:t-1v">
+                    <div className="text-center text-gray-600" data-oid="v8evloh">
+                        <p data-oid="e8j4k9w">
                             Powered by Compass Labs API •
                             <a
                                 href="https://docs.compasslabs.ai"
                                 className="text-blue-600 hover:text-blue-700 ml-1"
-                                data-oid="bbltfy8"
+                                data-oid="r2iuudd"
                             >
                                 View Documentation
                             </a>
