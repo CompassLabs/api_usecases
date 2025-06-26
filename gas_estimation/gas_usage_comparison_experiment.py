@@ -1,3 +1,12 @@
+# launch anvil here...
+import os
+
+# use subprocess.
+# finality... here's another command which is kill anvil...
+# run this command at end or at crash.
+# pkill -9 anvil...
+
+
 import time
 import devtools
 from dotenv import load_dotenv
@@ -43,6 +52,9 @@ w3.provider.make_request(
     RPCEndpoint("anvil_setBalance"),
     [WALLET, "0x56BC75E2D63100000"],  # Equivalent to 100 ETH in wei
 )
+w3.provider.make_request(RPCEndpoint("evm_setAutomine"), [True])
+
+
 
 print(CHAIN)
 def print_ETH_balance():
@@ -372,6 +384,7 @@ multicall_request_list = [
 def process_sequential():
     iteration = 0
     for function, request in non_multicall_request_list:
+        w3.provider.make_request(RPCEndpoint("evm_mine"), [])
         d = request.model_dump()
         if "ACTION_TYPE" in d:
             del d["ACTION_TYPE"]
@@ -391,6 +404,7 @@ def process_sequential():
         time.sleep(0)
         print("block number after:", w3.eth.block_number)
         trace = w3.provider.make_request("debug_traceCall", [tx, "latest", {}])
+
         #print(f"trace: {trace}")
         total_gas_trace_call1 = trace["result"]["gas"]
         iteration = iteration + 1
