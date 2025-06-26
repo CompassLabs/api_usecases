@@ -32,6 +32,7 @@ OUTPUT_PATH = os.path.join(SCRIPT_DIR, "gas_estimation_report.json")
 load_dotenv()
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
+ETH_RPC = os.getenv("ETH_RPC")
 WALLET = os.getenv("WALLET") or "0xebba555178005Aae650bd32B7B27FBE2cfEe743d"
 
 # Clients
@@ -70,7 +71,7 @@ def setup_anvil():
             "--host",
             "0.0.0.0",
             "--fork-url",
-            "https://hidden-late-putty.quiknode.pro/769c80cd4f5e8075d89db841c129e8c3fee67bd2",
+            ETH_RPC,
             "--port",
             "8545",
             "--chain-id",
