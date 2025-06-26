@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from web3 import Web3, HTTPProvider
 from web3.types import RPCEndpoint
 from compass_api_sdk import CompassAPI, models
+import time
+import subprocess
 
 # Configuration
 RPC_URL = "http://127.0.0.1:8545"
@@ -15,7 +17,7 @@ TOKENS = {
     "USDC": models.TokenEnum.USDC,
     "USDT": models.TokenEnum.USDT,
     "WETH": models.TokenEnum.WETH,
-    "ETH": "ETH"
+    "ETH": "ETH",
 }
 USDC = TOKENS["USDC"]
 USDT = TOKENS["USDT"]
@@ -34,9 +36,8 @@ w3 = Web3(HTTPProvider(RPC_URL))
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
 # This will accumulate everything
-output_data = {
-    "process_requests": []
-}
+output_data = {"process_requests": []}
+
 
 # Helpers
 def send_tx(response):
@@ -46,23 +47,53 @@ def send_tx(response):
     # convert receipt to a serializable dict
     return tx_hash, dict(receipt)
 
+
 def collect(section, data):
     """Append a record to output_data at output_data[section]."""
     output_data[section].append(data)
     print({section: data})
 
+
 # Blockchain setup for Anvil
 def setup_anvil():
+    import subprocess
+
+    anvil_process = subprocess.Popen(
+        [
+            "anvil",
+            "--no-mining",
+            "--hardfork",
+            "prague",
+            "--host",
+            "0.0.0.0",
+            "--fork-url",
+            "https://hidden-late-putty.quiknode.pro/769c80cd4f5e8075d89db841c129e8c3fee67bd2",
+            "--port",
+            "8545",
+            "--chain-id",
+            "1",
+            "--no-rate-limit",
+        ]
+    )
+
+    # Optional: wait a few seconds for Anvil to start up
+    time.sleep(3)
+
+    # continue with the rest of your script...
     w3.provider.make_request(RPCEndpoint("anvil_impersonateAccount"), [WALLET])
-    w3.provider.make_request(RPCEndpoint("anvil_setBalance"), [WALLET, hex(100 * 10**18)])
+    w3.provider.make_request(
+        RPCEndpoint("anvil_setBalance"), [WALLET, hex(100 * 10**18)]
+    )
     w3.provider.make_request(RPCEndpoint("evm_setAutomine"), [True])
+
 
 # Data-gathering functions
 def get_aave_metrics():
     pos = compass.aave_v3.user_position_per_token(
-        chain=CHAIN, user=WALLET,
+        chain=CHAIN,
+        user=WALLET,
         token=models.AaveUserPositionPerTokenToken.USDC,
-        server_url=SERVER_URL
+        server_url=SERVER_URL,
     )
     summary = compass.aave_v3.user_position_summary(
         chain=CHAIN, user=WALLET, server_url=SERVER_URL
@@ -71,8 +102,9 @@ def get_aave_metrics():
         "Collateral": summary.total_collateral,
         "Debt": summary.total_debt,
         "TokenBalance": pos.token_balance,
-        "HealthFactor": summary.health_factor
+        "HealthFactor": summary.health_factor,
     }
+
 
 def get_portfolio():
     return {
@@ -82,15 +114,17 @@ def get_portfolio():
         for name, token in TOKENS.items()
     }
 
+
 def get_allowances():
     pool = models.GenericAllowanceContractEnum.AAVE_V3_POOL
     return {
         name: compass.universal.allowance(
-            chain=CHAIN, user=WALLET, token=token,
-            contract=pool, server_url=SERVER_URL
+            chain=CHAIN, user=WALLET, token=token, contract=pool, server_url=SERVER_URL
         ).amount
-        for name, token in TOKENS.items() if name in ("USDC", "USDT", "WETH")
+        for name, token in TOKENS.items()
+        if name in ("USDC", "USDT", "WETH")
     }
+
 
 # Initial funding via Anvil and swaps
 def fund_account():
@@ -100,7 +134,6 @@ def fund_account():
         amount=10, chain=CHAIN, sender=WALLET, server_url=SERVER_URL
     )
     tx_hash, receipt = send_tx(response)
-
 
     # swaps
     for tok in ("USDC", "USDT"):
@@ -113,10 +146,11 @@ def fund_account():
             wrap_eth=True,
             chain=CHAIN,
             sender=WALLET,
-            server_url=SERVER_URL
+            server_url=SERVER_URL,
         )
         tx_hash, receipt = send_tx(response)
         print(get_portfolio())
+
 
 non_multicall_request_list = [
     (
@@ -215,6 +249,7 @@ non_multicall_request_list = [
     ),
 ]
 
+
 # Sequential processing of DeFi actions
 def process_requests():
     tasks = non_multicall_request_list
@@ -229,43 +264,44 @@ def process_requests():
         gas_est = w3.eth.estimate_gas(response.model_dump(by_alias=True))
         tx_hash, receipt = send_tx(response)
         trace = w3.provider.make_request(
-            "debug_traceCall",
-            [response.model_dump(by_alias=True), "latest", {}]
+            "debug_traceCall", [response.model_dump(by_alias=True), "latest", {}]
         )
         used_gas = trace["result"]["gas"]
 
-        collect("process_requests", {
-            "Step": idx,
-            "Function": fn.__name__,
-            "EstGas": gas_est,
-            "UsedGas": used_gas,
-            "TxHash": tx_hash,
-            #"TxReceipt": receipt,
-            "TxReceiptStatus": receipt["status"],
-            "Portfolio": get_portfolio(),
-            "AaveMetrics": get_aave_metrics(),
-            "Allowances": get_allowances()
-        })
+        collect(
+            "process_requests",
+            {
+                "Step": idx,
+                "Function": fn.__name__,
+                "EstGas": gas_est,
+                "UsedGas": used_gas,
+                "TxHash": tx_hash,
+                # "TxReceipt": receipt,
+                "TxReceiptStatus": receipt["status"],
+                "Portfolio": get_portfolio(),
+                "AaveMetrics": get_aave_metrics(),
+                "Allowances": get_allowances(),
+            },
+        )
+
 
 if __name__ == "__main__":
     setup_anvil()
     fund_account()
     process_requests()
     # finally, dump everything
-    #print(json.dumps(output_data, indent=2))
-    results = output_data['process_requests']
-
+    # print(json.dumps(output_data, indent=2))
+    results = output_data["process_requests"]
 
     all_success = all(item["TxReceiptStatus"] == 1 for item in results)
-    print(f"did all transactions succeed: {all_success}")  # True if all are 1, False otherwise
+    print(
+        f"did all transactions succeed: {all_success}"
+    )  # True if all are 1, False otherwise
     print(f"portfolio afterwards: {get_portfolio()}")
 
     total_est_gas = sum(item["EstGas"] for item in results)
     total_used_gas = sum(item["UsedGas"] for item in results)
 
-    gas_totals = {
-        "TotalEstGas": total_est_gas,
-        "TotalUsedGas": total_used_gas
-    }
+    gas_totals = {"TotalEstGas": total_est_gas, "TotalUsedGas": total_used_gas}
 
     print(gas_totals)
