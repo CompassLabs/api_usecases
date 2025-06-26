@@ -8,6 +8,7 @@ from compass_api_sdk import CompassAPI, models
 import time
 import subprocess
 import subprocess
+from datetime import datetime
 
 
 # Configuration
@@ -108,7 +109,7 @@ def get_aave_metrics():
     return {
         "Collateral": summary.total_collateral,
         "Debt": summary.total_debt,
-        "TokenBalance": pos.token_balance,
+        "ATokenBalance": pos.token_balance,
         "HealthFactor": summary.health_factor,
     }
 
@@ -279,6 +280,7 @@ def process_requests():
             "process_requests",
             {
                 "Step": idx,
+                "TimeStamp": datetime.now().isoformat(),
                 "Function": fn.__name__,
                 "EstGas": gas_est,
                 "UsedGas": used_gas,

@@ -2,21 +2,22 @@
   "process_requests": [
     {
       "Step": 1,
+      "TimeStamp": "2025-06-26T13:47:38.308707",
       "Function": "allowance_set",
       "EstGas": 55937,
       "UsedGas": 35658,
-      "TxHash": "4de601d1644781c007bc20d9f72b327faf6dcc30b326386242dc10ab9f143316",
+      "TxHash": "3a7fe4598cc23b4b85c7c26fb8a10e1f16d4d4c942392e0287d1d4e652e3f87f",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
         "USDT": "2",
         "WETH": "10",
-        "ETH": "89.997664134600412013"
+        "ETH": "89.99731930298633672"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
@@ -27,21 +28,22 @@
     },
     {
       "Step": 2,
+      "TimeStamp": "2025-06-26T13:47:40.724369",
       "Function": "allowance_set",
       "EstGas": 48549,
       "UsedGas": 26499,
-      "TxHash": "343e807dd84807fdec723be09581ef0cf0abfd211207cb126aa94f8ee27db78a",
+      "TxHash": "8a881b60b9136fc09d8e1281e7b39f727ccb71f88d868c4b634331c68e4ad829",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
         "USDT": "2",
         "WETH": "10",
-        "ETH": "89.997592247703447701"
+        "ETH": "89.997222459801928943"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
@@ -52,21 +54,22 @@
     },
     {
       "Step": 3,
+      "TimeStamp": "2025-06-26T13:47:40.903161",
       "Function": "allowance_set",
       "EstGas": 55937,
       "UsedGas": 35658,
-      "TxHash": "27f7d1f4e6052f22e1627ce48e5400453b449924e2f80c309aa18c3da23fbd18",
+      "TxHash": "cb219e258744ef7d292575e7e83c9ba4e45f718c409f3cf1978bc9ebffbeb040",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
         "USDT": "2",
         "WETH": "10",
-        "ETH": "89.997516234140053623"
+        "ETH": "89.997124572179007481"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
@@ -77,21 +80,22 @@
     },
     {
       "Step": 4,
+      "TimeStamp": "2025-06-26T13:47:41.079772",
       "Function": "allowance_set",
       "EstGas": 48549,
       "UsedGas": 26499,
-      "TxHash": "b676f523824b6ee83501cdcd0ba08ba9728e409522e44b222b641bfdf8b5540e",
+      "TxHash": "77269e5b3def1ab87f7a877db4c3ef4f96e975d2ca1efd1fccbc3dd41da17d41",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
         "USDT": "2",
         "WETH": "10",
-        "ETH": "89.997453993587701449"
+        "ETH": "89.997047690642388391"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
@@ -102,21 +106,22 @@
     },
     {
       "Step": 5,
+      "TimeStamp": "2025-06-26T13:47:41.906440",
       "Function": "supply",
       "EstGas": 219369,
       "UsedGas": 118410,
-      "TxHash": "fd1baa4f51ce4382eca2641e92f787db13f2ab9c48feda8272ef54d8fed8a278",
+      "TxHash": "46963ac7236f217fbdf4f9c6f46e7f136d077158871b0b769e5c6fdd43719ad3",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "0",
         "USDT": "2",
         "WETH": "10",
-        "ETH": "89.997200147293310064"
+        "ETH": "89.996745626261929201"
       },
       "AaveMetrics": {
         "Collateral": "1.99987922",
         "Debt": "0",
-        "TokenBalance": "2",
+        "ATokenBalance": "2",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
@@ -127,22 +132,23 @@
     },
     {
       "Step": 6,
+      "TimeStamp": "2025-06-26T13:47:45.187423",
       "Function": "borrow",
       "EstGas": 308914,
       "UsedGas": 192583,
-      "TxHash": "0a8124665a4265013f9a2e18e45c19784044d9146673e79cd7748c006a9d1e4f",
+      "TxHash": "7809522cb4f3f234463da98390051dd30f07e7204314fbb5da868565a2eb894a",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "0",
         "USDT": "3",
         "WETH": "10",
-        "ETH": "89.996849825240028962"
+        "ETH": "89.996342068117294087"
       },
       "AaveMetrics": {
         "Collateral": "1.99987922",
-        "Debt": "1.00044007",
-        "TokenBalance": "2",
-        "HealthFactor": "1.55921962421996962433468070230446755886077880859375"
+        "Debt": "1.00044208",
+        "ATokenBalance": "2",
+        "HealthFactor": "1.559216491573405249937422922812402248382568359375"
       },
       "Allowances": {
         "USDC": "8",
@@ -152,101 +158,105 @@
     },
     {
       "Step": 7,
+      "TimeStamp": "2025-06-26T13:47:45.462118",
       "Function": "repay",
-      "EstGas": 188958,
+      "EstGas": 175123,
       "UsedGas": 60616,
-      "TxHash": "7268be82b5f4be4a5c31558ffa7e3f10dd304b58fd1d2fd78086ee8bc7168490",
+      "TxHash": "5162402d990c7b99e47e36a4aa6d78af7b9618cbfa558c89c5cfe6d09b4b592f",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "0",
-        "USDT": "2.000001",
+        "USDT": "2",
         "WETH": "10",
-        "ETH": "89.996642132722740922"
+        "ETH": "89.996126258590491584"
       },
       "AaveMetrics": {
         "Collateral": "1.99987922",
         "Debt": "0",
-        "TokenBalance": "2",
+        "ATokenBalance": "2",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
         "USDC": "8",
-        "USDT": "9.000001",
+        "USDT": "9",
         "WETH": "0"
       }
     },
     {
       "Step": 8,
+      "TimeStamp": "2025-06-26T13:47:45.677152",
       "Function": "withdraw",
-      "EstGas": 205352,
+      "EstGas": 268649,
       "UsedGas": 76920,
-      "TxHash": "16bedbf4a33b145cbee320f0ab1901a4ccee2349ac839568e3cd0f4c5fbd2b97",
+      "TxHash": "64eac4711c7fc56d02106f1525ce434ec9d01d10f2114ad1e22a9856677d747b",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
-        "USDT": "2.000001",
+        "USDT": "2",
         "WETH": "10",
-        "ETH": "89.996428350116932177"
+        "ETH": "89.995811855374198649"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
         "USDC": "8",
-        "USDT": "9.000001",
+        "USDT": "9",
         "WETH": "0"
       }
     },
     {
       "Step": 9,
+      "TimeStamp": "2025-06-26T13:47:46.618664",
       "Function": "swap_sell_exactly",
       "EstGas": 133266,
       "UsedGas": 125146,
-      "TxHash": "b6c56469fc72acd7858888aeb6ff847422cce8d0e3c7f4349e1282a3d5bcc82d",
+      "TxHash": "1fa797a13ea1aa1873ce15e63004d04f3a60a0911d0ccbeaa572fba1730caadc",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "1",
-        "USDT": "2.996984",
+        "USDT": "2.996983",
         "WETH": "10",
-        "ETH": "89.996288691364366743"
+        "ETH": "89.995661801989777651"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
         "USDC": "8",
-        "USDT": "9.000001",
+        "USDT": "9",
         "WETH": "0"
       }
     },
     {
       "Step": 10,
+      "TimeStamp": "2025-06-26T13:47:46.973849",
       "Function": "swap_buy_exactly",
       "EstGas": 135136,
       "UsedGas": 129166,
-      "TxHash": "000c25478f247f36f11afa5c13891e18cb2f56e7faaa31ee6cb2ee9a97c95fd3",
+      "TxHash": "5f371ce8441ae7cbea810d50edb59afac7a83d5c5d0d14385fbaaecde792a54d",
       "TxReceiptStatus": 1,
       "Portfolio": {
         "USDC": "2",
-        "USDT": "1.993991",
+        "USDT": "1.99399",
         "WETH": "10",
-        "ETH": "89.996152126051436109"
+        "ETH": "89.995517317914064095"
       },
       "AaveMetrics": {
         "Collateral": "0",
         "Debt": "0",
-        "TokenBalance": "0",
+        "ATokenBalance": "0",
         "HealthFactor": "115792089237316203707617735395386539918674240093853421928448"
       },
       "Allowances": {
         "USDC": "8",
-        "USDT": "9.000001",
+        "USDT": "9",
         "WETH": "0"
       }
     }
