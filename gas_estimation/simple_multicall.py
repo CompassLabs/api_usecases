@@ -10,13 +10,11 @@ from rich.console import Console
 console = Console()
 
 w3 = Web3(HTTPProvider("http://127.0.0.1:8545"))  # ETHEREUM
-#w3 = Web3(HTTPProvider("http://127.0.0.1:8546"))  # BASE
+# w3 = Web3(HTTPProvider("http://127.0.0.1:8546"))  # BASE
 CHAIN = models.Chain.ETHEREUM_MAINNET
-#CHAIN = models.Chain.BASE_MAINNET
-#FEE = models.FeeEnum.ZERO_DOT_01 # DOESN'T work on base for buying USDT for some reason
+# CHAIN = models.Chain.BASE_MAINNET
+# FEE = models.FeeEnum.ZERO_DOT_01 # DOESN'T work on base for buying USDT for some reason
 FEE = models.FeeEnum.ZERO_DOT_3
-
-
 
 
 load_dotenv()
@@ -32,9 +30,9 @@ WETH = models.TokenEnum.WETH
 USDT = models.TokenEnum.USDT
 MORPHO_VAULT = "0x341193ED21711472e71aECa4A942123452bd0ddA"  # Re7 USDC Core
 
-#WALLET = "0xfcbA14864649dCc37774a20933C22A27e0478Fff"
-#WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
-WALLET = "0xebba555178005Aae650bd32B7B27FBE2cfEe743d" # DANGER... MAKE A NEW ACCOUNT FROM SCRATCH WITH NEW METAMASK
+# WALLET = "0xfcbA14864649dCc37774a20933C22A27e0478Fff"
+# WALLET = "0xa829B388A3DF7f581cE957a95edbe419dd146d1B"
+WALLET = "0xebba555178005Aae650bd32B7B27FBE2cfEe743d"  # DANGER... MAKE A NEW ACCOUNT FROM SCRATCH WITH NEW METAMASK
 
 w3.provider.make_request(RPCEndpoint("anvil_impersonateAccount"), [WALLET])
 w3.provider.make_request(
@@ -43,6 +41,8 @@ w3.provider.make_request(
 )
 
 print(CHAIN)
+
+
 def print_ETH_balance():
     res = compass.token.balance(
         chain=CHAIN,
@@ -62,13 +62,13 @@ def print_aave_metrics():
         server_url="http://0.0.0.0:80",
     )
     res2 = compass.aave_v3.user_position_summary(
-        chain=CHAIN,
-        user=WALLET,
-        server_url="http://0.0.0.0:80"
+        chain=CHAIN, user=WALLET, server_url="http://0.0.0.0:80"
     )
 
-    #print(f"💰 A Token Balance: {res1.token_balance}")
-    print(f"🌈 SUMMARY 🌈: 💰 Collateral: {res2.total_collateral}, 🧾 Debt: {res2.total_debt}, 💰 A Token Balance: {res1.token_balance}, Health Factor: {res2.health_factor} ")
+    # print(f"💰 A Token Balance: {res1.token_balance}")
+    print(
+        f"🌈 SUMMARY 🌈: 💰 Collateral: {res2.total_collateral}, 🧾 Debt: {res2.total_debt}, 💰 A Token Balance: {res1.token_balance}, Health Factor: {res2.health_factor} "
+    )
 
 
 def print_USDC_balance():
@@ -109,7 +109,6 @@ def print_portfolio():
           • USDC: {portfolio[1].amount}
           • ETH:  {portfolio[2].amount}
           • WETH:  {portfolio[3].amount}"""
-
     )
 
 
@@ -141,10 +140,11 @@ def wrap_eth_tx():
     )
     unsigned_transaction = res.model_dump(by_alias=True)
     # print(unsigned_transaction)
-    #print(w3.eth.send_transaction(unsigned_transaction).hex())
+    # print(w3.eth.send_transaction(unsigned_transaction).hex())
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    #print(f"wait_for_wrap_eth: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    # print(f"wait_for_wrap_eth: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
+
 
 def uniswap_buy_USDC_tx():
     res = compass.uniswap_v3.swap_buy_exactly(
@@ -160,10 +160,11 @@ def uniswap_buy_USDC_tx():
     )
     unsigned_transaction = res.model_dump(by_alias=True)
     # print(unsigned_transaction)
-    #print(w3.eth.send_transaction(unsigned_transaction).hex())
+    # print(w3.eth.send_transaction(unsigned_transaction).hex())
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    #print(f"wait_for buy_usdc: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    # print(f"wait_for buy_usdc: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
+
 
 def uniswap_buy_USDT_tx():
     res = compass.uniswap_v3.swap_buy_exactly(
@@ -180,8 +181,9 @@ def uniswap_buy_USDT_tx():
     unsigned_transaction = res.model_dump(by_alias=True)
     # print(unsigned_transaction)
     tx_hash = w3.eth.send_transaction(unsigned_transaction).hex()
-    #print(f"wait_for buy_usdt: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
+    # print(f"wait_for buy_usdt: {w3.eth.wait_for_transaction_receipt(tx_hash)}")
     pass
+
 
 non_multicall_request_list = [
     (
@@ -379,7 +381,7 @@ def process_sequential():
         print(f"tx: {tx}")
         unsigned_transaction = tx.model_dump(by_alias=True)
         gas_estimate = w3.eth.estimate_gas(unsigned_transaction)
-        #gas_estimate = 0
+        # gas_estimate = 0
 
         print("block number before:", w3.eth.block_number)
 
@@ -393,9 +395,7 @@ def process_sequential():
         total_gas_trace_call1 = trace["result"]["gas"]
         iteration = iteration + 1
 
-
-        #time.sleep(2)  # weirdly this makes it work... repay fails without it
-
+        # time.sleep(2)  # weirdly this makes it work... repay fails without it
 
         console.print(
             f"[bold cyan]COMPLETED: {iteration}[/] | [bold magenta]{function.__name__}[/] | [bold yellow]{gas_estimate}[/] | [bold green]{total_gas_trace_call1}[/]"
@@ -403,8 +403,7 @@ def process_sequential():
         print_portfolio()
         print_aave_metrics()
         print_allowances()
-        #print("block number after:", w3.eth.block_number)
-
+        # print("block number after:", w3.eth.block_number)
 
 
 # Multicall Stuff
@@ -423,16 +422,15 @@ signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 
 sender = account.address
 
+
 def multicalling_the_call(length: int):
-
     action_set = multicall_request_list[0:length]
     print(f" length of set: {len(action_set)}")
     for j in action_set:
         print(j.model_dump(by_alias=True))
 
-
     signed_authorization = signed_auth.model_dump(by_alias=True)
-    #print(signed_authorization)
+    # print(signed_authorization)
     res_multicall = compass.transaction_bundler.bundler_execute(
         chain=CHAIN,
         sender=sender,
@@ -457,27 +455,25 @@ def multicalling_the_call(length: int):
     print("block number after:", w3.eth.block_number)
     trace = w3.provider.make_request("debug_traceCall", [res_multicall, "latest", {}])
     print(trace)
-    #total_gas_trace_call1 = trace["result"]["gas"] # DOESN'T WORK IN MULTICALL FOR SOME REASON
+    # total_gas_trace_call1 = trace["result"]["gas"] # DOESN'T WORK IN MULTICALL FOR SOME REASON
 
     # time.sleep(2)  # weirdly this makes it work... repay fails without it
 
     console.print(
-        f"[bold cyan]COMPLETED: {1}[/] | [bold magenta]{action_set[-1]}[/] | [bold yellow]{gas_estimate}[/] | [bold green]{"?"}[/]"
+        f"[bold cyan]COMPLETED: {1}[/] | [bold magenta]{action_set[-1]}[/] | [bold yellow]{gas_estimate}[/] | [bold green]{'?'}[/]"
     )
     print_portfolio()
     print_aave_metrics()
-    
-    
+
+
 def FUNCTION(length: int):
-
     action_set = multicall_request_list[0:length]
     print(f" length of set: {len(action_set)}")
     for j in action_set:
         print(j.model_dump(by_alias=True))
 
-
     signed_authorization = signed_auth.model_dump(by_alias=True)
-    #print(signed_authorization)
+    # print(signed_authorization)
     res_multicall = compass.transaction_bundler.bundler_execute(
         chain=CHAIN,
         sender=sender,
@@ -502,17 +498,15 @@ def FUNCTION(length: int):
     print("block number after:", w3.eth.block_number)
     trace = w3.provider.make_request("debug_traceCall", [res_multicall, "latest", {}])
     print(trace)
-    #total_gas_trace_call1 = trace["result"]["gas"] # DOESN'T WORK IN MULTICALL FOR SOME REASON
+    # total_gas_trace_call1 = trace["result"]["gas"] # DOESN'T WORK IN MULTICALL FOR SOME REASON
 
     # time.sleep(2)  # weirdly this makes it work... repay fails without it
 
     console.print(
-        f"[bold cyan]COMPLETED: {1}[/] | [bold magenta]{action_set[-1]}[/] | [bold yellow]{gas_estimate}[/] | [bold green]{"?"}[/]"
+        f"[bold cyan]COMPLETED: {1}[/] | [bold magenta]{action_set[-1]}[/] | [bold yellow]{gas_estimate}[/] | [bold green]{'?'}[/]"
     )
     print_portfolio()
     print_aave_metrics()
-
-
 
 
 if __name__ == "__main__":
@@ -520,14 +514,12 @@ if __name__ == "__main__":
     print_aave_metrics()
     print_portfolio()
     wrap_eth_tx()
-    #time.sleep(2)
+    # time.sleep(2)
     uniswap_buy_USDC_tx()
 
     uniswap_buy_USDT_tx()
-    #time.sleep(3)
+    # time.sleep(3)
     print_portfolio()
-
-
 
     # Multicall Stuff
 
@@ -545,10 +537,8 @@ if __name__ == "__main__":
 
     sender = account.address
 
-
     CHAIN = models.Chain.ETHEREUM_MAINNET
     signed_authorization = signed_auth.model_dump(by_alias=True)
-
 
     res = compass.transaction_bundler.bundler_execute(
         chain=CHAIN,
@@ -576,14 +566,12 @@ if __name__ == "__main__":
         server_url="http://0.0.0.0:80",
     )
 
-
     unsigned_transaction = res.model_dump(by_alias=True)
-    signed_transaction = w3.eth.account.sign_transaction(unsigned_transaction, PRIVATE_KEY)
+    signed_transaction = w3.eth.account.sign_transaction(
+        unsigned_transaction, PRIVATE_KEY
+    )
     txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
     time.sleep(5)
     print(txn_hash.hex())
     print_portfolio()
     print_allowances()
-
-
-
