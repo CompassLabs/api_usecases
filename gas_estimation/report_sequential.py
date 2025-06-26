@@ -7,6 +7,8 @@ from web3.types import RPCEndpoint
 from compass_api_sdk import CompassAPI, models
 import time
 import subprocess
+import subprocess
+
 
 # Configuration
 RPC_URL = "http://127.0.0.1:8545"
@@ -60,7 +62,7 @@ def collect(section, data):
 
 # Blockchain setup for Anvil
 def setup_anvil():
-    import subprocess
+    subprocess.run(["pkill", "-9", "anvil"])
 
     anvil_process = subprocess.Popen(
         [
@@ -291,28 +293,30 @@ def process_requests():
 
 
 if __name__ == "__main__":
-    subprocess.run(["pkill", "-9", "anvil"])
+    # setup
     anvil_process = setup_anvil()
     atexit.register(anvil_process.terminate)
     fund_account()
-    process_requests()
-    # finally, dump everything
-    # print(json.dumps(output_data, indent=2))
-    results = output_data["process_requests"]
 
-    all_success = all(item["TxReceiptStatus"] == 1 for item in results)
+    # run experiment
+    process_requests()
     final_portfolio = get_portfolio()
+
+    # process results of experiment
+    results = output_data["process_requests"]
+    all_success = all(item["TxReceiptStatus"] == 1 for item in results)
 
     total_est_gas = sum(item["EstGas"] for item in results)
     total_used_gas = sum(item["UsedGas"] for item in results)
 
     gas_totals = {"TotalEstGas": total_est_gas, "TotalUsedGas": total_used_gas}
-    print(
-        f"did all transactions succeed: {all_success}"
-    )
+    print(f"did all transactions succeed: {all_success}")
     print(f"portfolio afterwards: {final_portfolio}")
     print(gas_totals)
 
+    # output report
     with open(OUTPUT_PATH, "w") as f:
         json.dump(output_data, f, indent=2)
+
+    # kill anvil
     anvil_process.kill()
