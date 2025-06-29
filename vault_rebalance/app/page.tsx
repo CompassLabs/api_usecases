@@ -8,19 +8,14 @@ import {
     UserOperation,
     VaultPosition,
 } from '@compass-labs/api-sdk/models/components';
-import { http, SendTransactionRequest, getAddress } from 'viem';
-import { mainnet } from 'viem/chains';
-import { createWalletClient } from 'viem';
+import { getAddress } from 'viem';
 import { MorphoDepositParams, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
 import { toBeHex } from 'ethers';
-
-const RPC_URL = process.env.RPC_URL;
 
 const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.COMPASS_API_KEY,
     serverURL: 'http://localhost:8000',
 });
-
 // Type declaration for ethereum window object
 declare global {
     interface Window {
@@ -57,6 +52,37 @@ export default function Page() {
                 const checksumAddress = getAddress(accounts[0]);
                 setWalletAddress(checksumAddress);
                 setIsConnected(true);
+                
+                // Switch to Base network
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x2105' }], // Base mainnet chainId
+                    });
+                } catch (switchError: any) {
+                    // This error code indicates that the chain has not been added to MetaMask
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x2105',
+                                    chainName: 'Base',
+                                    nativeCurrency: {
+                                        name: 'ETH',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['https://mainnet.base.org'],
+                                    blockExplorerUrls: ['https://basescan.org']
+                                }]
+                            });
+                        } catch (addError) {
+                            console.error('Failed to add Base network:', addError);
+                        }
+                    }
+                }
+                
                 // Simulate fetching user positions
                 setTimeout(async () => {
                     await getUserPositions(checksumAddress);
@@ -165,24 +191,29 @@ export default function Page() {
                 yParity: yParity,
             },
         });
-
         // Send transaction via MetaMask
         if (typeof window.ethereum !== 'undefined') {
             try {
                 console.log(bundleTx);
+                // Add the v property to the authorization list object
+                const modifiedAuthorizationList = bundleTx.authorizationList?.map((authObj: any) => ({
+                    ...authObj,
+                    v: v
+                })) || [];
+                console.log(modifiedAuthorizationList);
                 const txParams = {
                     from: walletAddress,
                     to: bundleTx.to,
                     value: toBeHex(bundleTx.value),
                     data: bundleTx.data,
                     gas: toBeHex(bundleTx.gas),
-                    authorizationList: bundleTx.authorizationList,
+                    authorizationList: modifiedAuthorizationList,
+                    nonce: toBeHex(bundleTx.nonce),
                 };
                 const txHash = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [txParams],
                 });
-                console.log('Transaction hash:', txHash);
                 setTransactionStatus(`Transaction submitted! Hash: ${txHash}`);
             } catch (error) {
                 console.error('Transaction failed:', error);
