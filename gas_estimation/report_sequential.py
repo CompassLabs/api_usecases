@@ -18,7 +18,7 @@ SERVER_URL = "http://0.0.0.0:80"
 CHAIN = models.Chain.ETHEREUM_MAINNET
 FEE = models.FeeEnum.ZERO_DOT_3
 INTEREST_RATE_MODE = models.InterestRateMode.VARIABLE
-TOKENS = [TokenEnum.USDC, TokenEnum.USDT, TokenEnum.WETH, TokenEnum.DAI]
+TOKENS = [TokenEnum.USDC, TokenEnum.USDT, TokenEnum.WETH]
 ETH = "ETH"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "gas_estimation_report.json")
@@ -169,33 +169,33 @@ non_multicall_request_list = [
     (
         compass.universal.allowance_set,
         models.SetAllowanceRequest(
-            token=TokenEnum.DAI,
+            token=TokenEnum.USDT,
             contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
             amount="10",
             chain=CHAIN,
             sender=WALLET,
         ),
     ),
-    # (
-    #     compass.universal.allowance_set,
-    #     models.SetAllowanceRequest(
-    #         token=TokenEnum.USDC,
-    #         contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
-    #         amount="10",
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #     ),
-    # ),
-    # (
-    #     compass.universal.allowance_set,
-    #     models.SetAllowanceRequest(
-    #         token=TokenEnum.USDT,
-    #         contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
-    #         amount="10",
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #     ),
-    # ),
+    (
+        compass.universal.allowance_set,
+        models.SetAllowanceRequest(
+            token=TokenEnum.USDC,
+            contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
+            amount="10",
+            chain=CHAIN,
+            sender=WALLET,
+        ),
+    ),
+    (
+        compass.universal.allowance_set,
+        models.SetAllowanceRequest(
+            token=TokenEnum.USDT,
+            contract=models.SetAllowanceRequestContractEnum.UNISWAP_V3_ROUTER,
+            amount="10",
+            chain=CHAIN,
+            sender=WALLET,
+        ),
+    ),
     (
         compass.aave_v3.supply,
         models.AaveSupplyRequest(token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET),
@@ -203,7 +203,7 @@ non_multicall_request_list = [
     (
         compass.aave_v3.borrow,
         models.AaveBorrowRequest(
-            token=TokenEnum.DAI,
+            token=TokenEnum.USDT,
             amount="1",
             chain=CHAIN,
             sender=WALLET,
@@ -211,46 +211,46 @@ non_multicall_request_list = [
             on_behalf_of=WALLET
         ),
     ),
-    # (
-    #     compass.aave_v3.repay,
-    #     models.AaveRepayRequest(
-    #         token=USDT,
-    #         amount="1",
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #         interest_rate_mode=INTEREST_RATE_MODE,
-    #     ),
-    # ),
-    # (
-    #     compass.aave_v3.withdraw,
-    #     models.AaveWithdrawRequest(
-    #         token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET, recipient=WALLET
-    #     ),
-    # ),
-    # (
-    #     compass.uniswap_v3.swap_sell_exactly,
-    #     models.UniswapSellExactlyRequest(
-    #         token_in=TokenEnum.USDC,
-    #         token_out=TokenEnum.USDT,
-    #         fee=FEE,
-    #         amount="1",
-    #         max_slippage_percent="0.2",
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #     ),
-    # ),
-    # (
-    #     compass.uniswap_v3.swap_buy_exactly,
-    #     models.UniswapSellExactlyRequest(
-    #         token_in=TokenEnum.USDT,
-    #         token_out=TokenEnum.USDC,
-    #         fee=FEE,
-    #         amount="1",
-    #         max_slippage_percent="0.2",
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #     ),
-    # ),
+    (
+        compass.aave_v3.repay,
+        models.AaveRepayRequest(
+            token=TokenEnum.USDT,
+            amount="1",
+            chain=CHAIN,
+            sender=WALLET,
+            interest_rate_mode=INTEREST_RATE_MODE,
+        ),
+    ),
+    (
+        compass.aave_v3.withdraw,
+        models.AaveWithdrawRequest(
+            token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET, recipient=WALLET
+        ),
+    ),
+    (
+        compass.uniswap_v3.swap_sell_exactly,
+        models.UniswapSellExactlyRequest(
+            token_in=TokenEnum.USDC,
+            token_out=TokenEnum.USDT,
+            fee=FEE,
+            amount="1",
+            max_slippage_percent="0.2",
+            chain=CHAIN,
+            sender=WALLET,
+        ),
+    ),
+    (
+        compass.uniswap_v3.swap_buy_exactly,
+        models.UniswapSellExactlyRequest(
+            token_in=TokenEnum.USDT,
+            token_out=TokenEnum.USDC,
+            fee=FEE,
+            amount="1",
+            max_slippage_percent="0.2",
+            chain=CHAIN,
+            sender=WALLET,
+        ),
+    ),
 ]
 
 
