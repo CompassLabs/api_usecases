@@ -1,20 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
-import { MorphoUserPositionRequest } from '@compass-labs/api-sdk/models/operations';
 import {
-    SetAllowanceParams,
-    UserOperation,
     VaultPosition,
 } from '@compass-labs/api-sdk/models/components';
-import { getAddress } from 'viem';
-import { MorphoDepositParams, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
-import { toBeHex } from 'ethers';
+import { connectWallet } from './actions/connectWallet';
+import { handleRebalance } from './actions/handleRebalance';
+import { handleVaultAmountChange } from './actions/handleVaultAmountChange';
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+console.log('COMPASS_API_KEY', process.env.NEXT_PUBLIC_COMPASS_API_KEY);
 
 const compassApiSDK = new CompassApiSDK({
-    apiKeyAuth: process.env.COMPASS_API_KEY,
-    serverURL: 'http://localhost:8000',
+    apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY as string,
 });
 // Type declaration for ethereum window object
 declare global {
@@ -31,206 +32,7 @@ export default function Page() {
     const [vaultPositions, setVaultPositions] = useState<VaultPosition[]>([]);
     const [loading, setLoading] = useState(false);
     const [transactionStatus, setTransactionStatus] = useState('');
-    const [vaultRebalanceAmounts, setVaultRebalanceAmounts] = useState<{ [key: string]: string }>(
-        {},
-    );
-
-    const getUserPositions = async (address: string) => {
-        const userPositions = await compassApiSDK.morpho.userPosition({
-            chain: 'base:mainnet',
-            userAddress: address,
-        } as MorphoUserPositionRequest);
-
-        setVaultPositions(userPositions.vaultPositions);
-    };
-
-    const connectWallet = async () => {
-        if (typeof window.ethereum !== 'undefined') {
-            try {
-                setLoading(true);
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const checksumAddress = getAddress(accounts[0]);
-                setWalletAddress(checksumAddress);
-                setIsConnected(true);
-                
-                // Switch to Base network
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x2105' }], // Base mainnet chainId
-                    });
-                } catch (switchError: any) {
-                    // This error code indicates that the chain has not been added to MetaMask
-                    if (switchError.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x2105',
-                                    chainName: 'Base',
-                                    nativeCurrency: {
-                                        name: 'ETH',
-                                        symbol: 'ETH',
-                                        decimals: 18
-                                    },
-                                    rpcUrls: ['https://mainnet.base.org'],
-                                    blockExplorerUrls: ['https://basescan.org']
-                                }]
-                            });
-                        } catch (addError) {
-                            console.error('Failed to add Base network:', addError);
-                        }
-                    }
-                }
-                
-                // Simulate fetching user positions
-                setTimeout(async () => {
-                    await getUserPositions(checksumAddress);
-                    setLoading(false);
-                }, 1500);
-            } catch (error) {
-                console.error('Failed to connect wallet:', error);
-                setLoading(false);
-            }
-        } else {
-            alert('Please install MetaMask to use this application');
-        }
-        // NOTE: use this when making designs in onlook
-        // setIsConnected(true);
-        // setWalletAddress('0xa829B388A3DF7f581cE957a95edbe419dd146d1B');
-        // await getUserPositions('0xa829B388A3DF7f581cE957a95edbe419dd146d1B');
-        // await publicClient.transport.request({
-        //     method: 'anvil_setBalance' as any,
-        //     params: ['0xa829B388A3DF7f581cE957a95edbe419dd146d1B', '0x56BC75E2D63100000'], // 100 ETH in wei
-        // });
-    };
-    const handleRebalance = async () => {
-        console.log(vaultRebalanceAmounts);
-        console.log(vaultPositions);
-        let vault_actions: UserOperation[] = [];
-        let totalAmount = 0;
-        for (const vault of vaultPositions) {
-            const amountBefore = Number(vault.state.assets) / 10 ** vault.vault.asset.decimals;
-            totalAmount += Number(amountBefore);
-        } // Add allowance operations at the beginning
-        for (const vault of vaultPositions) {
-            vault_actions.push({
-                body: {
-                    actionType: 'SET_ALLOWANCE',
-                    token: vault.vault.asset.address,
-                    contract: vault.vault.address,
-                    amount: totalAmount * 10,
-                } as SetAllowanceParams,
-            } as UserOperation);
-        }
-        let totalRebalanceAmount = 0;
-
-        // Then add withdraw and deposit operations
-        for (const vault of vaultPositions) {
-            const vaultAddress = vault.vault.address;
-
-            vault_actions.push({
-                body: {
-                    actionType: 'MORPHO_WITHDRAW',
-                    vaultAddress: vaultAddress,
-                    amount: 'ALL',
-                    receiver: vaultAddress,
-                } as MorphoWithdrawParams,
-            } as UserOperation);
-
-            const rebalanceAmount = Number(vaultRebalanceAmounts[vaultAddress]);
-            if (rebalanceAmount > 0) {
-                vault_actions.push({
-                    body: {
-                        actionType: 'MORPHO_DEPOSIT',
-                        vaultAddress: vaultAddress,
-                        amount: rebalanceAmount,
-                        receiver: walletAddress,
-                    } as MorphoDepositParams,
-                } as UserOperation);
-            }
-
-            totalRebalanceAmount += Number(vaultRebalanceAmounts[vaultAddress]);
-        }
-
-        if (totalRebalanceAmount > totalAmount) {
-            alert('Total rebalance amount is greater than total amount');
-            return;
-        }
-
-        const auth = await compassApiSDK.transactionBundler.bundlerAuthorization({
-            chain: 'base:mainnet',
-            sender: walletAddress,
-        });
-
-        const message = `Sign this message to authorize the transaction bundler.\n\nContract: ${auth.address}\nNonce: ${auth.nonce}`;
-
-        const signature = await window.ethereum?.request({
-            method: 'personal_sign',
-            params: [message, walletAddress],
-        });
-
-        // Parse the signature
-        const r = signature.slice(0, 66);
-        const s = '0x' + signature.slice(66, 130);
-        const v = parseInt(signature.slice(130, 132), 16);
-        const yParity = v === 27 ? 0 : 1;
-
-        console.log(vault_actions);
-
-        const bundleTx = await compassApiSDK.transactionBundler.bundlerExecute({
-            chain: 'base:mainnet',
-            sender: walletAddress,
-            actions: vault_actions,
-            signedAuthorization: {
-                nonce: auth.nonce,
-                address: auth.address,
-                chainId: auth.chainId,
-                r: r,
-                s: s,
-                yParity: yParity,
-            },
-        });
-        // Send transaction via MetaMask
-        if (typeof window.ethereum !== 'undefined') {
-            try {
-                console.log(bundleTx);
-                // Add the v property to the authorization list object
-                const modifiedAuthorizationList = bundleTx.authorizationList?.map((authObj: any) => ({
-                    ...authObj,
-                    v: v
-                })) || [];
-                console.log(modifiedAuthorizationList);
-                const txParams = {
-                    from: walletAddress,
-                    to: bundleTx.to,
-                    value: toBeHex(bundleTx.value),
-                    data: bundleTx.data,
-                    gas: toBeHex(bundleTx.gas),
-                    authorizationList: modifiedAuthorizationList,
-                    nonce: toBeHex(bundleTx.nonce),
-                };
-                const txHash = await window.ethereum.request({
-                    method: 'eth_sendTransaction',
-                    params: [txParams],
-                });
-                setTransactionStatus(`Transaction submitted! Hash: ${txHash}`);
-            } catch (error) {
-                console.error('Transaction failed:', error);
-                setTransactionStatus('Transaction failed. Please try again.');
-            }
-        } else {
-            console.error('MetaMask not found');
-            setTransactionStatus('MetaMask not found. Please install MetaMask.');
-        }
-    };
-
-    const handleVaultAmountChange = (vaultAddress: string, amount: string) => {
-        setVaultRebalanceAmounts((prev) => ({
-            ...prev,
-            [vaultAddress]: amount,
-        }));
-    };
+    const [vaultRebalanceAmounts, setVaultRebalanceAmounts] = useState<{ [key: string]: string }>({});
 
     return (
         <div
@@ -257,7 +59,7 @@ export default function Page() {
 
                         {!isConnected ? (
                             <button
-                                onClick={connectWallet}
+                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaultPositions, compassApiSDK)}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                                 data-oid="slwvc-5"
@@ -331,7 +133,7 @@ export default function Page() {
                             rebalancing
                         </p>
                         <button
-                            onClick={connectWallet}
+                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaultPositions, compassApiSDK)}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                             data-oid="zlj2rd2"
                         >
@@ -504,10 +306,7 @@ export default function Page() {
                                                             ] || ''
                                                         }
                                                         onChange={(e) =>
-                                                            handleVaultAmountChange(
-                                                                position.vault.address,
-                                                                e.target.value,
-                                                            )
+                                                            handleVaultAmountChange(setVaultRebalanceAmounts, position.vault.address, e.target.value)
                                                         }
                                                         placeholder="0.00"
                                                         className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -564,7 +363,7 @@ export default function Page() {
                                 </div>
 
                                 <button
-                                    onClick={handleRebalance}
+                                    onClick={() => handleRebalance({ compassApiSDK, vaultPositions, vaultRebalanceAmounts, walletAddress, setTransactionStatus, setLoading })}
                                     disabled={
                                         loading ||
                                         Object.entries(vaultRebalanceAmounts).filter(
