@@ -198,7 +198,9 @@ non_multicall_request_list = [
     ),
     (
         compass.aave_v3.supply,
-        models.AaveSupplyRequest(token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET),
+        models.AaveSupplyRequest(
+            token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET
+        ),
     ),
     (
         compass.aave_v3.borrow,
@@ -208,7 +210,7 @@ non_multicall_request_list = [
             chain=CHAIN,
             sender=WALLET,
             interest_rate_mode=INTEREST_RATE_MODE,
-            on_behalf_of=WALLET
+            on_behalf_of=WALLET,
         ),
     ),
     (
@@ -224,7 +226,11 @@ non_multicall_request_list = [
     (
         compass.aave_v3.withdraw,
         models.AaveWithdrawRequest(
-            token=TokenEnum.USDC, amount="2", chain=CHAIN, sender=WALLET, recipient=WALLET
+            token=TokenEnum.USDC,
+            amount="2",
+            chain=CHAIN,
+            sender=WALLET,
+            recipient=WALLET,
         ),
     ),
     (
@@ -275,17 +281,17 @@ def process_requests():
         collect(
             "process_requests",
             {
-                "Step": idx,
-                "TimeStamp": datetime.now().isoformat(),
-                "Function": fn.__name__,
-                "EstGas": gas_est,
-                "UsedGas": used_gas,
-                "TxHash": tx_hash,
+                "step": idx,
+                "time_stamp": datetime.now().isoformat(),
+                "function": fn.__name__,
+                "estimated_gas": gas_est,
+                "used_gas": used_gas,
+                "tx_has": tx_hash,
                 # "TxReceipt": receipt,
-                "TxReceiptStatus": receipt["status"],
-                "Portfolio": get_portfolio(),
-                "AaveMetrics": get_aave_metrics(),
-                "Allowances": get_allowances(),
+                "tx_receipt_status": receipt["status"],
+                "portfolio": get_portfolio(),
+                "aave_metrics": get_aave_metrics(),
+                "allowances": get_allowances(),
             },
         )
 
@@ -301,14 +307,17 @@ if __name__ == "__main__":
 
     # process results of experiment
     results = output_data["process_requests"]
-    all_success = all(item["TxReceiptStatus"] == 1 for item in results)
+    all_success = all(item["tx_receipt_status"] == 1 for item in results)
 
-    total_est_gas = sum(item["EstGas"] for item in results)
-    total_used_gas = sum(item["UsedGas"] for item in results)
+    total_est_gas = sum(item["estimated_gas"] for item in results)
+    total_used_gas = sum(item["used_gas"] for item in results)
 
-    gas_totals = {"TotalEstGas": total_est_gas, "TotalUsedGas": total_used_gas}
+    gas_totals = {
+        "total_estimated_gas": total_est_gas,
+        "total_used_gas": total_used_gas,
+    }
     print(f"did all transactions succeed: {all_success}")
-    portfolio_afterwards = results[-1]["Portfolio"]
+    portfolio_afterwards = results[-1]["portfolio"]
     print(f"portfolio afterwards: {portfolio_afterwards}")
     print(gas_totals)
 
