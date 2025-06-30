@@ -35,7 +35,12 @@ w3 = Web3(HTTPProvider(RPC_URL))
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
 # This will accumulate everything
-output_data = {"process_requests": []}
+output_data = {
+    "sequential_requests": [],
+    "sequential_gas_totals": [],
+    "bundler_requests": [],
+    "bundler_gas_totals": [],
+}
 
 
 # Helpers
@@ -261,7 +266,7 @@ non_multicall_request_list = [
 
 
 # Sequential processing of DeFi actions
-def process_requests():
+def process_sequential_requests():
     tasks = non_multicall_request_list
 
     for idx, (fn, req) in enumerate(tasks, start=1):
@@ -279,7 +284,7 @@ def process_requests():
         used_gas = trace["result"]["gas"]
 
         collect(
-            "process_requests",
+            "sequential_requests",
             {
                 "step": idx,
                 "time_stamp": datetime.now().isoformat(),
@@ -303,10 +308,10 @@ if __name__ == "__main__":
     fund_account()
 
     # run experiment
-    process_requests()
+    process_sequential_requests()
 
     # process results of experiment
-    results = output_data["process_requests"]
+    results = output_data["sequential_requests"]
     all_success = all(item["tx_receipt_status"] == 1 for item in results)
 
     total_est_gas = sum(item["estimated_gas"] for item in results)
@@ -320,6 +325,8 @@ if __name__ == "__main__":
     portfolio_afterwards = results[-1]["portfolio"]
     print(f"portfolio afterwards: {portfolio_afterwards}")
     print(gas_totals)
+
+    collect("sequential_gas_totals", gas_totals)
 
     # output report
     with open(OUTPUT_PATH, "w") as f:
