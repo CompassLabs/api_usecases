@@ -40,7 +40,6 @@ export const handleRebalance = async ({
                 actionType: 'MORPHO_WITHDRAW',
                 vaultAddress: vaultAddress,
                 amount: 'ALL',
-                receiver: vaultAddress,
             } as MorphoWithdrawParams,
         } as UserOperation);
         const rebalanceAmount = Number(vaultRebalanceAmounts[vaultAddress]);
@@ -50,7 +49,6 @@ export const handleRebalance = async ({
                     actionType: 'MORPHO_DEPOSIT',
                     vaultAddress: vaultAddress,
                     amount: rebalanceAmount,
-                    receiver: walletAddress,
                 } as MorphoDepositParams,
             } as UserOperation);
         }
