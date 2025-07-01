@@ -86,7 +86,7 @@ def get_aave_metrics():
         "Debt": summary.total_debt,
         "ATokenBalance": pos.token_balance,
         "HealthFactor": summary.health_factor,
-        "LiquidationThreshold": summary.liquidation_threshold
+        "LiquidationThreshold": summary.liquidation_threshold,
     }
 
 
@@ -365,10 +365,23 @@ def process_sequential_requests():
     tasks = non_multicall_request_list
 
     for idx, (fn, req) in enumerate(tasks, start=1):
-        import devtools
         devtools.debug(fn.__name__)
+        if fn.__name__ == "repay":
+            devtools.debug("IF STATEMENT TRIGGERED")
+            params = models.AaveRepayRequest(
+                token=TokenEnum.GHO,
+                amount=get_aave_metrics()['Debt'],
+                chain=CHAIN,
+                sender=WALLET,
+                interest_rate_mode=INTEREST_RATE_MODE,
+            ).model_dump()
+            devtools.debug(params)
+
+        else:
+            params = req.model_dump()
+            devtools.debug(params)
+
         # w3.provider.make_request(RPCEndpoint("evm_mine"), [])
-        params = req.model_dump()
         params.pop("ACTION_TYPE", None)
         params["server_url"] = SERVER_URL
         response = fn(**params)
@@ -379,7 +392,7 @@ def process_sequential_requests():
         #     "debug_traceCall", [response.model_dump(by_alias=True), "latest", {}]
         # )
         # used_gas = trace["result"]["gas"]
-        used_gas = receipt['gasUsed']
+        used_gas = receipt["gasUsed"]
 
         collect(
             "sequential_requests",
@@ -420,34 +433,34 @@ if __name__ == "__main__":
     devtools.debug(get_allowances())
 
     # run experiment
-    #process_bundler_requests()
+    # process_bundler_requests()
     process_sequential_requests()
 
     devtools.debug(get_aave_metrics())
     devtools.debug(get_portfolio())
     devtools.debug(get_allowances())
 
-    # # process results of experiment
-    # results = output_data["sequential_requests"]
-    # all_success = all(item["tx_receipt_status"] == 1 for item in results)
-    #
-    # total_est_gas = sum(item["estimated_gas"] for item in results)
-    # total_used_gas = sum(item["used_gas"] for item in results)
-    #
-    # gas_totals = {
-    #     "total_estimated_gas": total_est_gas,
-    #     "total_used_gas": total_used_gas,
-    # }
-    # print(f"did all transactions succeed: {all_success}")
-    # portfolio_afterwards = results[-1]["portfolio"]
-    # print(f"portfolio afterwards: {portfolio_afterwards}")
-    # print(gas_totals)
-    #
-    # collect("sequential_gas_totals", gas_totals)
-    #
-    # # output report
-    # with open(OUTPUT_PATH, "w") as f:
-    #     json.dump(output_data, f, indent=2)
+    # process results of experiment
+    results = output_data["sequential_requests"]
+    all_success = all(item["tx_receipt_status"] == 1 for item in results)
+
+    total_est_gas = sum(item["estimated_gas"] for item in results)
+    total_used_gas = sum(item["used_gas"] for item in results)
+
+    gas_totals = {
+        "total_estimated_gas": total_est_gas,
+        "total_used_gas": total_used_gas,
+    }
+    print(f"did all transactions succeed: {all_success}")
+    portfolio_afterwards = results[-1]["portfolio"]
+    print(f"portfolio afterwards: {portfolio_afterwards}")
+    print(gas_totals)
+
+    collect("sequential_gas_totals", gas_totals)
+
+    # output report
+    with open(OUTPUT_PATH, "w") as f:
+        json.dump(output_data, f, indent=2)
     #
     # # kill anvil
     # anvil_process.kill()
