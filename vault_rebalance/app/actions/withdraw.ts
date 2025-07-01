@@ -1,61 +1,40 @@
-import { SetAllowanceParams, UserOperation, MorphoDepositParams, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
+import { SetAllowanceParams, UserOperation, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
 import { toBeHex } from 'ethers';
 
-export const handleRebalance = async ({
+export const withdraw = async ({
     compassApiSDK,
-    vaultPositions,
-    vaultRebalanceAmounts,
+    vaultAddress,
+    amount,
     walletAddress,
     setTransactionStatus,
 }: {
     compassApiSDK: any,
-    vaultPositions: any[],
-    vaultRebalanceAmounts: { [key: string]: string },
+    vaultAddress: string,
+    amount: string,
     walletAddress: string,
     setTransactionStatus: (status: string) => void,
 }) => {
-    let vault_actions: UserOperation[] = [];
-    let totalAmount = 0;
-    for (const vault of vaultPositions) {
-        const amountBefore = Number(vault.state.assets) / 10 ** vault.vault.asset.decimals;
-        totalAmount += Number(amountBefore);
-    }
-    for (const vault of vaultPositions) {
-        vault_actions.push({
-            body: {
-                actionType: 'SET_ALLOWANCE',
-                token: vault.vault.asset.address,
-                contract: vault.vault.address,
-                amount: totalAmount * 10,
-            } as SetAllowanceParams,
-        } as UserOperation);
-    }
-    let totalRebalanceAmount = 0;
-    for (const vault of vaultPositions) {
-        const vaultAddress = vault.vault.address;
-        vault_actions.push({
-            body: {
-                actionType: 'MORPHO_WITHDRAW',
-                vaultAddress: vaultAddress,
-                amount: 'ALL',
-            } as MorphoWithdrawParams,
-        } as UserOperation);
-        const rebalanceAmount = Number(vaultRebalanceAmounts[vaultAddress]);
-        if (rebalanceAmount > 0) {
-            vault_actions.push({
-                body: {
-                    actionType: 'MORPHO_DEPOSIT',
-                    vaultAddress: vaultAddress,
-                    amount: rebalanceAmount,
-                } as MorphoDepositParams,
-            } as UserOperation);
-        }
-        totalRebalanceAmount += Number(vaultRebalanceAmounts[vaultAddress]);
-    }
-    if (totalRebalanceAmount > totalAmount) {
-        alert('Total rebalance amount is greater than total amount');
-        return;
-    }
+    let withdraw_actions: UserOperation[] = [];
+   
+    
+    withdraw_actions.push({
+        body: {
+            actionType: 'SET_ALLOWANCE',
+            token: "USDC", // TODO change this to the token resolution
+            contract: vaultAddress,
+            amount: amount,
+        } as SetAllowanceParams,
+    } as UserOperation);
+
+    withdraw_actions.push({
+        body: {
+            actionType: 'MORPHO_WITHDRAW',
+            vaultAddress: vaultAddress,
+            amount: amount,
+        } as MorphoWithdrawParams, 
+    } as UserOperation);
+    
+
     const auth = await compassApiSDK.transactionBundler.bundlerAuthorization({
         chain: 'base:mainnet',
         sender: walletAddress,
@@ -72,7 +51,7 @@ export const handleRebalance = async ({
     const bundleTx = await compassApiSDK.transactionBundler.bundlerExecute({
         chain: 'base:mainnet',
         sender: walletAddress,
-        actions: vault_actions,
+        actions: withdraw_actions,
         signedAuthorization: {
             nonce: auth.nonce,
             address: auth.address,
