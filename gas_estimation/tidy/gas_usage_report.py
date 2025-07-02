@@ -10,6 +10,7 @@ import subprocess
 import subprocess
 from datetime import datetime
 from compass_api_sdk.models import TokenEnum
+from eth_account import Account
 
 
 # Configuration
@@ -79,6 +80,7 @@ def setup_anvil():
             "--chain-id",
             "1",
             "--no-rate-limit",
+            "--silent",
         ]
     )
 
@@ -158,6 +160,163 @@ def fund_account():
         )
         tx_hash, receipt = send_tx(response)
         # print(get_portfolio())
+
+
+request_list_bundler = [
+    models.UserOperation(
+        body=models.SetAllowanceParams(
+            ACTION_TYPE="SET_ALLOWANCE",
+            token=models.TokenEnum.USDC,
+            contract=models.SetAllowanceParamsContractEnum.AAVE_V3_POOL,
+            amount="77",
+        )
+    ),
+    models.UserOperation(
+        body=models.SetAllowanceParams(
+            ACTION_TYPE="SET_ALLOWANCE",
+            token=models.TokenEnum.USDT,
+            contract=models.SetAllowanceParamsContractEnum.AAVE_V3_POOL,
+            amount="77",
+        )
+    ),
+    models.UserOperation(
+        body=models.SetAllowanceParams(
+            ACTION_TYPE="SET_ALLOWANCE",
+            token=models.TokenEnum.USDC,
+            contract=models.SetAllowanceParamsContractEnum.UNISWAP_V3_ROUTER,
+            amount="77",
+        )
+    ),
+    models.UserOperation(
+        body=models.SetAllowanceParams(
+            ACTION_TYPE="SET_ALLOWANCE",
+            token=models.TokenEnum.USDT,
+            contract=models.SetAllowanceParamsContractEnum.UNISWAP_V3_ROUTER,
+            amount="77",
+        )
+    ),
+    models.UserOperation(
+        body=models.AaveSupplyParams(
+            ACTION_TYPE="AAVE_SUPPLY",
+            token=models.TokenEnum.USDC,
+            on_behalf_of=WALLET,
+            amount="2",
+        )
+    ),
+    # (
+    #     compass.aave_v3.supply,
+    #     models.AaveSupplyRequest(token=USDC, amount="10", chain=chain, sender=WALLET),
+    # ),
+    # models.UserOperation(
+    #     body=models.AaveSupplyParams(
+    #         token=models.TokenEnum.USDC,
+    #         amount="10",
+    #         ACTION_TYPE="AAVE_SUPPLY",
+    #     )
+    # ),
+    # (
+    #     compass.aave_v3.withdraw,
+    #     models.AaveWithdrawRequest(
+    #         token=USDC, amount="10", chain=chain, sender=WALLET, recipient=WALLET
+    #     ),
+    # ),
+    # models.UserOperation(
+    #     body=models.AaveWithdrawParams(
+    #         token=models.TokenEnum.USDC,
+    #         amount="10",
+    #         recipient=WALLET,
+    #         ACTION_TYPE="AAVE_WITHDRAW",
+    #     )
+    # ),
+]
+
+
+actions = [
+    # Set Allowance
+    models.UserOperation(
+        body=models.SetAllowanceParams(
+            ACTION_TYPE="SET_ALLOWANCE",
+            token=models.TokenEnum.USDC,
+            contract=models.SetAllowanceParamsContractEnum.UNISWAP_V3_ROUTER,
+            amount="100",
+        )
+    ),
+    # Swap WETH for USDC on Uniswap
+    models.UserOperation(
+        body=models.UniswapBuyExactlyParams(
+            ACTION_TYPE="UNISWAP_BUY_EXACTLY",
+            token_in=models.TokenEnum.WETH,
+            token_out=models.TokenEnum.USDC,
+            fee=models.FeeEnum.ZERO_DOT_01,
+            max_slippage_percent=0.5,
+            amount=1,
+            wrap_eth=True,
+        )
+    ),
+]
+
+
+def process_bundler_requests():
+    # First get the authorization
+    account = Account.from_key(PRIVATE_KEY)
+
+    auth = compass.transaction_bundler.bundler_authorization(
+        chain=models.Chain.ETHEREUM_MAINNET, sender=account.address
+    )
+
+    auth_dict = auth.model_dump(mode="json", by_alias=True)
+    print(f"AUTH DICT: {auth_dict}")
+
+    # Sign the authorization
+    signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
+
+    chain = models.Chain.ETHEREUM_MAINNET
+    sender = account.address
+    signed_authorization = signed_auth.model_dump(by_alias=True)
+
+    response = compass.transaction_bundler.bundler_execute(
+        chain=chain,
+        sender=sender,
+        signed_authorization=signed_authorization,
+        # actions = actions,
+        actions=request_list_bundler,
+        server_url="http://0.0.0.0:80",
+    )
+
+    unsigned_transaction = response.model_dump(by_alias=True)
+    print(f"UNSIGNED_TRANSACTION: {unsigned_transaction}")
+
+    gas_estimation = w3.eth.estimate_gas(response.model_dump(by_alias=True))
+    trace = w3.provider.make_request(
+        "debug_traceCall", [response.model_dump(by_alias=True), "latest", {}]
+    )
+    print(trace)
+    # used_gas = trace["result"]["gas"]
+    print(f"GAS ESTIMATION: {gas_estimation}")
+    # print(f"GAS USDED: {used_gas}")
+
+    signed_transaction = w3.eth.account.sign_transaction(
+        unsigned_transaction, PRIVATE_KEY
+    )
+    print(signed_transaction)
+    txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
+    print(txn_hash.hex())
+    w3.provider.make_request(RPCEndpoint("evm_mine"), [])
+    receipt = w3.eth.wait_for_transaction_receipt(txn_hash)
+    print("-----RECEIPT------")
+    print(receipt)
+
+    # print(sender)
+    get_allowance_res = compass.universal.allowance(
+        chain=models.GenericAllowanceChain.ETHEREUM_MAINNET,
+        token=models.TokenEnum.USDC,
+        contract=models.GenericAllowanceContractEnum.UNISWAP_V3_ROUTER,
+        user=sender,
+        server_url="http://0.0.0.0:80",
+    )
+
+    # Handle response
+    print(get_allowance_res)
 
 
 non_multicall_request_list = [
@@ -305,32 +464,40 @@ if __name__ == "__main__":
     # setup
     anvil_process = setup_anvil()
     atexit.register(anvil_process.terminate)
+
+    process_bundler_requests()
+
+    import devtools
+
+    devtools.debug(get_aave_metrics())
+
     fund_account()
 
     # run experiment
-    process_sequential_requests()
+    # process_sequential_requests()
+    # process_bundler_requests()
 
-    # process results of experiment
-    results = output_data["sequential_requests"]
-    all_success = all(item["tx_receipt_status"] == 1 for item in results)
-
-    total_est_gas = sum(item["estimated_gas"] for item in results)
-    total_used_gas = sum(item["used_gas"] for item in results)
-
-    gas_totals = {
-        "total_estimated_gas": total_est_gas,
-        "total_used_gas": total_used_gas,
-    }
-    print(f"did all transactions succeed: {all_success}")
-    portfolio_afterwards = results[-1]["portfolio"]
-    print(f"portfolio afterwards: {portfolio_afterwards}")
-    print(gas_totals)
-
-    collect("sequential_gas_totals", gas_totals)
-
-    # output report
-    with open(OUTPUT_PATH, "w") as f:
-        json.dump(output_data, f, indent=2)
-
-    # kill anvil
-    anvil_process.kill()
+    # # process results of experiment
+    # results = output_data["sequential_requests"]
+    # all_success = all(item["tx_receipt_status"] == 1 for item in results)
+    #
+    # total_est_gas = sum(item["estimated_gas"] for item in results)
+    # total_used_gas = sum(item["used_gas"] for item in results)
+    #
+    # gas_totals = {
+    #     "total_estimated_gas": total_est_gas,
+    #     "total_used_gas": total_used_gas,
+    # }
+    # print(f"did all transactions succeed: {all_success}")
+    # portfolio_afterwards = results[-1]["portfolio"]
+    # print(f"portfolio afterwards: {portfolio_afterwards}")
+    # print(gas_totals)
+    #
+    # collect("sequential_gas_totals", gas_totals)
+    #
+    # # output report
+    # with open(OUTPUT_PATH, "w") as f:
+    #     json.dump(output_data, f, indent=2)
+    #
+    # # kill anvil
+    # anvil_process.kill()
