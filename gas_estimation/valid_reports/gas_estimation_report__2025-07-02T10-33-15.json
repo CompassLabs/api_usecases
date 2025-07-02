@@ -1,0 +1,315 @@
+{
+  "sequential_requests": [
+    {
+      "step": 1,
+      "time_stamp": "2025-07-02T10:33:41.191093",
+      "function": "allowance_set",
+      "estimated_gas": 38704,
+      "used_gas": 38337,
+      "tx_hash": "8279365cc87c3fd9c05610620de940d684fe7718d92c09c51210b4802556f1b3",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.00129447499368978"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "10",
+        "GHO": "76",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 2,
+      "time_stamp": "2025-07-02T10:33:51.470088",
+      "function": "allowance_set",
+      "estimated_gas": 34420,
+      "used_gas": 34062,
+      "tx_hash": "30dc8e88d453f91f9806fcf6c6bdf7330c88d06bc97b191e36c3501d1efbe07d",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001294300803128086"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "10",
+        "GHO": "10",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 3,
+      "time_stamp": "2025-07-02T10:34:01.383552",
+      "function": "allowance_set",
+      "estimated_gas": 38704,
+      "used_gas": 38337,
+      "tx_hash": "97ec8e40ad7cceb8029a6d16608b633de103578d9c774aecc8e068bacb3504ff",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001294104486842762"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "10",
+        "GHO": "10",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 4,
+      "time_stamp": "2025-07-02T10:34:11.045983",
+      "function": "allowance_set",
+      "estimated_gas": 34420,
+      "used_gas": 34062,
+      "tx_hash": "945d5a358f711245acc8435dad0c735bb9397381bf21a6f6c1edfa7270a52361",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001293930498729116"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "10",
+        "GHO": "10",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 5,
+      "time_stamp": "2025-07-02T10:34:21.049620",
+      "function": "supply",
+      "estimated_gas": 213569,
+      "used_gas": 207932,
+      "tx_hash": "fa25d609942b70ea106350e4c37c724a5e0707428f63d8849d7691e9899963b7",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "10.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001292886239406086"
+      },
+      "aave_metrics": {
+        "Collateral": "1.99988",
+        "Debt": "0",
+        "ATokenBalance": "2",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "14999.1"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "10",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 6,
+      "time_stamp": "2025-07-02T10:34:31.490955",
+      "function": "borrow",
+      "estimated_gas": 282281,
+      "used_gas": 273417,
+      "tx_hash": "c2d84abf3cd43c74a80d9249f3cb6d298836ea7969d9e3dd099a9364ab0c5a0a",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "10.900147",
+        "GHO": "2.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001291506972527382"
+      },
+      "aave_metrics": {
+        "Collateral": "1.99988",
+        "Debt": "1.00000001",
+        "ATokenBalance": "2",
+        "HealthFactor": "1.559906384400936207867971461382694542407989501953125",
+        "LiquidationThreshold": "4999.0999"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "10",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 7,
+      "time_stamp": "2025-07-02T10:34:41.184479",
+      "function": "repay",
+      "estimated_gas": 180629,
+      "used_gas": 175507,
+      "tx_hash": "3d6dc81836b861a48f5643c5b693ff93c4dc41716d9ddf7783a35b7deb381e8b",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "10.900147",
+        "GHO": "1.84009032858360128",
+        "WETH": "0",
+        "ETH": "0.001290623328958248"
+      },
+      "aave_metrics": {
+        "Collateral": "1.99988",
+        "Debt": "0",
+        "ATokenBalance": "2",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "14999.1"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "8.99999999",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 8,
+      "time_stamp": "2025-07-02T10:34:51.251032",
+      "function": "withdraw",
+      "estimated_gas": 241534,
+      "used_gas": 233618,
+      "tx_hash": "4211b9aecaabe31e84e395415a22d120c3826154f12b491dc8600335e1c027c1",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009032858360128",
+        "WETH": "0",
+        "ETH": "0.001289454782631872"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "8.99999999",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 9,
+      "time_stamp": "2025-07-02T10:35:01.162603",
+      "function": "swap_sell_exactly",
+      "estimated_gas": 126010,
+      "used_gas": 122797,
+      "tx_hash": "7c8fe9264ba77629bf6ba6b52b2ea1ef8d2def9de3976b32d71cd3d04685fe4a",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "11.900147",
+        "GHO": "2.834944902097187503",
+        "WETH": "0",
+        "ETH": "0.001288832105553473"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "8.99999999",
+        "WETH": "0"
+      }
+    },
+    {
+      "step": 10,
+      "time_stamp": "2025-07-02T10:35:11.447079",
+      "function": "swap_buy_exactly",
+      "estimated_gas": 129372,
+      "used_gas": 122251,
+      "tx_hash": "9f9533a9cb6e54caa78d1b9f743bc200e3d176a3a5915549e06f97c50fde36cd",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.834094230324475783",
+        "WETH": "0",
+        "ETH": "0.001288213951813216"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "8",
+        "GHO": "8.99999999",
+        "WETH": "0"
+      }
+    }
+  ],
+  "sequential_gas_totals": [
+    {
+      "total_estimated_gas": 1319643,
+      "total_used_gas": 1280320
+    }
+  ],
+  "bundler_requests": [
+    {
+      "step": 1,
+      "time_stamp": "2025-07-02T10:33:27.180548",
+      "function": "Bundler Bundle",
+      "estimated_gas": 739845,
+      "used_gas": 672284,
+      "tx_hash": "0e0c51fd9facc2e46a28f3d94399e8141751fd6fccdb14414452dd2c97c9587c",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "12.900147",
+        "GHO": "1.84009033858360128",
+        "WETH": "0",
+        "ETH": "0.001294670078557907"
+      },
+      "aave_metrics": {
+        "Collateral": "0",
+        "Debt": "0",
+        "ATokenBalance": "0",
+        "HealthFactor": "115792089237316203707617735395386539918674240093853421928448",
+        "LiquidationThreshold": "0"
+      },
+      "allowances": {
+        "USDC": "75",
+        "GHO": "76",
+        "WETH": "0"
+      }
+    }
+  ],
+  "bundler_gas_totals": [
+    {
+      "total_estimated_gas": 739845,
+      "total_used_gas": 672284
+    }
+  ]
+}
