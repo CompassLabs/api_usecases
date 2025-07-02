@@ -1,13 +1,11 @@
 import os
 import json
-import atexit
 from dotenv import load_dotenv
 from web3 import Web3, HTTPProvider
-from web3.types import RPCEndpoint
+
 from compass_api_sdk import CompassAPI, models
 import time
-import subprocess
-import subprocess
+
 from datetime import datetime
 from compass_api_sdk.models import TokenEnum
 from eth_account import Account
@@ -442,27 +440,13 @@ def process_sequential_requests():
 
 
 if __name__ == "__main__":
-    # setup
-
-    # send_tx(
-    #     compass.universal.wrap_eth(
-    #         amount=10,
-    #         chain=CHAIN,
-    #         sender=WALLET,
-    #         server_url=SERVER_URL
-    #     )
-    # )
-
-    # process_bundler_requests()
-
-    import devtools
-
     devtools.debug(get_aave_metrics())
     devtools.debug(get_portfolio())
     devtools.debug(get_allowances())
 
     # run experiment
     process_bundler_requests()
+    time.sleep(5)
     process_sequential_requests()
 
     devtools.debug(get_aave_metrics())
