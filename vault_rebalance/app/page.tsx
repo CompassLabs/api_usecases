@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
-import {
-    VaultPosition,
-} from '@compass-labs/api-sdk/models/components';
 import { connectWallet } from './actions/connectWallet';
 import { handleRebalance } from './actions/handleRebalance';
 import { handleVaultAmountChange } from './actions/handleVaultAmountChange';
 import { deposit } from './actions/deposit';
 import { withdraw } from './actions/withdraw';
+import { VaultForTracking } from './actions/addVaultForTracking';
+import { addVaultForTracking } from './actions/addVaultForTracking';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -17,7 +16,7 @@ dotenv.config();
 console.log('COMPASS_API_KEY', process.env.NEXT_PUBLIC_COMPASS_API_KEY);
 
 const compassApiSDK = new CompassApiSDK({
-    apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY as string,
+    apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY as string
 });
 // Type declaration for ethereum window object
 declare global {
@@ -31,7 +30,7 @@ declare global {
 export default function Page() {
     const [isConnected, setIsConnected] = useState(false);
     const [walletAddress, setWalletAddress] = useState('');
-    const [vaultPositions, setVaultPositions] = useState<VaultPosition[]>([]);
+    const [vaults, setVaults] = useState<VaultForTracking[]>([]);
     const [loading, setLoading] = useState(false);
     const [transactionStatus, setTransactionStatus] = useState('');
     const [vaultRebalanceAmounts, setVaultRebalanceAmounts] = useState<{ [key: string]: string }>({});
@@ -39,6 +38,27 @@ export default function Page() {
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawVaultAddress, setWithdrawVaultAddress] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [trackVaultAddress, setTrackVaultAddress] = useState('');
+
+    async function refetchAllVaults() {
+        setLoading(true);
+        try {
+            const updatedVaults = await Promise.all(
+                vaults.map(async (vault) => {
+                    const response = await compassApiSDK.erc4626Vaults.vault({
+                        vaultAddress: vault.address,
+                        chain: "base:mainnet",
+                        userAddress: walletAddress,
+                    });
+                    return { ...response, address: vault.address }
+                })
+            );
+            setVaults(updatedVaults);
+        } catch (e) {
+            setTransactionStatus("Failed to refetch vaults");
+        }
+        setLoading(false);
+    }
 
     return (
         <div
@@ -65,7 +85,7 @@ export default function Page() {
 
                         {!isConnected ? (
                             <button
-                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaultPositions, compassApiSDK)}
+                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                                 data-oid="slwvc-5"
@@ -91,6 +111,50 @@ export default function Page() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="e5epmo_">
+                {/* Track Vault Section */}
+                {isConnected && (
+                    <div className="mb-8 bg-white rounded-xl shadow-lg p-6" data-oid="track-vault-section">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Track Vault</h3>
+                        <div className="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Vault Address</label>
+                                <input
+                                    type="text"
+                                    value={trackVaultAddress}
+                                    onChange={(e) => setTrackVaultAddress(e.target.value)}
+                                    placeholder="0x..."
+                                    className="w-full border border-gray-300 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    if (!trackVaultAddress) {
+                                        setTransactionStatus('Please enter a vault address.');
+                                        return;
+                                    }
+                                    console.log('trackVaultAddress', trackVaultAddress);
+                                    await addVaultForTracking(
+                                        compassApiSDK,
+                                        setVaults,
+                                        vaults,
+                                        trackVaultAddress,
+                                        setTransactionStatus,
+                                        walletAddress
+                                    );
+                                }}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
+                                disabled={!trackVaultAddress}
+                            >
+                                Track Vault
+                            </button>
+                        </div>
+                        {transactionStatus && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
+                                <div className="text-blue-800 text-sm">{transactionStatus}</div>
+                            </div>
+                        )}
+                    </div>
+                )}
                 {/* Deposit Section */}
                 {isConnected && (
                     <div className="mb-8 bg-white rounded-xl shadow-lg p-6" data-oid="deposit-section">
@@ -129,6 +193,7 @@ export default function Page() {
                                         setTransactionStatus,
                                         walletAddress,
                                     });
+                                    await refetchAllVaults();
                                 }}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                                 disabled={!depositVaultAddress || !depositAmount}
@@ -181,6 +246,7 @@ export default function Page() {
                                         setTransactionStatus,
                                         walletAddress,
                                     });
+                                    await refetchAllVaults();
                                 }}
                                 className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-2 rounded-lg hover:from-red-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50"
                                 disabled={!withdrawVaultAddress || !withdrawAmount}
@@ -244,7 +310,7 @@ export default function Page() {
                             rebalancing
                         </p>
                         <button
-                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaultPositions, compassApiSDK)}
+                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                             data-oid="zlj2rd2"
                         >
@@ -262,7 +328,7 @@ export default function Page() {
                             >
                                 Vault Positions
                             </h3>
-                            {loading && vaultPositions.length === 0 ? (
+                            {loading ? (
                                 <div
                                     className="flex items-center justify-center py-8"
                                     data-oid="_7l79m0"
@@ -275,15 +341,11 @@ export default function Page() {
                                         Loading vault positions...
                                     </span>
                                 </div>
-                            ) : vaultPositions.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500" data-oid="z0nbbt0">
-                                    <p data-oid="mz2ambw">No vault positions found</p>
-                                </div>
                             ) : (
                                 <div className="space-y-4" data-oid=":qw4d99">
-                                    {vaultPositions.map((position, index) => (
+                                    {vaults.map((vault, index) => (
                                         <div
-                                            key={position.id}
+                                            key={vault.address}
                                             className="border border-gray-200 rounded-lg p-4"
                                             data-oid="x7.icqj"
                                         >
@@ -296,14 +358,14 @@ export default function Page() {
                                                         className="font-medium text-gray-900"
                                                         data-oid=".qrj7kr"
                                                     >
-                                                        {position.vault.name}
+                                                        {vault.name}
                                                     </div>
                                                     <div
                                                         className="text-sm text-gray-500"
                                                         data-oid="tgut7da"
                                                     >
-                                                        {position.vault.address.slice(0, 6)}...
-                                                        {position.vault.address.slice(-4)}
+                                                        {vault.address.slice(0, 6)}...
+                                                        {vault.address.slice(-4)}
                                                     </div>
                                                 </div>
                                                 <div className="text-right" data-oid="3man7uk">
@@ -311,17 +373,13 @@ export default function Page() {
                                                         className="font-semibold text-gray-900"
                                                         data-oid="3s.n7pf"
                                                     >
-                                                        ${position.state.assets}
+                                                        {vault.userPosition ? `${vault.userPosition.tokenAmount}` : '0'} {vault.asset.symbol}
                                                     </div>
                                                     <div
                                                         className="text-sm text-gray-600"
                                                         data-oid="tk88a_j"
                                                     >
-                                                        $
-                                                        {(
-                                                            Number(position.state.assets) /
-                                                            10 ** position.vault.asset.decimals
-                                                        ).toFixed(5)}
+                                                        Shares: {vault.userPosition ? vault.userPosition.shares : 0}
                                                     </div>
                                                 </div>
                                             </div>
@@ -349,7 +407,7 @@ export default function Page() {
                                 >
                                     Your Vault Positions
                                 </h4>
-                                {loading && vaultPositions.length === 0 ? (
+                                {loading && vaults.length === 0 ? (
                                     <div
                                         className="flex items-center justify-center py-8"
                                         data-oid="y:2862h"
@@ -362,7 +420,7 @@ export default function Page() {
                                             Loading vault positions...
                                         </span>
                                     </div>
-                                ) : vaultPositions.length === 0 ? (
+                                ) : vaults.length === 0 ? (
                                     <div
                                         className="text-center py-8 text-gray-500"
                                         data-oid="yj5fl0:"
@@ -374,9 +432,9 @@ export default function Page() {
                                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
                                         data-oid="ol6o8c9"
                                     >
-                                        {vaultPositions.map((position, index) => (
+                                        {vaults.map((vault, index) => (
                                             <div
-                                                key={position.id}
+                                                key={vault.address}
                                                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                                                 data-oid="grh0hvq"
                                             >
@@ -385,20 +443,20 @@ export default function Page() {
                                                         className="font-medium text-gray-900 text-sm mb-1"
                                                         data-oid="k3ub5fk"
                                                     >
-                                                        {position.vault.name}
+                                                        {vault.name}
                                                     </h5>
                                                     <div
                                                         className="text-xs text-gray-500 mb-2"
                                                         data-oid="wg__4a:"
                                                     >
-                                                        {position.vault.address.slice(0, 6)}...
-                                                        {position.vault.address.slice(-4)}
+                                                        {vault.address.slice(0, 6)}...
+                                                        {vault.address.slice(-4)}
                                                     </div>
                                                     <div
                                                         className="text-xs text-gray-600"
                                                         data-oid="zmrk8ad"
                                                     >
-                                                        Current Assets: ${position.state.assetsUsd}
+                                                        Current Assets: {vault.userPosition ? vault.userPosition.tokenAmount : '0'} {vault.asset.symbol}
                                                     </div>
                                                 </div>
 
@@ -413,11 +471,11 @@ export default function Page() {
                                                         type="number"
                                                         value={
                                                             vaultRebalanceAmounts[
-                                                                position.vault.address
+                                                                vault.address
                                                             ] || ''
                                                         }
                                                         onChange={(e) =>
-                                                            handleVaultAmountChange(setVaultRebalanceAmounts, position.vault.address, e.target.value)
+                                                            handleVaultAmountChange(setVaultRebalanceAmounts, vault.address, e.target.value)
                                                         }
                                                         placeholder="0.00"
                                                         className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -474,7 +532,7 @@ export default function Page() {
                                 </div>
 
                                 <button
-                                    onClick={() => handleRebalance({ compassApiSDK, vaultPositions, vaultRebalanceAmounts, walletAddress, setTransactionStatus })}
+                                    onClick={() => handleRebalance({ compassApiSDK, vaultPositions: vaults, vaultRebalanceAmounts, walletAddress, setTransactionStatus })}
                                     disabled={
                                         loading ||
                                         Object.entries(vaultRebalanceAmounts).filter(

@@ -1,5 +1,5 @@
 import { getAddress } from 'viem';
-import { getUserPositions } from './getUserPositions';
+// import { getUserPositions } from './getUserPositions';
 import { VaultPosition } from '@compass-labs/api-sdk/models/components';
 
 export const connectWallet = async (setLoading: (loading: boolean) => void, setWalletAddress: (address: string) => void, setIsConnected: (connected: boolean) => void, setVaultPositions: (positions: VaultPosition[]) => void, compassApiSDK: any)  => {
@@ -54,7 +54,7 @@ export const connectWallet = async (setLoading: (loading: boolean) => void, setW
             // }
 
             // Get user positions immediately after successful network switch
-            await getUserPositions(compassApiSDK, setVaultPositions, checksumAddress);
+            // await getUserPositions(compassApiSDK, setVaultPositions, checksumAddress);
             setLoading(false);
         } catch (error) {
             console.error('Failed to connect wallet:', error);

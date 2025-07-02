@@ -10,7 +10,7 @@
         "format": "prettier --write ."
     },
     "dependencies": {
-        "@compass-labs/api-sdk": "^0.5.29",
+        "@compass-labs/api-sdk": "^0.5.36",
         "@radix-ui/react-slot": "^1.1.0",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",

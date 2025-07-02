@@ -1,5 +1,6 @@
-import { SetAllowanceParams, UserOperation, MorphoDepositParams, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
+import { SetAllowanceParams, UserOperation, MorphoDepositParams, MorphoWithdrawParams, VaultGetVaultResponse } from '@compass-labs/api-sdk/models/components';
 import { toBeHex } from 'ethers';
+import { VaultForTracking } from './addVaultForTracking';
 
 export const handleRebalance = async ({
     compassApiSDK,
@@ -9,7 +10,7 @@ export const handleRebalance = async ({
     setTransactionStatus,
 }: {
     compassApiSDK: any,
-    vaultPositions: any[],
+    vaultPositions: VaultForTracking[],
     vaultRebalanceAmounts: { [key: string]: string },
     walletAddress: string,
     setTransactionStatus: (status: string) => void,
@@ -17,22 +18,22 @@ export const handleRebalance = async ({
     let vault_actions: UserOperation[] = [];
     let totalAmount = 0;
     for (const vault of vaultPositions) {
-        const amountBefore = Number(vault.state.assets) / 10 ** vault.vault.asset.decimals;
+        const amountBefore = Number(vault.userPosition?.tokenAmount) / 10 ** vault.asset.decimals;
         totalAmount += Number(amountBefore);
     }
     for (const vault of vaultPositions) {
         vault_actions.push({
             body: {
                 actionType: 'SET_ALLOWANCE',
-                token: vault.vault.asset.address,
-                contract: vault.vault.address,
+                token: vault.asset.address,
+                contract: vault.address,
                 amount: totalAmount * 10,
             } as SetAllowanceParams,
         } as UserOperation);
     }
     let totalRebalanceAmount = 0;
     for (const vault of vaultPositions) {
-        const vaultAddress = vault.vault.address;
+        const vaultAddress = vault.address;
         vault_actions.push({
             body: {
                 actionType: 'MORPHO_WITHDRAW',
