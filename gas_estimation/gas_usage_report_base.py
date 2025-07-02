@@ -33,8 +33,12 @@ INTEREST_RATE_MODE = models.InterestRateMode.VARIABLE
 TOKENS = [TokenEnum.USDC, TokenEnum.GHO, TokenEnum.WETH]
 ETH = "ETH"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_PATH = os.path.join(SCRIPT_DIR, "gas_estimation_report.json")
- 
+filename = (
+    "gas_estimation_report__"
+    + datetime.now().isoformat(timespec="seconds").replace(":", "-")
+    + ".json"
+)
+OUTPUT_PATH = os.path.join(SCRIPT_DIR, filename)
 
 
 # Clients
@@ -492,8 +496,6 @@ if __name__ == "__main__":
         "total_used_gas": bundler_results[0]["used_gas"],
     }
     collect("bundler_gas_totals", bundler_gas_totals)
-    
-    
 
     # output report
     with open(OUTPUT_PATH, "w") as f:
