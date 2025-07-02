@@ -34,6 +34,7 @@ TOKENS = [TokenEnum.USDC, TokenEnum.GHO, TokenEnum.WETH]
 ETH = "ETH"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "gas_estimation_report.json")
+ 
 
 
 # Clients
@@ -359,6 +360,30 @@ def process_bundler_requests():
     print("-----RECEIPT------")
     print(receipt)
 
+    time.sleep(5)
+    # trace = w3.provider.make_request(
+    #     "debug_traceCall", [response.model_dump(by_alias=True), "latest", {}]
+    # )
+    # used_gas = trace["result"]["gas"]
+    used_gas = receipt["gasUsed"]
+
+    collect(
+        "bundler_requests",
+        {
+            "step": 1,
+            "time_stamp": datetime.now().isoformat(),
+            "function": "Bundler Bundle",
+            "estimated_gas": gas_estimation,
+            "used_gas": used_gas,
+            "tx_hash": txn_hash.hex(),
+            # "TxReceipt": receipt,
+            "tx_receipt_status": receipt["status"],
+            "portfolio": get_portfolio(),
+            "aave_metrics": get_aave_metrics(),
+            "allowances": get_allowances(),
+        },
+    )
+
 
 # Sequential processing of DeFi actions
 def process_sequential_requests():
@@ -370,7 +395,7 @@ def process_sequential_requests():
             devtools.debug("IF STATEMENT TRIGGERED")
             params = models.AaveRepayRequest(
                 token=TokenEnum.GHO,
-                amount=get_aave_metrics()['Debt'],
+                amount=get_aave_metrics()["Debt"],
                 chain=CHAIN,
                 sender=WALLET,
                 interest_rate_mode=INTEREST_RATE_MODE,
@@ -433,14 +458,14 @@ if __name__ == "__main__":
     devtools.debug(get_allowances())
 
     # run experiment
-    # process_bundler_requests()
+    process_bundler_requests()
     process_sequential_requests()
 
     devtools.debug(get_aave_metrics())
     devtools.debug(get_portfolio())
     devtools.debug(get_allowances())
 
-    # process results of experiment
+    # PROCESS RESULTS OF SEQUENTIAL EXPERIMENT
     results = output_data["sequential_requests"]
     all_success = all(item["tx_receipt_status"] == 1 for item in results)
 
@@ -458,9 +483,18 @@ if __name__ == "__main__":
 
     collect("sequential_gas_totals", gas_totals)
 
+    # PROCESS RESULTS OF BUNDLER EXPERIMENT
+
+    bundler_results = output_data["bundler_requests"]
+
+    bundler_gas_totals = {
+        "total_estimated_gas": bundler_results[0]["estimated_gas"],
+        "total_used_gas": bundler_results[0]["used_gas"],
+    }
+    collect("bundler_gas_totals", bundler_gas_totals)
+    
+    
+
     # output report
     with open(OUTPUT_PATH, "w") as f:
         json.dump(output_data, f, indent=2)
-    #
-    # # kill anvil
-    # anvil_process.kill()
