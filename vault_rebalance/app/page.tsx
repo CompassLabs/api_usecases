@@ -39,6 +39,8 @@ export default function Page() {
     const [withdrawVaultAddress, setWithdrawVaultAddress] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [trackVaultAddress, setTrackVaultAddress] = useState('');
+    const [vaultDepositAmounts, setVaultDepositAmounts] = useState<{ [address: string]: string }>({});
+    const [vaultWithdrawAmounts, setVaultWithdrawAmounts] = useState<{ [address: string]: string }>({});
 
     async function refetchAllVaults() {
         setLoading(true);
@@ -101,16 +103,25 @@ export default function Page() {
                                     Connected
                                 </div>
                                 <div className="text-sm text-gray-600" data-oid="mj6-cq1">
-                                    {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                                    {walletAddress}
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
             </header>
-
+        
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="e5epmo_">
+                <div className="text-center mb-12" data-oid="fm3m4_7">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid="b78izdb">
+                        ERC4626 Vaults by Compass Labs
+                    </h2>
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="2d7kw2g">
+                        Showcase the power of Compass API for automated vault rebalancing. Connect
+                        your wallet to view positions and execute rebalancing strategies.
+                    </p>
+                </div>
                 {/* Track Vault Section */}
                 {isConnected && (
                     <div className="mb-8 bg-white rounded-xl shadow-lg p-6" data-oid="track-vault-section">
@@ -155,123 +166,6 @@ export default function Page() {
                         )}
                     </div>
                 )}
-                {/* Deposit Section */}
-                {isConnected && (
-                    <div className="mb-8 bg-white rounded-xl shadow-lg p-6" data-oid="deposit-section">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Deposit into Vault</h3>
-                        <div className="flex flex-col md:flex-row md:items-end gap-4 mb-4">
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Vault Address</label>
-                                <input
-                                    type="text"
-                                    value={depositVaultAddress}
-                                    onChange={(e) => setDepositVaultAddress(e.target.value)}
-                                    placeholder="0x..."
-                                    className="w-full border border-gray-300 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (USD)</label>
-                                <input
-                                    type="number"
-                                    value={depositAmount}
-                                    onChange={(e) => setDepositAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    className="w-full border border-gray-300 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                            <button
-                                onClick={async () => {
-                                    if (!depositVaultAddress || !depositAmount) {
-                                        setTransactionStatus('Please enter both vault address and amount.');
-                                        return;
-                                    }
-                                    await deposit({
-                                        compassApiSDK,
-                                        vaultAddress: depositVaultAddress,
-                                        amount: depositAmount,
-                                        setTransactionStatus,
-                                        walletAddress,
-                                    });
-                                    await refetchAllVaults();
-                                }}
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
-                                disabled={!depositVaultAddress || !depositAmount}
-                            >
-                                Deposit
-                            </button>
-                        </div>
-                        {transactionStatus && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
-                                <div className="text-green-800 text-sm">{transactionStatus}</div>
-                            </div>
-                        )}
-                    </div>
-                )}
-                {/* Withdraw Section */}
-                {isConnected && (
-                    <div className="mb-12 bg-white rounded-xl shadow-lg p-6" data-oid="withdraw-section">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Withdraw from Vault</h3>
-                        <div className="flex flex-col md:flex-row md:items-end gap-4 mb-4">
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Vault Address</label>
-                                <input
-                                    type="text"
-                                    value={withdrawVaultAddress}
-                                    onChange={(e) => setWithdrawVaultAddress(e.target.value)}
-                                    placeholder="0x..."
-                                    className="w-full border border-gray-300 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (USD)</label>
-                                <input
-                                    type="number"
-                                    value={withdrawAmount}
-                                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    className="w-full border border-gray-300 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                            <button
-                                onClick={async () => {
-                                    if (!withdrawVaultAddress || !withdrawAmount) {
-                                        setTransactionStatus('Please enter both vault address and amount.');
-                                        return;
-                                    }
-                                    await withdraw({
-                                        compassApiSDK,
-                                        vaultAddress: withdrawVaultAddress,
-                                        amount: withdrawAmount,
-                                        setTransactionStatus,
-                                        walletAddress,
-                                    });
-                                    await refetchAllVaults();
-                                }}
-                                className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-2 rounded-lg hover:from-red-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50"
-                                disabled={!withdrawVaultAddress || !withdrawAmount}
-                            >
-                                Withdraw
-                            </button>
-                        </div>
-                        {transactionStatus && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-                                <div className="text-red-800 text-sm">{transactionStatus}</div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Hero Section */}
-                <div className="text-center mb-12" data-oid="fm3m4_7">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid="b78izdb">
-                        ERC4626 Vault Rebalancing
-                    </h2>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="2d7kw2g">
-                        Showcase the power of Compass API for automated vault rebalancing. Connect
-                        your wallet to view positions and execute rebalancing strategies.
-                    </p>
-                </div>
 
                 {!isConnected ? (
                     /* Welcome State */
@@ -382,6 +276,66 @@ export default function Page() {
                                                         Shares: {vault.userPosition ? vault.userPosition.shares : 0}
                                                     </div>
                                                 </div>
+                                            </div>
+                                            {/* Deposit functionality */}
+                                            <div className="flex flex-col md:flex-row md:items-end gap-2 mb-2">
+                                                <input
+                                                    type="number"
+                                                    value={vaultDepositAmounts[vault.address] || ''}
+                                                    onChange={e => setVaultDepositAmounts(a => ({ ...a, [vault.address]: e.target.value }))}
+                                                    placeholder="Deposit amount (USD)"
+                                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                <button
+                                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 rounded-lg"
+                                                    onClick={async () => {
+                                                        if (!vaultDepositAmounts[vault.address]) {
+                                                            setTransactionStatus('Please enter a deposit amount.');
+                                                            return;
+                                                        }
+                                                        await deposit({
+                                                            compassApiSDK,
+                                                            vaultAddress: vault.address,
+                                                            amount: vaultDepositAmounts[vault.address],
+                                                            setTransactionStatus,
+                                                            walletAddress,
+                                                        });
+                                                        await refetchAllVaults();
+                                                    }}
+                                                    disabled={!vaultDepositAmounts[vault.address]}
+                                                >
+                                                    Deposit
+                                                </button>
+                                            </div>
+                                            {/* Withdraw functionality */}
+                                            <div className="flex flex-col md:flex-row md:items-end gap-2">
+                                                <input
+                                                    type="number"
+                                                    value={vaultWithdrawAmounts[vault.address] || ''}
+                                                    onChange={e => setVaultWithdrawAmounts(a => ({ ...a, [vault.address]: e.target.value }))}
+                                                    placeholder="Withdraw amount (USD)"
+                                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                <button
+                                                    className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-1 rounded-lg"
+                                                    onClick={async () => {
+                                                        if (!vaultWithdrawAmounts[vault.address]) {
+                                                            setTransactionStatus('Please enter a withdraw amount.');
+                                                            return;
+                                                        }
+                                                        await withdraw({
+                                                            compassApiSDK,
+                                                            vaultAddress: vault.address,
+                                                            amount: vaultWithdrawAmounts[vault.address],
+                                                            setTransactionStatus,
+                                                            walletAddress,
+                                                        });
+                                                        await refetchAllVaults();
+                                                    }}
+                                                    disabled={!vaultWithdrawAmounts[vault.address]}
+                                                >
+                                                    Withdraw
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
