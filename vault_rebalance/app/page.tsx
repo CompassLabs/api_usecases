@@ -261,6 +261,12 @@ export default function Page() {
                                                         {vault.address.slice(0, 6)}...
                                                         {vault.address.slice(-4)}
                                                     </div>
+                                                    {/* APYs */}
+                                                    <div className="mt-2 text-xs text-gray-700">
+                                                        <div>APY 1d: <span className="font-mono">{vault.apy?.apy1Day ?? '-'}</span>%</div>
+                                                        <div>APY 7d: <span className="font-mono">{vault.apy?.apy7Day ?? '-'}</span>%</div>
+                                                        <div>APY 30d: <span className="font-mono">{vault.apy?.apy30Day ?? '-'}</span>%</div>
+                                                    </div>
                                                 </div>
                                                 <div className="text-right" data-oid="3man7uk">
                                                     <div
