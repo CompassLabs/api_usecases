@@ -5,13 +5,13 @@ import { VaultForTracking } from './addVaultForTracking';
 export const handleRebalance = async ({
     compassApiSDK,
     vaultPositions,
-    vaultRebalanceAmounts,
+    vaultTargetAllocations,
     walletAddress,
     setTransactionStatus,
 }: {
     compassApiSDK: any,
     vaultPositions: VaultForTracking[],
-    vaultRebalanceAmounts: { [key: string]: string },
+    vaultTargetAllocations: { [key: string]: string },
     walletAddress: string,
     setTransactionStatus: (status: string) => void,
 }) => {
@@ -41,7 +41,8 @@ export const handleRebalance = async ({
                 amount: 'ALL',
             } as MorphoWithdrawParams,
         } as UserOperation);
-        const rebalanceAmount = Number(vaultRebalanceAmounts[vaultAddress]);
+        const usdPrice = await compassApiSDK.token.price({ token: vault.asset.symbol as any, chain: "base:mainnet" });
+        const rebalanceAmount = Number(vaultTargetAllocations[vaultAddress]) * Number(usdPrice);
         if (rebalanceAmount > 0) {
             vault_actions.push({
                 body: {
@@ -51,7 +52,7 @@ export const handleRebalance = async ({
                 } as MorphoDepositParams,
             } as UserOperation);
         }
-        totalRebalanceAmount += Number(vaultRebalanceAmounts[vaultAddress]);
+        totalRebalanceAmount += rebalanceAmount;
     }
     if (totalRebalanceAmount > totalAmount) {
         alert('Total rebalance amount is greater than total amount');
