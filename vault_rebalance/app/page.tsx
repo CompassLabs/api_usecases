@@ -87,7 +87,7 @@ export default function Page() {
 
                         {!isConnected ? (
                             <button
-                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
+                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults, compassApiSDK)}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                                 data-oid="slwvc-5"
@@ -115,11 +115,10 @@ export default function Page() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="e5epmo_">
                 <div className="text-center mb-12" data-oid="fm3m4_7">
                     <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid="b78izdb">
-                        ERC4626 Vaults by Compass Labs
+                        Compass Vault Manager
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="2d7kw2g">
-                        Showcase the power of Compass API for automated vault rebalancing. Connect
-                        your wallet to view positions and execute rebalancing strategies.
+                        Manage allocations across any ERC-4626 yield vault. View positions and performance, deposit or withdraw funds, and rebalance your portfolio, all in one place.
                     </p>
                 </div>
                 {/* Track Vault Section */}
@@ -200,15 +199,15 @@ export default function Page() {
                             Connect Your Wallet
                         </h3>
                         <p className="text-gray-600 mb-6" data-oid="50hbyu1">
-                            Connect your MetaMask wallet to view your vault positions and start
+                            Connect your Wallet to view your vault positions and start
                             rebalancing
                         </p>
                         <button
-                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
+                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults, compassApiSDK)}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                             data-oid="zlj2rd2"
                         >
-                            Connect MetaMask
+                            Connect Wallet
                         </button>
                     </div>
                 ) : (
@@ -255,17 +254,29 @@ export default function Page() {
                                                         {vault.name}
                                                     </div>
                                                     <div
-                                                        className="text-sm text-gray-500"
+                                                        className="text-sm text-gray-500 flex items-center gap-2"
                                                         data-oid="tgut7da"
                                                     >
-                                                        {vault.address.slice(0, 6)}...
-                                                        {vault.address.slice(-4)}
+                                                        <span>
+                                                            {vault.address.slice(0, 6)}...
+                                                            {vault.address.slice(-4)}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => navigator.clipboard.writeText(vault.address)}
+                                                            className="p-1 hover:bg-gray-100 rounded"
+                                                            title="Copy address"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                     {/* APYs */}
                                                     <div className="mt-2 text-xs text-gray-700">
-                                                        <div>APY 1d: <span className="font-mono">{vault.apy?.apy1Day ?? '-'}</span>%</div>
-                                                        <div>APY 7d: <span className="font-mono">{vault.apy?.apy7Day ?? '-'}</span>%</div>
-                                                        <div>APY 30d: <span className="font-mono">{vault.apy?.apy30Day ?? '-'}</span>%</div>
+                                                        <div>APY 1d: <span className="font-mono">{vault.apy?.apy1Day ? Number(vault.apy.apy1Day).toFixed(2) : '-'}</span>%</div>
+                                                        <div>APY 7d: <span className="font-mono">{vault.apy?.apy7Day ? Number(vault.apy.apy7Day).toFixed(2) : '-'}</span>%</div>
+                                                        <div>APY 30d: <span className="font-mono">{vault.apy?.apy30Day ? Number(vault.apy.apy30Day).toFixed(2) : '-'}</span>%</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right" data-oid="3man7uk">
@@ -520,49 +531,6 @@ export default function Page() {
                     </div>
                 )}
 
-                {/* API Endpoints Section */}
-                <div className="mt-12 bg-white rounded-xl shadow-lg p-8" data-oid="rdc_xcz">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-6" data-oid="ft:x1me">
-                        Compass API Endpoints
-                    </h3>
-                    <div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        data-oid="60rv:41"
-                    >
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="th89v8n">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="n025b.x">
-                                Vault Operations
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="_j34mer">
-                                <li data-oid="pniousv">• Deposit to Vault</li>
-                                <li data-oid="rb8ew6e">• Withdraw from Vault</li>
-                                <li data-oid="odfb-yo">• Transaction Bundling</li>
-                                <li data-oid="uniswap1">• Swap</li>
-                                <li data-oid="uniswap2">• Liquidity Provision</li>
-                            </ul>
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="u::qw95">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="vh0-bwc">
-                                Morpho Integration
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid=".q8rra4">
-                                <li data-oid="h7el.i5">• Check Vault Position</li>
-                                <li data-oid="pd3ypf4">• Check Market Position</li>
-                                <li data-oid="9bcfx99">• Check User Position</li>
-                            </ul>
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="ws0.5xn">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="l8d230u">
-                                Features
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="vgx-5do">
-                                <li data-oid="xo0wm:f">• Real-time Data</li>
-                                <li data-oid="5ow9hcf">• Automated Rebalancing</li>
-                                <li data-oid="kyfmwhs">• Gas Optimization</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </main>
 
             {/* Footer */}
