@@ -456,7 +456,13 @@ export default function Page() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="z-gt:.p">
                     <div className="text-center text-gray-600" data-oid="57aj3vs">
                         <p data-oid="uol:v-u">
-                            Powered by Compass Labs API •
+                            <a
+                                href="https://compasslabs.ai"
+                                className="text-blue-600 hover:text-blue-700 ml-1"
+                                data-oid="wk24tig"
+                            >
+                                Powered by Compass Labs API •
+                            </a>
                             <a
                                 href="https://docs.compasslabs.ai"
                                 className="text-blue-600 hover:text-blue-700 ml-1"
