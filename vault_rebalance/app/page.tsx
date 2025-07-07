@@ -433,7 +433,10 @@ export default function Page() {
                         </div>
                         
                         <button
-                            onClick={() => handleRebalance({ compassApiSDK, vaultPositions: vaults, vaultTargetAllocations, walletAddress, setTransactionStatus })}
+                            onClick={async () => {
+                                await handleRebalance({ compassApiSDK, vaultPositions: vaults, vaultTargetAllocations, walletAddress, setTransactionStatus });
+                                await refetchAllVaults();
+                            }}
                             disabled={loading || Object.values(vaultTargetAllocations).every(allocation => !allocation || parseFloat(allocation) === 0)}
                             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
