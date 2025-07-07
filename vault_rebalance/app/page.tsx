@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { connectWallet } from './actions/connectWallet';
 import { handleRebalance } from './actions/handleRebalance';
@@ -103,16 +104,13 @@ export default function Page() {
                     <div className="flex justify-between items-center" data-oid="eudspgc">
                         <div className="flex items-center space-x-3" data-oid="s7k_v-z">
                             <div
-                                className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center"
+                                className="w-8 h-8 bg-transparent rounded-lg flex items-center justify-center"
                                 data-oid="0wsr9:y"
                             >
                                 <span className="text-white font-bold text-sm" data-oid="no2b2ql">
-                                    C
+                                    <Image src="/images/logo.svg" alt="Compass Labs" width={32} height={32} />
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-bold text-gray-900" data-oid="9mmzgly">
-                                Vault rebalancing
-                            </h1>
                         </div>
 
                         {!isConnected ? (
