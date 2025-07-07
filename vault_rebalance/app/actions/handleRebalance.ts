@@ -1,24 +1,24 @@
 import { SetAllowanceParams, UserOperation, MorphoDepositParams, MorphoWithdrawParams, VaultGetVaultResponse } from '@compass-labs/api-sdk/models/components';
-import { toBeHex } from 'ethers';
+import { toBeHex, BrowserProvider } from 'ethers';
 import { VaultForTracking } from './addVaultForTracking';
 
 export const handleRebalance = async ({
     compassApiSDK,
     vaultPositions,
-    vaultRebalanceAmounts,
+    vaultTargetAllocations,
     walletAddress,
     setTransactionStatus,
 }: {
     compassApiSDK: any,
     vaultPositions: VaultForTracking[],
-    vaultRebalanceAmounts: { [key: string]: string },
+    vaultTargetAllocations: { [key: string]: string },
     walletAddress: string,
     setTransactionStatus: (status: string) => void,
 }) => {
     let vault_actions: UserOperation[] = [];
     let totalAmount = 0;
     for (const vault of vaultPositions) {
-        const amountBefore = Number(vault.userPosition?.tokenAmount) / 10 ** vault.asset.decimals;
+        const amountBefore = Number(vault.userPosition?.tokenAmount);
         totalAmount += Number(amountBefore);
     }
     for (const vault of vaultPositions) {
@@ -41,7 +41,13 @@ export const handleRebalance = async ({
                 amount: 'ALL',
             } as MorphoWithdrawParams,
         } as UserOperation);
-        const rebalanceAmount = Number(vaultRebalanceAmounts[vaultAddress]);
+        const usdPrice = await compassApiSDK.token.price({ 
+            token: vault.asset.symbol as any, 
+            chain: "base:mainnet" 
+        });
+        const usdcPrice = usdPrice?.price || usdPrice;
+        const rebalanceAmount = Number(vaultTargetAllocations[vaultAddress]) * Number(usdcPrice) * totalAmount / 100;
+        console.log("rebalanceAmount", rebalanceAmount, vaultTargetAllocations[vaultAddress], vaultTargetAllocations[vaultAddress], totalAmount);
         if (rebalanceAmount > 0) {
             vault_actions.push({
                 body: {
@@ -51,7 +57,7 @@ export const handleRebalance = async ({
                 } as MorphoDepositParams,
             } as UserOperation);
         }
-        totalRebalanceAmount += Number(vaultRebalanceAmounts[vaultAddress]);
+        totalRebalanceAmount += rebalanceAmount;
     }
     if (totalRebalanceAmount > totalAmount) {
         alert('Total rebalance amount is greater than total amount');
@@ -102,7 +108,22 @@ export const handleRebalance = async ({
                 method: 'eth_sendTransaction',
                 params: [txParams],
             });
-            setTransactionStatus(`Transaction submitted! Hash: ${txHash}`);
+            
+            setTransactionStatus(`Transaction submitted! Hash: ${txHash}. Waiting for confirmation...`);
+            
+            // Wait for transaction receipt using ethers
+            const provider = new BrowserProvider(window.ethereum);
+            const receipt = await provider.waitForTransaction(txHash);
+            
+            if (receipt) {
+                if (receipt.status === 1) {
+                    setTransactionStatus(`Transaction confirmed! Hash: ${txHash}`);
+                } else {
+                    setTransactionStatus(`Transaction failed! Hash: ${txHash}`);
+                }
+            } else {
+                setTransactionStatus(`Transaction failed to confirm. Hash: ${txHash}`);
+            }
         } catch (error) {
             console.error('Transaction failed:', error);
             setTransactionStatus('Transaction failed. Please try again.');

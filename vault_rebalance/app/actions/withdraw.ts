@@ -1,5 +1,5 @@
 import { SetAllowanceParams, UserOperation, MorphoWithdrawParams } from '@compass-labs/api-sdk/models/components';
-import { toBeHex } from 'ethers';
+import { BrowserProvider, toBeHex } from 'ethers';
 
 export const withdraw = async ({
     compassApiSDK,
@@ -80,7 +80,19 @@ export const withdraw = async ({
                 method: 'eth_sendTransaction',
                 params: [txParams],
             });
-            setTransactionStatus(`Transaction submitted! Hash: ${txHash}`);
+            // Wait for transaction receipt using ethers
+            const provider = new BrowserProvider(window.ethereum);
+            const receipt = await provider.waitForTransaction(txHash);
+            
+            if (receipt) {
+                if (receipt.status === 1) {
+                    setTransactionStatus(`Transaction confirmed! Hash: ${txHash}`);
+                } else {
+                    setTransactionStatus(`Transaction failed! Hash: ${txHash}`);
+                }
+            } else {
+                setTransactionStatus(`Transaction failed to confirm. Hash: ${txHash}`);
+            }
         } catch (error) {
             console.error('Transaction failed:', error);
             setTransactionStatus('Transaction failed. Please try again.');

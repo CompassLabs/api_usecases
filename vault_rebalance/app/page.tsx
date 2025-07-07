@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { connectWallet } from './actions/connectWallet';
 import { handleRebalance } from './actions/handleRebalance';
@@ -33,14 +33,11 @@ export default function Page() {
     const [vaults, setVaults] = useState<VaultForTracking[]>([]);
     const [loading, setLoading] = useState(false);
     const [transactionStatus, setTransactionStatus] = useState('');
-    const [vaultRebalanceAmounts, setVaultRebalanceAmounts] = useState<{ [key: string]: string }>({});
-    const [depositVaultAddress, setDepositVaultAddress] = useState('');
-    const [depositAmount, setDepositAmount] = useState('');
-    const [withdrawVaultAddress, setWithdrawVaultAddress] = useState('');
-    const [withdrawAmount, setWithdrawAmount] = useState('');
     const [trackVaultAddress, setTrackVaultAddress] = useState('');
     const [vaultDepositAmounts, setVaultDepositAmounts] = useState<{ [address: string]: string }>({});
     const [vaultWithdrawAmounts, setVaultWithdrawAmounts] = useState<{ [address: string]: string }>({});
+    const [vaultTargetAllocations, setVaultTargetAllocations] = useState<{ [address: string]: string }>({});
+    const [totalUsdValue, setTotalUsdValue] = useState(0);
 
     async function refetchAllVaults() {
         setLoading(true);
@@ -61,6 +58,39 @@ export default function Page() {
         }
         setLoading(false);
     }
+
+    useEffect(() => {
+        const calculateTotalValue = async () => {
+            let totalUsdValue = 0;
+            for (const vault of vaults) {
+                try {
+                    const priceResponse = await compassApiSDK.token.price({
+                        token: vault.asset.symbol as any,
+                        chain: "base:mainnet",
+                    });
+                    const tokenAmount = vault.userPosition?.tokenAmount;
+                    
+                    // Extract price from response - it might be nested
+                    const priceUsd = priceResponse?.price || priceResponse;
+                    
+                    console.log(vault.asset.symbol, 'priceResponse:', priceResponse, 'tokenAmount:', tokenAmount);
+                    
+                    if (priceUsd && tokenAmount && !isNaN(Number(priceUsd)) && !isNaN(Number(tokenAmount))) {
+                        const vaultValue = Number(tokenAmount) * Number(priceUsd);
+                        console.log('Adding vault value:', vaultValue);
+                        totalUsdValue += vaultValue;
+                    }
+                } catch (error) {
+                    console.error(`Failed to get price for ${vault.asset.symbol}:`, error);
+                }
+            }
+            setTotalUsdValue(totalUsdValue);
+        };
+        
+        if (vaults.length > 0) {
+            calculateTotalValue();
+        }
+    }, [vaults]);
 
     return (
         <div
@@ -87,7 +117,7 @@ export default function Page() {
 
                         {!isConnected ? (
                             <button
-                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
+                                onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults, compassApiSDK)}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                                 data-oid="slwvc-5"
@@ -115,11 +145,10 @@ export default function Page() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-oid="e5epmo_">
                 <div className="text-center mb-12" data-oid="fm3m4_7">
                     <h2 className="text-4xl font-bold text-gray-900 mb-4" data-oid="b78izdb">
-                        ERC4626 Vaults by Compass Labs
+                        Compass Vault Manager
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto" data-oid="2d7kw2g">
-                        Showcase the power of Compass API for automated vault rebalancing. Connect
-                        your wallet to view positions and execute rebalancing strategies.
+                        Manage allocations across any ERC-4626 yield vault. View positions and performance, deposit or withdraw funds, and rebalance your portfolio, all in one place.
                     </p>
                 </div>
                 {/* Track Vault Section */}
@@ -200,15 +229,15 @@ export default function Page() {
                             Connect Your Wallet
                         </h3>
                         <p className="text-gray-600 mb-6" data-oid="50hbyu1">
-                            Connect your MetaMask wallet to view your vault positions and start
+                            Connect your Wallet to view your vault positions and start
                             rebalancing
                         </p>
                         <button
-                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults as any, compassApiSDK)}
+                            onClick={async () => await connectWallet(setLoading, setWalletAddress, setIsConnected, setVaults, compassApiSDK)}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                             data-oid="zlj2rd2"
                         >
-                            Connect MetaMask
+                            Connect Wallet
                         </button>
                     </div>
                 ) : (
@@ -216,12 +245,22 @@ export default function Page() {
                     <div className="w-full" data-oid="q0x7m8c">
                         {/* Vault Positions */}
                         <div className="bg-white rounded-xl shadow-lg p-6" data-oid="w2qzmur">
-                            <h3
-                                className="text-xl font-semibold text-gray-900 mb-4"
-                                data-oid=".9l_c-o"
-                            >
-                                Vault Positions
-                            </h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3
+                                    className="text-xl font-semibold text-gray-900"
+                                    data-oid=".9l_c-o"
+                                >
+                                    Vault Positions
+                                </h3>
+                                <div className="text-right">
+                                    <div className="text-lg font-semibold text-gray-900">
+                                        ${totalUsdValue.toFixed(2)}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        Total Portfolio Value
+                                    </div>
+                                </div>
+                            </div>
                             {loading ? (
                                 <div
                                     className="flex items-center justify-center py-8"
@@ -255,17 +294,29 @@ export default function Page() {
                                                         {vault.name}
                                                     </div>
                                                     <div
-                                                        className="text-sm text-gray-500"
+                                                        className="text-sm text-gray-500 flex items-center gap-2"
                                                         data-oid="tgut7da"
                                                     >
-                                                        {vault.address.slice(0, 6)}...
-                                                        {vault.address.slice(-4)}
+                                                        <span>
+                                                            {vault.address.slice(0, 6)}...
+                                                            {vault.address.slice(-4)}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => navigator.clipboard.writeText(vault.address)}
+                                                            className="p-1 hover:bg-gray-100 rounded"
+                                                            title="Copy address"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                     {/* APYs */}
                                                     <div className="mt-2 text-xs text-gray-700">
-                                                        <div>APY 1d: <span className="font-mono">{vault.apy?.apy1Day ?? '-'}</span>%</div>
-                                                        <div>APY 7d: <span className="font-mono">{vault.apy?.apy7Day ?? '-'}</span>%</div>
-                                                        <div>APY 30d: <span className="font-mono">{vault.apy?.apy30Day ?? '-'}</span>%</div>
+                                                        <div>APY 1d: <span className="font-mono">{vault.apy?.apy1Day ? Number(vault.apy.apy1Day).toFixed(2) : '-'}</span>%</div>
+                                                        <div>APY 7d: <span className="font-mono">{vault.apy?.apy7Day ? Number(vault.apy.apy7Day).toFixed(2) : '-'}</span>%</div>
+                                                        <div>APY 30d: <span className="font-mono">{vault.apy?.apy30Day ? Number(vault.apy.apy30Day).toFixed(2) : '-'}</span>%</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right" data-oid="3man7uk">
@@ -282,6 +333,19 @@ export default function Page() {
                                                         Shares: {vault.userPosition ? vault.userPosition.shares : 0}
                                                     </div>
                                                 </div>
+                                            </div>
+                        {/* Target allocation */}
+                                            <div className="mb-2">
+                                                <input
+                                                    type="number"
+                                                    value={vaultTargetAllocations[vault.address] || ''}
+                                                    onChange={e => setVaultTargetAllocations(prev => ({ ...prev, [vault.address]: e.target.value }))}
+                                                    placeholder="Target allocation (%)"
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
                                             </div>
                                             {/* Deposit functionality */}
                                             <div className="flex flex-col md:flex-row md:items-end gap-2 mb-2">
@@ -312,6 +376,7 @@ export default function Page() {
                                                 >
                                                     Deposit
                                                 </button>
+                                                
                                             </div>
                                             {/* Withdraw functionality */}
                                             <div className="flex flex-col md:flex-row md:items-end gap-2">
@@ -351,218 +416,41 @@ export default function Page() {
                     </div>
                 )}
 
-                {/* Rebalancing Interface - Full Width */}
-                {isConnected && (
-                    <div className="mt-8 bg-white rounded-xl shadow-lg p-6" data-oid="e2crsuo">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4" data-oid="kgxduwh">
-                            Rebalance Vaults
-                        </h3>
-
-                        <div className="space-y-6" data-oid="1-r3izg">
-                            {/* Vault Positions List */}
-                            <div data-oid="p.zwxui">
-                                <h4
-                                    className="text-lg font-medium text-gray-900 mb-4"
-                                    data-oid="xs2icme"
-                                >
-                                    Your Vault Positions
-                                </h4>
-                                {loading && vaults.length === 0 ? (
-                                    <div
-                                        className="flex items-center justify-center py-8"
-                                        data-oid="y:2862h"
-                                    >
-                                        <div
-                                            className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
-                                            data-oid="-v4887k"
-                                        ></div>
-                                        <span className="ml-2 text-gray-600" data-oid="65hyqgj">
-                                            Loading vault positions...
-                                        </span>
-                                    </div>
-                                ) : vaults.length === 0 ? (
-                                    <div
-                                        className="text-center py-8 text-gray-500"
-                                        data-oid="yj5fl0:"
-                                    >
-                                        <p data-oid="59sbx_j">No vault positions found</p>
-                                    </div>
-                                ) : (
-                                    <div
-                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-                                        data-oid="ol6o8c9"
-                                    >
-                                        {vaults.map((vault, index) => (
-                                            <div
-                                                key={vault.address}
-                                                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                                data-oid="grh0hvq"
-                                            >
-                                                <div className="mb-3" data-oid="y9hwolr">
-                                                    <h5
-                                                        className="font-medium text-gray-900 text-sm mb-1"
-                                                        data-oid="k3ub5fk"
-                                                    >
-                                                        {vault.name}
-                                                    </h5>
-                                                    <div
-                                                        className="text-xs text-gray-500 mb-2"
-                                                        data-oid="wg__4a:"
-                                                    >
-                                                        {vault.address.slice(0, 6)}...
-                                                        {vault.address.slice(-4)}
-                                                    </div>
-                                                    <div
-                                                        className="text-xs text-gray-600"
-                                                        data-oid="zmrk8ad"
-                                                    >
-                                                        Current Assets: {vault.userPosition ? vault.userPosition.tokenAmount : '0'} {vault.asset.symbol}
-                                                    </div>
-                                                </div>
-
-                                                <div data-oid="r_:6-he">
-                                                    <label
-                                                        className="block text-xs font-medium text-gray-700 mb-1"
-                                                        data-oid="q8-8p4h"
-                                                    >
-                                                        Rebalance Amount (USD)
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        value={
-                                                            vaultRebalanceAmounts[
-                                                                vault.address
-                                                            ] || ''
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleVaultAmountChange(setVaultRebalanceAmounts, vault.address, e.target.value)
-                                                        }
-                                                        placeholder="0.00"
-                                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                        data-oid="ol1o1iz"
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                {/* Rebalance Button */}
+                {isConnected && vaults.length > 0 && (
+                    <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div>
+                                <h4 className="font-medium text-gray-900">Portfolio Rebalancing</h4>
+                                <p className="text-sm text-gray-600">Execute rebalancing based on target allocations</p>
                             </div>
-
-                            {/* Summary and Execute Button */}
-                            <div className="border-t border-gray-200 pt-4" data-oid="b__kka-">
-                                <div
-                                    className="flex justify-between items-center mb-4"
-                                    data-oid="a6fvw0j"
-                                >
-                                    <div data-oid="44.xsn1">
-                                        <h4
-                                            className="font-medium text-gray-900"
-                                            data-oid="aq2nsgc"
-                                        >
-                                            Rebalance Summary
-                                        </h4>
-                                        <p className="text-sm text-gray-600" data-oid="vhwb.qq">
-                                            Vaults with amounts:{' '}
-                                            {
-                                                Object.entries(vaultRebalanceAmounts).filter(
-                                                    ([_, amount]) =>
-                                                        amount && parseFloat(amount) > 0,
-                                                ).length
-                                            }
-                                        </p>
-                                    </div>
-                                    <div className="text-right" data-oid="xaf:467">
-                                        <div className="text-sm text-gray-600" data-oid="7ar97zt">
-                                            Total Amount
-                                        </div>
-                                        <div
-                                            className="font-semibold text-gray-900"
-                                            data-oid="cje:osl"
-                                        >
-                                            $
-                                            {Object.values(vaultRebalanceAmounts)
-                                                .reduce(
-                                                    (sum, amount) =>
-                                                        sum + (parseFloat(amount) || 0),
-                                                    0,
-                                                )
-                                                .toFixed(2)}
-                                        </div>
-                                    </div>
+                            <div className="text-right">
+                                <div className="text-sm text-gray-600">Total Target Allocation</div>
+                                <div className="font-semibold text-gray-900">
+                                    {Object.values(vaultTargetAllocations).reduce((sum, allocation) => sum + (parseFloat(allocation) || 0), 0).toFixed(2)}%
                                 </div>
-
-                                <button
-                                    onClick={() => handleRebalance({ compassApiSDK, vaultPositions: vaults, vaultRebalanceAmounts, walletAddress, setTransactionStatus })}
-                                    disabled={
-                                        loading ||
-                                        Object.entries(vaultRebalanceAmounts).filter(
-                                            ([_, amount]) => amount && parseFloat(amount) > 0,
-                                        ).length === 0
-                                    }
-                                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    data-oid="4m7.5ai"
-                                >
-                                    {loading ? 'Processing...' : 'Execute Rebalance'}
-                                </button>
-
-                                {transactionStatus && (
-                                    <div
-                                        className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4"
-                                        data-oid="91:-uih"
-                                    >
-                                        <div className="text-green-800 text-sm" data-oid="7mt5f:7">
-                                            {transactionStatus}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
+                        
+                        <button
+                            onClick={async () => {
+                                await handleRebalance({ compassApiSDK, vaultPositions: vaults, vaultTargetAllocations, walletAddress, setTransactionStatus });
+                                await refetchAllVaults();
+                            }}
+                            disabled={loading || Object.values(vaultTargetAllocations).every(allocation => !allocation || parseFloat(allocation) === 0)}
+                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Processing...' : 'Execute Portfolio Rebalance'}
+                        </button>
+
+                        {transactionStatus && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                                <div className="text-green-800 text-sm">{transactionStatus}</div>
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {/* API Endpoints Section */}
-                <div className="mt-12 bg-white rounded-xl shadow-lg p-8" data-oid="rdc_xcz">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-6" data-oid="ft:x1me">
-                        Compass API Endpoints
-                    </h3>
-                    <div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        data-oid="60rv:41"
-                    >
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="th89v8n">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="n025b.x">
-                                Vault Operations
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="_j34mer">
-                                <li data-oid="pniousv">• Deposit to Vault</li>
-                                <li data-oid="rb8ew6e">• Withdraw from Vault</li>
-                                <li data-oid="odfb-yo">• Transaction Bundling</li>
-                                <li data-oid="uniswap1">• Swap</li>
-                                <li data-oid="uniswap2">• Liquidity Provision</li>
-                            </ul>
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="u::qw95">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="vh0-bwc">
-                                Morpho Integration
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid=".q8rra4">
-                                <li data-oid="h7el.i5">• Check Vault Position</li>
-                                <li data-oid="pd3ypf4">• Check Market Position</li>
-                                <li data-oid="9bcfx99">• Check User Position</li>
-                            </ul>
-                        </div>
-                        <div className="border border-gray-200 rounded-lg p-4" data-oid="ws0.5xn">
-                            <h4 className="font-semibold text-gray-900 mb-2" data-oid="l8d230u">
-                                Features
-                            </h4>
-                            <ul className="text-sm text-gray-600 space-y-1" data-oid="vgx-5do">
-                                <li data-oid="xo0wm:f">• Real-time Data</li>
-                                <li data-oid="5ow9hcf">• Automated Rebalancing</li>
-                                <li data-oid="kyfmwhs">• Gas Optimization</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </main>
 
             {/* Footer */}
