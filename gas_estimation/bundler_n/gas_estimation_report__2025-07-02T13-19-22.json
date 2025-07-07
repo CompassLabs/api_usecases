@@ -1,0 +1,39 @@
+{
+  "sequential_requests": [],
+  "sequential_gas_totals": [],
+  "bundler_requests": [
+    {
+      "step": 1,
+      "time_stamp": "2025-07-02T13:19:37.174828",
+      "function": "Bundler Bundle",
+      "estimated_gas": 1535339,
+      "used_gas": 1403141,
+      "tx_hash": "ac612a2e4ceafae788084017f1335779a83d1f58b052f052e3e45df30090d81d",
+      "tx_receipt_status": 1,
+      "portfolio": {
+        "USDC": "10.900149",
+        "GHO": "1.702178844128893093",
+        "WETH": "0",
+        "ETH": "0.001205115709251413"
+      },
+      "aave_metrics": {
+        "Collateral": "1.99988",
+        "Debt": "1E-8",
+        "ATokenBalance": "2",
+        "HealthFactor": "155990640",
+        "LiquidationThreshold": "14999.0999"
+      },
+      "allowances": {
+        "USDC": "75",
+        "GHO": "76",
+        "WETH": "0"
+      }
+    }
+  ],
+  "bundler_gas_totals": [
+    {
+      "total_estimated_gas": 1535339,
+      "total_used_gas": 1403141
+    }
+  ]
+}

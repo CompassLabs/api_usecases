@@ -333,7 +333,7 @@ def process_bundler_requests():
         sender=sender,
         signed_authorization=signed_authorization,
         # actions = actions,
-        actions=request_list_bundler + request_list_bundler,
+        actions= request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler + request_list_bundler,
         server_url=SERVER_URL,
     )
 
@@ -446,30 +446,30 @@ if __name__ == "__main__":
 
     # run experiment
     process_bundler_requests()
-    time.sleep(5)
-    process_sequential_requests()
+    #time.sleep(5)
+    #process_sequential_requests()
 
     devtools.debug(get_aave_metrics())
     devtools.debug(get_portfolio())
     devtools.debug(get_allowances())
 
     # PROCESS RESULTS OF SEQUENTIAL EXPERIMENT
-    results = output_data["sequential_requests"]
-    all_success = all(item["tx_receipt_status"] == 1 for item in results)
-
-    total_est_gas = sum(item["estimated_gas"] for item in results)
-    total_used_gas = sum(item["used_gas"] for item in results)
-
-    gas_totals = {
-        "total_estimated_gas": total_est_gas,
-        "total_used_gas": total_used_gas,
-    }
-    print(f"did all transactions succeed: {all_success}")
-    portfolio_afterwards = results[-1]["portfolio"]
-    print(f"portfolio afterwards: {portfolio_afterwards}")
-    print(gas_totals)
-
-    collect("sequential_gas_totals", gas_totals)
+    # results = output_data["sequential_requests"]
+    # all_success = all(item["tx_receipt_status"] == 1 for item in results)
+    #
+    # total_est_gas = sum(item["estimated_gas"] for item in results)
+    # total_used_gas = sum(item["used_gas"] for item in results)
+    #
+    # gas_totals = {
+    #     "total_estimated_gas": total_est_gas,
+    #     "total_used_gas": total_used_gas,
+    # }
+    # print(f"did all transactions succeed: {all_success}")
+    # portfolio_afterwards = results[-1]["portfolio"]
+    # print(f"portfolio afterwards: {portfolio_afterwards}")
+    # print(gas_totals)
+    #
+    # collect("sequential_gas_totals", gas_totals)
 
     # PROCESS RESULTS OF BUNDLER EXPERIMENT
 
