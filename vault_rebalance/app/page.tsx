@@ -461,7 +461,7 @@ export default function Page() {
                                 className="text-blue-600 hover:text-blue-700 ml-1"
                                 data-oid="wk24tig"
                             >
-                                Powered by Compass Labs API •
+                                Powered by Compass Labs •
                             </a>
                             <a
                                 href="https://docs.compasslabs.ai"
