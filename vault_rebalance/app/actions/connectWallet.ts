@@ -59,7 +59,18 @@ export const connectWallet = async (
 ) => {
     if (typeof window.ethereum !== 'undefined') {
         try {
-            console.log('Connecting wallet');
+            // Check if Trust Wallet is detected (Trust Wallet may not always expose isTrustWallet)
+            const ethereum = window.ethereum as any;
+            const isTrustWallet = ethereum.isTrustWallet || 
+                                  ethereum.isTrust || 
+                                  (ethereum.providers && ethereum.providers.some((p: any) => p.isTrustWallet));
+            
+            if (isTrustWallet) {
+                console.log('Connecting Trust Wallet');
+            } else {
+                console.log('Connecting wallet (Trust Wallet recommended)');
+            }
+            
             setLoading(true);
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             console.log('Accounts', accounts);
@@ -78,7 +89,7 @@ export const connectWallet = async (
             //     });
             //     console.log('Switched to Base network');
             // } catch (switchError: any) {
-            //     // This error code indicates that the chain has not been added to MetaMask
+            //     // This error code indicates that the chain has not been added to the wallet
             //     if (switchError.code === 4902) {
             //         try {
             //             await window.ethereum.request({
@@ -98,7 +109,7 @@ export const connectWallet = async (
             //             console.log('Added Base network');
             //         } catch (addError) {
             //             console.error('Failed to add Base network:', addError);
-            //             throw new Error('Failed to add Base network to MetaMask');
+            //             throw new Error('Failed to add Base network to wallet');
             //         }
             //     } else {
             //         // Handle other switch errors (like user rejection)
@@ -127,6 +138,6 @@ export const connectWallet = async (
             alert('Failed to connect wallet. Please try again.');
         }
     } else {
-        alert('Please install MetaMask to use this application');
+        alert('Please install Trust Wallet or a compatible Web3 wallet to use this application');
     }
 };
