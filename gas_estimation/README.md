@@ -30,7 +30,7 @@ On average, bundling these 10 transactions into a single atomic transaction save
 
 ### Experiment 2: Larger Transaction Bundles
 
-We extended our tests with bundles ranging from 10 to 100 transactions. Gas savings increase with bundle size:
+We extended our tests with bundles ranging from 10 to 100 transactions. Gas savings increase with bundle size (but with diminishing returns):
 
 ![Description](readme_images/multicall_savings_curve.png)
 
