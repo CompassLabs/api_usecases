@@ -21,6 +21,8 @@ The transaction sequence included:
 9. UNISWAP\_SELL\_EXACTLY
 10. UNISWAP\_BUY\_EXACTLY
 
+Please find the transaction hashes and complete experimental results here
+
 On average, bundling these 10 transactions into a single atomic transaction saves **approximately 47% in gas costs** (1.89x less gas).
 
 | Execution Method | Average Gas Used |
