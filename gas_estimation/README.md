@@ -48,7 +48,7 @@ We extended our tests with bundles ranging from 10 to 100 transactions. Gas savi
 | 100         | 69.45%      |
 
 
-# conclusion
+# Conclusion
 Compass Bundler significantly reduces Ethereum gas expenses, particularly as bundle sizes grow.
 
 
