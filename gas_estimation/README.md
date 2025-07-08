@@ -1,0 +1,56 @@
+# Ethereum Gas Savings with Compass Bundler
+
+This document outlines the Ethereum gas savings when using Compass Bundler for executing DeFi transactions compared to sequential execution.
+
+## How much gas do you save?
+
+We conducted tests on the Base mainnet by repeatedly running representative DeFi transaction sequences, comparing gas costs with and without using Compass Bundler.
+
+### Experiment 1: 10 Transactions Bundled
+
+The transaction sequence included:
+
+1. SET\_ALLOWANCE (x4)
+2. AAVE\_SUPPLY
+3. AAVE\_BORROW
+4. AAVE\_REPAY
+5. AAVE\_WITHDRAW
+6. UNISWAP\_SELL\_EXACTLY
+7. UNISWAP\_BUY\_EXACTLY
+
+On average, bundling these 10 transactions into a single atomic transaction saves **approximately 47% in gas costs** (1.89x less gas).
+
+| Execution Method | Average Gas Used |
+| ---------------- | ---------------- |
+| Sequential       | 1,276,383        |
+| Bundler          | 674,067          |
+
+### Experiment 2: Larger Transaction Bundles
+
+We extended our tests with bundles ranging from 10 to 100 transactions. Gas savings increase with bundle size:
+
+* **2x savings** at **11 transactions**
+* **3x savings** at **47 transactions**
+
+| Bundle Size | Gas Savings |
+| ----------- | ----------- |
+| 10          | 47.89%      |
+| 30          | 64.05%      |
+| 50          | 68.88%      |
+| 70          | 68.34%      |
+| 100         | 69.45%      |
+
+### Detailed Transaction Gas Costs (Sequential)
+
+Mean sequential gas cost per transaction type:
+
+| Transaction Type | Average Gas Cost |
+| ---------------- | ---------------- |
+| Allowance Set    | 36,200           |
+| Borrow           | 272,314          |
+| Repay            | 175,507          |
+| Supply           | 205,256          |
+| Swap             | 122,524          |
+| Withdraw         | 233,460          |
+
+Compass Bundler significantly reduces Ethereum gas expenses, particularly as bundle sizes grow.
