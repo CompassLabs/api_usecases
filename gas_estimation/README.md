@@ -10,13 +10,16 @@ We conducted tests on the Base mainnet by repeatedly running representative DeFi
 
 The transaction sequence included:
 
-1. SET\_ALLOWANCE (x4)
-2. AAVE\_SUPPLY
-3. AAVE\_BORROW
-4. AAVE\_REPAY
-5. AAVE\_WITHDRAW
-6. UNISWAP\_SELL\_EXACTLY
-7. UNISWAP\_BUY\_EXACTLY
+1. SET\_ALLOWANCE
+2. SET\_ALLOWANCE
+3. SET\_ALLOWANCE
+4. SET\_ALLOWANCE
+5. AAVE\_SUPPLY
+6. AAVE\_BORROW
+7. AAVE\_REPAY
+8. AAVE\_WITHDRAW
+9. UNISWAP\_SELL\_EXACTLY
+10. UNISWAP\_BUY\_EXACTLY
 
 On average, bundling these 10 transactions into a single atomic transaction saves **approximately 47% in gas costs** (1.89x less gas).
 
@@ -39,6 +42,8 @@ We extended our tests with bundles ranging from 10 to 100 transactions. Gas savi
 | 50          | 68.88%      |
 | 70          | 68.34%      |
 | 100         | 69.45%      |
+
+
 
 ### Detailed Transaction Gas Costs (Sequential)
 
