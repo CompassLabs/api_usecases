@@ -46,18 +46,7 @@ We extended our tests with bundles ranging from 10 to 100 transactions. Gas savi
 | 100         | 69.45%      |
 
 
-
-### Detailed Transaction Gas Costs (Sequential)
-
-Mean sequential gas cost per transaction type:
-
-| Transaction Type | Average Gas Cost |
-| ---------------- | ---------------- |
-| Allowance Set    | 36,200           |
-| Borrow           | 272,314          |
-| Repay            | 175,507          |
-| Supply           | 205,256          |
-| Swap             | 122,524          |
-| Withdraw         | 233,460          |
-
+# conclusion
 Compass Bundler significantly reduces Ethereum gas expenses, particularly as bundle sizes grow.
+
+
