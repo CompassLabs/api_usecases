@@ -81,42 +81,42 @@ export const connectWallet = async (
             setIsConnected(true);
             
             // Switch to Base network
-            // try {
-            //     console.log('Switching to Base network');
-            //     await window.ethereum.request({
-            //         method: 'wallet_switchEthereumChain',
-            //         params: [{ chainId: '0x2105' }], // Base mainnet chainId
-            //     });
-            //     console.log('Switched to Base network');
-            // } catch (switchError: any) {
-            //     // This error code indicates that the chain has not been added to the wallet
-            //     if (switchError.code === 4902) {
-            //         try {
-            //             await window.ethereum.request({
-            //                 method: 'wallet_addEthereumChain',
-            //                 params: [{
-            //                     chainId: '0x2105',
-            //                     chainName: 'Base',
-            //                     nativeCurrency: {
-            //                         name: 'ETH',
-            //                         symbol: 'ETH',
-            //                         decimals: 18
-            //                     },
-            //                     rpcUrls: ['https://mainnet.base.org'],
-            //                     blockExplorerUrls: ['https://basescan.org']
-            //                 }]
-            //             });
-            //             console.log('Added Base network');
-            //         } catch (addError) {
-            //             console.error('Failed to add Base network:', addError);
-            //             throw new Error('Failed to add Base network to wallet');
-            //         }
-            //     } else {
-            //         // Handle other switch errors (like user rejection)
-            //         console.error('Failed to switch to Base network:', switchError);
-            //         throw new Error('Failed to switch to Base network');
-            //     }
-            // }
+            try {
+                console.log('Switching to Base network');
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x2105' }], // Base mainnet chainId
+                });
+                console.log('Switched to Base network');
+            } catch (switchError: any) {
+                // This error code indicates that the chain has not been added to the wallet
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x2105',
+                                chainName: 'Base',
+                                nativeCurrency: {
+                                    name: 'ETH',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://mainnet.base.org'],
+                                blockExplorerUrls: ['https://basescan.org']
+                            }]
+                        });
+                        console.log('Added Base network');
+                    } catch (addError) {
+                        console.error('Failed to add Base network:', addError);
+                        throw new Error('Failed to add Base network to wallet');
+                    }
+                } else {
+                    // Handle other switch errors (like user rejection)
+                    console.error('Failed to switch to Base network:', switchError);
+                    throw new Error('Failed to switch to Base network');
+                }
+            }
 
             // Get user positions immediately after successful network switch
             // await getUserPositions(compassApiSDK, setVaultPositions, checksumAddress);
