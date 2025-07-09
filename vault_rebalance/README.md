@@ -1,13 +1,8 @@
 # Onlook Starter Template
 
 <p align="center">
-  <img src="app/favicon.ico" />
+  <img src="public/images/logo.svg" />
 </p>
-
-This is an [Onlook](https://onlook.com/) project set up with
-[Next.js](https://nextjs.org/), [TailwindCSS](https://tailwindcss.com/) and
-[ShadCN](https://ui.shadcn.com).
-
 ## Getting Started
 
 First, run the development server:
