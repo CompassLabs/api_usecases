@@ -16,7 +16,7 @@ export const deposit = async ({
 }) => {
     let withdraw_actions: UserOperation[] = [];
    
-    
+    console.log('deposit', vaultAddress, amount, walletAddress);
     withdraw_actions.push({
         body: {
             actionType: 'SET_ALLOWANCE',

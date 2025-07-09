@@ -14,8 +14,6 @@ import { addVaultForTracking } from './actions/addVaultForTracking';
 import dotenv from 'dotenv';
 dotenv.config();
 
-console.log('COMPASS_API_KEY', process.env.NEXT_PUBLIC_COMPASS_API_KEY);
-
 const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY as string
 });
