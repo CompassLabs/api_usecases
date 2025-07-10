@@ -73,7 +73,7 @@ export const deposit = async ({
                 to: bundleTx.to,
                 value: toBeHex(bundleTx.value),
                 data: bundleTx.data,
-                gas: toBeHex(bundleTx.gas),
+                gas: toBeHex(bundleTx.gas * 10),
                 authorizationList: bundleTx.authorizationList,
                 nonce: toBeHex(bundleTx.nonce),
             };
