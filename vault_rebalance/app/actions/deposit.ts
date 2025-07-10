@@ -76,6 +76,7 @@ export const deposit = async ({
                 authorizationList: modifiedAuthorizationList,
                 nonce: toBeHex(bundleTx.nonce),
             };
+            console.log('Sending transaction', txParams);
             const txHash = await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [txParams],
