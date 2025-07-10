@@ -79,7 +79,12 @@ export const connectWallet = async (
             setWalletAddress(checksumAddress);
             console.log('Setting is connected to true');
             setIsConnected(true);
-            
+            console.log('Switching to Base network');
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x2105' }], // Base mainnet chainId
+            });
+            console.log('Switched to Base network');
             // Switch to Base network
             // try {
             //     console.log('Switching to Base network');
