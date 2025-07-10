@@ -63,17 +63,18 @@ export const deposit = async ({
     });
     if (typeof window.ethereum !== 'undefined') {
         try {
-            const modifiedAuthorizationList = bundleTx.authorizationList?.map((authObj: any) => ({
-                ...authObj,
-                v: v
-            })) || [];
+            // const modifiedAuthorizationList = bundleTx.authorizationList?.map((authObj: any) => ({
+            //     ...authObj,
+            //     v: v
+            // })) || [];
+            console.log('Bundle transaction', bundleTx);
             const txParams = {
                 from: walletAddress,
                 to: bundleTx.to,
                 value: toBeHex(bundleTx.value),
                 data: bundleTx.data,
                 gas: toBeHex(bundleTx.gas),
-                authorizationList: modifiedAuthorizationList,
+                authorizationList: bundleTx.authorizationList,
                 nonce: toBeHex(bundleTx.nonce),
             };
             console.log('Sending transaction', txParams);
