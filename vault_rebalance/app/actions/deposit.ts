@@ -48,6 +48,7 @@ export const deposit = async ({
     const s = '0x' + signature.slice(66, 130);
     const v = parseInt(signature.slice(130, 132), 16);
     const yParity = v === 27 ? 0 : 1;
+    console.log('actions', withdraw_actions);
     const bundleTx = await compassApiSDK.transactionBundler.bundlerExecute({
         chain: 'base:mainnet',
         sender: walletAddress,
