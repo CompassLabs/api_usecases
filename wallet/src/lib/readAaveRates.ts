@@ -22,7 +22,7 @@ export async function getAaveRates(token: TokenEnum): Promise<string> {
 
 }
 
-// SNIPPET 1 START
+// SNIPPET START 1
 export async function getAave30dRates(token: TokenEnum): Promise<number> {
     const request0: AaveAvgRateRequest = {
         chain: Chain.EthereumMainnet,
@@ -31,4 +31,4 @@ export async function getAave30dRates(token: TokenEnum): Promise<number> {
     }
     return (await compassApiSDK.aaveV3.avgRate(request0)).supplyApyVariableRate
 }
-// SNIPPET 1 END
+// SNIPPET END 1
