@@ -6,8 +6,6 @@ import {
   AaveWithdrawParams,
   TokenTransferErc20Params,
   TokenEnum,
-  TokenTransferRequest,
-  BatchedUserOperationsRequest,
   UserOperation,
   MulticallExecuteRequest,
   SetAllowanceParams,
@@ -115,8 +113,6 @@ export async function requestWithdrawTransaction(
   };
 
   const result = await compassApiSDK.transactionBatching.execute(request);
-
-  console.log(result);
 
   // You can return whatever part of result you want here
   return result;

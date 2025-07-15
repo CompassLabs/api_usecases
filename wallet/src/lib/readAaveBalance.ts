@@ -14,18 +14,11 @@ const compassApiSDK = new CompassApiSDK({
 
 export async function getAaveTokenBalance(token: TokenEnum, owner: string): Promise<string> {
 
-    console.log("Owner", owner);
-
-    const request0: AaveUserPositionPerTokenRequest = {
+    const request: AaveUserPositionPerTokenRequest = {
         chain: Chain.EthereumMainnet,
         user: owner,
         token: token
     }
-    const result0 = await compassApiSDK.aaveV3.userPositionPerToken(request0)
-    console.log("balance", result0);
-
-
-    // You can return whatever part of result you want here
-    return result0.tokenBalance;
+    return (await compassApiSDK.aaveV3.userPositionPerToken(request)).tokenBalance
 }
 

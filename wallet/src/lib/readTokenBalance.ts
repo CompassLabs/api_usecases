@@ -14,16 +14,12 @@ const compassApiSDK = new CompassApiSDK({
 
 export async function getTokenBalance(token: TokenEnum, owner: string): Promise<number> {
 
-    console.log("Owner", owner);
-
     const request0: TokenBalanceRequest = {
         chain: Chain.EthereumMainnet,
         user: owner,
         token: token
     }
-    const result0 = await compassApiSDK.token.balance(request0)
+    return Number((await compassApiSDK.token.balance(request0)).amount)
 
-    // You can return whatever part of result you want here
-    return Number(result0.amount);
 }
 
