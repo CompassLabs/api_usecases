@@ -1,0 +1,14 @@
+[project]
+name = "bundler_examples"
+version = "0.1.0"
+description = "using bundler with morpho"
+requires-python = ">=3.13"
+dependencies = [
+    "compass-api-sdk>=0.9.48",
+    "devtools>=0.12.2",
+    "dotenv>=0.9.9",
+    "plotly>=6.1.0",
+    "ruff>=0.11.10",
+    "streamlit>=1.45.1",
+    "web3>=7.11.1",
+]
