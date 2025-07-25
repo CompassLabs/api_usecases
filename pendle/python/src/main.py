@@ -25,18 +25,18 @@ markets_response = compass_api_sdk.pendle.markets(
 # SNIPPET END 1
 
 # SNIPPET START 2
-market = markets_response.markets.markets[0]
+selected_market = markets_response.markets.markets[0]
 # SNIPPET END 2
 
 # SNIPPET START 3
-market_address = market.address
-underlying_asset_address = market.underlying_asset.split("-")[1]
-pt_address = market.pt.split("-")[1]
-yt_address = market.yt.split("-")[1]
+market_address = selected_market.address
+underlying_asset_address = selected_market.underlying_asset.split("-")[1]
+pt_address = selected_market.pt.split("-")[1]
+yt_address = selected_market.yt.split("-")[1]
 # SNIPPET END 3
 
 # SNIPPET START 4
-user_position = compass_api_sdk.pendle.position(
+market = compass_api_sdk.pendle.market(
     chain="arbitrum:mainnet",
     user_address=WALLET_ADDRESS,
     market_address=market_address,
@@ -51,13 +51,13 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     contract="PendleRouter",
 )
 
-if underlying_asset_allowance.amount < user_position.underlying_token_balance:
+if underlying_asset_allowance.amount < market.user_position.underlying_token_balance:
     set_allowance_tx = compass_api_sdk.universal.allowance_set(
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
         contract="PendleRouter",
-        amount=user_position.underlying_token_balance,
+        amount=market.user_position.underlying_token_balance,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
@@ -70,7 +70,8 @@ buy_pt_tx = compass_api_sdk.pendle.buy_pt(
     chain="arbitrum:mainnet",
     sender=WALLET_ADDRESS,
     market_address=market_address,
-    amount=user_position.underlying_token_balance,
+    token_in=underlying_asset_address,
+    amount_in=market.user_position.underlying_token_balance,
     max_slippage_percent=0.1,
 )
 
@@ -80,7 +81,7 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 6
 
 # SNIPPET START 7
-user_position = compass_api_sdk.pendle.position(
+market = compass_api_sdk.pendle.market(
     chain="arbitrum:mainnet",
     user_address=WALLET_ADDRESS,
     market_address=market_address,
@@ -95,13 +96,13 @@ pt_allowance = compass_api_sdk.universal.allowance(
     contract="PendleRouter",
 )
 
-if pt_allowance.amount < user_position.pt_balance:
+if pt_allowance.amount < market.user_position.pt_balance:
     set_allowance_tx = compass_api_sdk.universal.allowance_set(
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=pt_address,
         contract="PendleRouter",
-        amount=user_position.pt_balance,
+        amount=market.user_position.pt_balance,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
@@ -114,7 +115,8 @@ sell_pt_tx = compass_api_sdk.pendle.sell_pt(
     chain="arbitrum:mainnet",
     sender=WALLET_ADDRESS,
     market_address=market_address,
-    amount=user_position.pt_balance,
+    token_out=underlying_asset_address,
+    amount_in=market.user_position.pt_balance,
     max_slippage_percent=0.1,
 )
 
@@ -124,7 +126,7 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 9
 
 # SNIPPET START 10
-user_position = compass_api_sdk.pendle.position(
+market = compass_api_sdk.pendle.market(
     chain="arbitrum:mainnet",
     user_address=WALLET_ADDRESS,
     market_address=market_address,
@@ -139,13 +141,13 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     contract="PendleRouter",
 )
 
-if underlying_asset_allowance.amount < user_position.underlying_token_balance:
+if underlying_asset_allowance.amount < market.user_position.underlying_token_balance:
     set_allowance_tx = compass_api_sdk.universal.allowance_set(
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
         contract="PendleRouter",
-        amount=user_position.underlying_token_balance,
+        amount=market.user_position.underlying_token_balance,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
@@ -158,7 +160,8 @@ buy_yt_tx = compass_api_sdk.pendle.buy_yt(
     chain="arbitrum:mainnet",
     sender=WALLET_ADDRESS,
     market_address=market_address,
-    amount=user_position.underlying_token_balance,
+    token_in=underlying_asset_address,
+    amount_in=market.user_position.underlying_token_balance,
     max_slippage_percent=0.1,
 )
 
@@ -180,7 +183,7 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 13
 
 # SNIPPET START 14
-user_position = compass_api_sdk.pendle.position(
+market = compass_api_sdk.pendle.market(
     chain="arbitrum:mainnet",
     user_address=WALLET_ADDRESS,
     market_address=market_address,
@@ -195,13 +198,13 @@ yt_allowance = compass_api_sdk.universal.allowance(
     contract="PendleRouter",
 )
 
-if yt_allowance.amount < user_position.yt_balance:
+if yt_allowance.amount < market.user_position.yt_balance:
     set_allowance_tx = compass_api_sdk.universal.allowance_set(
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=yt_address,
         contract="PendleRouter",
-        amount=user_position.yt_balance,
+        amount=market.user_position.yt_balance,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
@@ -214,7 +217,8 @@ sell_yt_tx = compass_api_sdk.pendle.sell_yt(
     chain="arbitrum:mainnet",
     sender=WALLET_ADDRESS,
     market_address=market_address,
-    amount=user_position.yt_balance,
+    token_out=underlying_asset_address,
+    amount_in=market.user_position.yt_balance,
     max_slippage_percent=0.1,
 )
 
@@ -224,7 +228,7 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 16
 
 # SNIPPET START 17
-user_position = compass_api_sdk.pendle.position(
+market = compass_api_sdk.pendle.market(
     chain="arbitrum:mainnet",
     user_address=WALLET_ADDRESS,
     market_address=market_address,
@@ -239,13 +243,13 @@ underlying_asset_allowance = compass_api_sdk.universal.allowance(
     contract="PendleRouter",
 )
 
-if underlying_asset_allowance.amount < user_position.underlying_token_balance:
+if underlying_asset_allowance.amount < market.user_position.underlying_token_balance:
     set_allowance_tx = compass_api_sdk.universal.allowance_set(
         chain="arbitrum:mainnet",
         sender=WALLET_ADDRESS,
         token=underlying_asset_address,
         contract="PendleRouter",
-        amount=user_position.underlying_token_balance,
+        amount=market.user_position.underlying_token_balance,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
@@ -258,7 +262,8 @@ add_liquidity_tx = compass_api_sdk.pendle.add_liquidity(
     chain="arbitrum:mainnet",
     sender=WALLET_ADDRESS,
     market_address=market_address,
-    amount=user_position.underlying_token_balance,
+    token_in=underlying_asset_address,
+    amount_in=market.user_position.underlying_token_balance,
     max_slippage_percent=0.1,
 )
 

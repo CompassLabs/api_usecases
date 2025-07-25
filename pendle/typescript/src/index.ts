@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
 import { arbitrum } from "viem/chains";
 import { http, createWalletClient, createPublicClient } from "viem";
-import { Contract } from "@compass-labs/api-sdk/models/operations";
+import { ContractEnum as Contract } from "@compass-labs/api-sdk/models/operations";
 
 dotenv.config();
 
@@ -38,23 +38,25 @@ const { markets } = await compassApiSDK.pendle.markets({
 // SNIPPET END 1
 
 // SNIPPET START 2
-const market = markets[0];
+const selectedMarket = markets[0];
 // SNIPPET END 2
 
 // SNIPPET START 3
-const marketAddress = market.address;
-const underlyingAssetAddress = market.underlyingAsset.split("-")[1];
-const ptAddress = market.pt.split("-")[1];
-const ytAddress = market.yt.split("-")[1];
+const marketAddress = selectedMarket.address;
+const underlyingAssetAddress = selectedMarket.underlyingAsset.split("-")[1];
+const ptAddress = selectedMarket.pt.split("-")[1];
+const ytAddress = selectedMarket.yt.split("-")[1];
 // SNIPPET END 3
 
 // SNIPPET START 4
-let userPosition = await compassApiSDK.pendle.position({
+let { userPosition, tokens } = await compassApiSDK.pendle.market({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
 });
 // SNIPPET END 4
+
+if (!userPosition) throw Error();
 
 // SNIPPET START 5
 let underlyingAssetAllowance = await compassApiSDK.universal.allowance({
@@ -90,7 +92,8 @@ const buyPtTx = await compassApiSDK.pendle.buyPt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
   marketAddress,
-  amount: userPosition.underlyingTokenBalance,
+  tokenIn: tokens.underlyingToken.address,
+  amountIn: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
@@ -102,12 +105,14 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 6
 
 // SNIPPET START 7
-userPosition = await compassApiSDK.pendle.position({
+({ userPosition } = await compassApiSDK.pendle.market({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
-});
+}));
 // SNIPPET END 7
+
+if (!userPosition) throw Error();
 
 // SNIPPET START 8
 const pTAllowance = await compassApiSDK.universal.allowance({
@@ -140,7 +145,8 @@ const sellPtTx = await compassApiSDK.pendle.sellPt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
   marketAddress,
-  amount: userPosition.ptBalance,
+  tokenOut: underlyingAssetAddress,
+  amountIn: userPosition.ptBalance,
   maxSlippagePercent: 0.1,
 });
 
@@ -152,12 +158,14 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 9
 
 // SNIPPET START 10
-userPosition = await compassApiSDK.pendle.position({
+({ userPosition } = await compassApiSDK.pendle.market({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
-});
+}));
 // SNIPPET END 10
+
+if (!userPosition) throw Error();
 
 // SNIPPET START 11
 underlyingAssetAllowance = await compassApiSDK.universal.allowance({
@@ -193,7 +201,8 @@ const buyYtTx = await compassApiSDK.pendle.buyYt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
   marketAddress,
-  amount: userPosition.underlyingTokenBalance,
+  tokenIn: underlyingAssetAddress,
+  amountIn: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
@@ -219,12 +228,14 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 13
 
 // SNIPPET START 14
-userPosition = await compassApiSDK.pendle.position({
+({ userPosition } = await compassApiSDK.pendle.market({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
-});
+}));
 // SNIPPET END 14
+
+if (!userPosition) throw Error();
 
 // SNIPPET START 15
 const yTAllowance = await compassApiSDK.universal.allowance({
@@ -257,7 +268,8 @@ const sellYtTx = await compassApiSDK.pendle.sellYt({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
   marketAddress,
-  amount: userPosition.ytBalance,
+  tokenOut: underlyingAssetAddress,
+  amountIn: userPosition.ytBalance,
   maxSlippagePercent: 0.1,
 });
 
@@ -269,12 +281,14 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 16
 
 // SNIPPET START 17
-userPosition = await compassApiSDK.pendle.position({
+({ userPosition } = await compassApiSDK.pendle.market({
   chain: "arbitrum:mainnet",
   userAddress: WALLET_ADDRESS,
   marketAddress,
-});
+}));
 // SNIPPET END 17
+
+if (!userPosition) throw Error();
 
 // SNIPPET START 18
 underlyingAssetAllowance = await compassApiSDK.universal.allowance({
@@ -310,7 +324,8 @@ const addLiquidityTx = await compassApiSDK.pendle.addLiquidity({
   chain: "arbitrum:mainnet",
   sender: WALLET_ADDRESS,
   marketAddress,
-  amount: userPosition.underlyingTokenBalance,
+  tokenIn: underlyingAssetAddress,
+  amountIn: userPosition.underlyingTokenBalance,
   maxSlippagePercent: 0.1,
 });
 
