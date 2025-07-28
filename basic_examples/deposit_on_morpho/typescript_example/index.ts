@@ -57,7 +57,7 @@ const main = async () => {
     console.log(UnsignedTransaction2);
 
 
-    // Sign and broadcast set allowance tx
+    // Sign and broadcast morpho deposit tx
     const tx2 = await walletClient.sendTransaction(UnsignedTransaction2 as unknown as SendTransactionRequest);
     console.log(tx2)
 }
