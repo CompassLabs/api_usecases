@@ -1,3 +1,4 @@
+
 from compass_api_sdk import CompassAPI, models
 from dotenv import load_dotenv
 import os
@@ -11,15 +12,7 @@ BASE_RPC_URL = os.getenv("BASE_RPC_URL")
 w3 = Web3(HTTPProvider(BASE_RPC_URL))
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
-from compass_api_sdk import CompassAPI, models
-
-
-
-response = compass.universal.allowance_set(token=models.TokenEnum.USDC, contract=SPECIFIC_MORPHO_VAULT, amount=1, chain=models.Chain.BASE_MAINNET, sender=WALLET_ADDRESS)
-
-print(response)
-
-
+# Helper function:
 def send_tx(response):
     tx = response.model_dump(by_alias=True)
     signed_tx = w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
@@ -29,5 +22,36 @@ def send_tx(response):
     return tx_hash, dict(receipt)
 
 
+
+# SET ALLOWANCE
+
+response = compass.universal.allowance_set(token=models.TokenEnum.USDC, contract=SPECIFIC_MORPHO_VAULT, amount=1, chain=models.Chain.BASE_MAINNET, sender=WALLET_ADDRESS)
+
+
+
+# SEND ALLOWANCE TRANSACTION
+
+
+
 print(send_tx(response))
+
+
+
+# DEPOSIT ON MORPHO
+
+
+
+res = compass.morpho.deposit(vault_address=SPECIFIC_MORPHO_VAULT, amount=1, chain=models.MorphoDepositRequestChain.BASE_MAINNET, sender=WALLET_ADDRESS)
+print(res.model_dump())
+
+#    Handle response
+print(res)
+
+
+# SEND DEPOSIT TRANSACTION
+
+
+
+print(send_tx(res))
+
 
