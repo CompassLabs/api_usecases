@@ -7,14 +7,12 @@ cd ./typescript_signing_example
 npm install @compass-labs/api-sdk viem dotenv
 ```
 
-
 to run:
 
 ```
 cd ./typescript_signing_example
-npx tsx index.ts 
+npx tsx index.ts
 ```
-
 
 tips:
 
