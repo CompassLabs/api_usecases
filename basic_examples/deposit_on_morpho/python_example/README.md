@@ -1,5 +1,8 @@
 # installation instructions
 
+1. populate the .env file
+2. run:
+
 
 ```
 uv sync
