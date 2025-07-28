@@ -1,0 +1,11 @@
+[project]
+name = "compass-user-dashboard"
+version = "0.1.0"
+description = "TBD"
+requires-python = ">=3.13"
+dependencies = [
+    "compass-api-sdk>=0.9.51",
+    "dotenv>=0.9.9",
+    "ruff>=0.12.4",
+    "web3>=7.12.1",
+]
