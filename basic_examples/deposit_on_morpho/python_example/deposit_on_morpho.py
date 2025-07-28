@@ -46,5 +46,5 @@ res = compass.morpho.deposit(
 )
 print(res.model_dump())
 
-# Sign and broadcast transaction
+# Sign and broadcast deposit transaction
 print(send_tx(res))
