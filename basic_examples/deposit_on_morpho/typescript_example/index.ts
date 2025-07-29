@@ -25,7 +25,6 @@ const main = async () => {
 
 
   // SNIPPET START 2
-
   const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.COMPASS_API_KEY,
   });
@@ -44,7 +43,7 @@ const main = async () => {
 
 
 
-  // SNIPPET START 2
+  // SNIPPET START 3
   // Get unsigned set allowance tx
   
   const UnsignedTx1 = await compass.universal.allowanceSet({
@@ -55,9 +54,9 @@ const main = async () => {
     sender: WALLET_ADDRESS,
   });
   console.log(UnsignedTx1);
-  // SNIPPET END 2
+  // SNIPPET END 3
 
-  // SNIPPET START 3
+  // SNIPPET START 4
   // Sign and broadcast set allowance tx and wait for confirmation
   const txHash1 = await walletClient.sendTransaction(
     UnsignedTx1 as any
@@ -70,9 +69,9 @@ const main = async () => {
     hash: txHash1,
   });
   console.log("allowance tx completed ✅")
-  // SNIPPET END 3
+  // SNIPPET END 4
 
-  // SNIPPET START 4
+  // SNIPPET START 5
   // Get unsigned morpho deposit tx
   const UnsignedTx2 = await compass.morpho.deposit({
     vaultAddress: SPECIFIC_MORPHO_VAULT,
@@ -81,9 +80,9 @@ const main = async () => {
     sender: WALLET_ADDRESS,
   });
   console.log(UnsignedTx2);
-  // SNIPPET START 4
-
   // SNIPPET START 5
+
+  // SNIPPET START 6
   // Sign and broadcast morpho deposit tx
   const txHash2 = await walletClient.sendTransaction(
     UnsignedTx2 as any
@@ -95,7 +94,7 @@ const main = async () => {
     hash: txHash2,
   });
   console.log("deposit tx completed ✅")
-  // SNIPPET START 5
+  // SNIPPET START 6
      
 };
 
