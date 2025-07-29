@@ -13,7 +13,7 @@
 to run:
 
 ```
-cd ./typescript_signing_example
+cd ./basic_examples/deposit_on_morpho/typescript_example/
 npx tsx index.ts
 ```
 
