@@ -6,7 +6,7 @@
 ## Typescript:
 
 ```
- cd basic_examples/deposit_on_morpho/typescript_example/
+ cd ./basic_examples/deposit_on_morpho/typescript_example/
  npm install @compass-labs/api-sdk viem dotenv
 ```
 
