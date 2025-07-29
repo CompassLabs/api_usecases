@@ -6,8 +6,8 @@
 ## Typescript:
 
 ```
-cd ./typescript_signing_example
-npm install @compass-labs/api-sdk viem dotenv
+ cd basic_examples/deposit_on_morpho/typescript_example/
+ npm install @compass-labs/api-sdk viem dotenv
 ```
 
 to run:
