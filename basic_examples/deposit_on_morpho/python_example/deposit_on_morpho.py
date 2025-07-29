@@ -1,3 +1,5 @@
+# SNIPPET START 1
+
 from compass_api_sdk import CompassAPI, models
 from dotenv import load_dotenv
 import os
@@ -12,8 +14,12 @@ BASE_RPC_URL = os.getenv("BASE_RPC_URL")
 w3 = Web3(HTTPProvider(BASE_RPC_URL))
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 
+# SNIPPET END 1
 
-# Helper function:
+
+
+# SNIPPET START 2
+# Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
     tx = response.model_dump(by_alias=True)
     signed_tx = w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
@@ -21,8 +27,10 @@ def send_tx(response):
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     # convert receipt to a serializable dict
     return tx_hash, dict(receipt)
+# SNIPPET END 2
 
 
+# SNIPPET START 3
 # SET ALLOWANCE
 # Get unsigned Allowance Transaction from the Compass API
 response = compass.universal.allowance_set(
@@ -32,10 +40,16 @@ response = compass.universal.allowance_set(
     chain=models.Chain.BASE_MAINNET,
     sender=WALLET_ADDRESS,
 )
+# SNIPPET END 3
 
+
+# SNIPPET START 4
 # Sign and broadcast allowance transaction
 print(send_tx(response))
+# SNIPPET END 4
 
+
+# SNIPPET START 5
 # DEPOSIT ON MORPHO
 # Get unsigned transaction
 res = compass.morpho.deposit(
@@ -46,5 +60,8 @@ res = compass.morpho.deposit(
 )
 print(res.model_dump())
 
+# SNIPPET START 6
 # Sign and broadcast deposit transaction
 print(send_tx(res))
+# SNIPPET END 6
+
