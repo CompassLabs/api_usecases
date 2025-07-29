@@ -1,12 +1,9 @@
 // SNIPPET START 1
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
-import { http } from "viem";
-import { createWalletClient } from "viem";
+import { mainnet, base, arbitrum } from "viem/chains";
+import { http, createWalletClient, createPublicClient } from "viem";
 import dotenv from "dotenv";
-import { SendTransactionRequest } from "viem";
-import { base } from "viem/chains";
 
 dotenv.config();
 
@@ -21,55 +18,82 @@ const main = async () => {
   const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
   const compass = new CompassApiSDK({ apiKeyAuth: COMPASS_API_KEY });
   const account = privateKeyToAccount(PRIVATE_KEY);
-  const walletClient = createWalletClient({
-    account: account,
-    chain: base,
-    transport: http(BASE_RPC_URL as string),
-  });
   //...}
   // SNIPPET END 1
 
 
+
+
+  // SNIPPET START 2
+
+  const compassApiSDK = new CompassApiSDK({
+    apiKeyAuth: process.env.COMPASS_API_KEY,
+  });
+
+  const walletClient = createWalletClient({
+    account,
+    chain: base,
+    transport: http(BASE_RPC_URL),
+  });
+
+  const publicClient = createPublicClient({
+    chain: base,
+    transport: http(BASE_RPC_URL),
+  });
+  // SNIPPET END 2
+
+
+
   // SNIPPET START 2
   // Get unsigned set allowance tx
-  const UnsignedTransaction1 = await compass.universal.allowanceSet({
+  
+  const UnsignedTx1 = await compass.universal.allowanceSet({
     token: "USDC",
     contract: SPECIFIC_MORPHO_VAULT,
-    amount: 0.1,
+    amount: 0.2,
     chain: "base:mainnet",
     sender: WALLET_ADDRESS,
   });
-  console.log(UnsignedTransaction1);
+  console.log(UnsignedTx1);
   // SNIPPET END 2
 
   // SNIPPET START 3
-  // Sign and broadcast set allowance tx
-  const tx1 = await walletClient.sendTransaction(
-    UnsignedTransaction1 as unknown as SendTransactionRequest,
+  // Sign and broadcast set allowance tx and wait for confirmation
+  const txHash1 = await walletClient.sendTransaction(
+    UnsignedTx1 as any
   );
-  console.log(tx1);
+  console.log(txHash1);
+
+  // wait for confirmation
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash1,
+  });
+  console.log("allowance tx completed")
   // SNIPPET END 3
 
   // SNIPPET START 4
   // Get unsigned morpho deposit tx
-  const UnsignedTransaction2 = await compass.morpho.deposit({
+  const UnsignedTx2 = await compass.morpho.deposit({
     vaultAddress: SPECIFIC_MORPHO_VAULT,
     amount: 0.1,
     chain: "base:mainnet",
     sender: WALLET_ADDRESS,
   });
-  console.log(UnsignedTransaction2);
+  console.log(UnsignedTx2);
   // SNIPPET START 4
 
   // SNIPPET START 5
   // Sign and broadcast morpho deposit tx
-  const tx2 = await walletClient.sendTransaction(
-    UnsignedTransaction2 as unknown as SendTransactionRequest,
+  const txHash2 = await walletClient.sendTransaction(
+    UnsignedTx2 as any
   );
-  console.log(tx2);
+  console.log(txHash2);
+    // wait for confirmation
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash2,
+  });
+  console.log("deposit tx completed")
   // SNIPPET START 5
-
-
      
 };
 
