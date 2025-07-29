@@ -65,10 +65,11 @@ const main = async () => {
   console.log(txHash1);
 
   // wait for confirmation
+  console.log("waiting for confirmation...⏳")
   await publicClient.waitForTransactionReceipt({
     hash: txHash1,
   });
-  console.log("allowance tx completed")
+  console.log("allowance tx completed ✅")
   // SNIPPET END 3
 
   // SNIPPET START 4
@@ -89,10 +90,11 @@ const main = async () => {
   );
   console.log(txHash2);
     // wait for confirmation
+  console.log("waiting for confirmation...⏳")
   await publicClient.waitForTransactionReceipt({
     hash: txHash2,
   });
-  console.log("deposit tx completed")
+  console.log("deposit tx completed ✅")
   // SNIPPET START 5
      
 };
