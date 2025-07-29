@@ -1,5 +1,6 @@
-# Deposit on Morpho using typescript
+# Deposit on Aave using typescript
 
+We set the USDC spending allowance for a Morpho vault, then perform a deposit.
 
 # Installation:
 
@@ -20,3 +21,4 @@ npx tsx index.ts
 tips:
 
 - make sure your private key starts with 0x in the typescript example.
+
