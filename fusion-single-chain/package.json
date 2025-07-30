@@ -13,6 +13,7 @@
     "@biconomy/abstractjs": "^1.0.22",
     "@compass-labs/api-sdk": "^0.5.63",
     "@tanstack/react-query": "^5.83.0",
+    "dotenv": "^17.2.1",
     "ethers": "^6.15.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

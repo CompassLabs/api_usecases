@@ -8,7 +8,7 @@ import {
   type Hex,
   formatUnits
 } from 'viem';
-import { arbitrum } from 'viem/chains';
+import { base } from 'viem/chains';
 import {
   createMeeClient,
   toMultichainNexusAccount,
@@ -17,7 +17,13 @@ import {
   type MultichainSmartAccount
 } from '@biconomy/abstractjs';
 import { useReadContract } from 'wagmi';
- 
+import { CompassApiSDK } from '@compass-labs/api-sdk';
+import VaultTracker from './actions/VaultTracker';
+import { deposit } from './actions/deposit';
+import type { VaultForTracking } from './actions/addVaultForTracking';
+// import { config } from 'dotenv';
+// config();
+
 export default function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
@@ -25,14 +31,23 @@ export default function App() {
   const [orchestrator, setOrchestrator] = useState<MultichainSmartAccount | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [meeScanLink, setMeeScanLink] = useState<string | null>(null);
-  const [recipients, setRecipients] = useState<string[]>(['']);
+  const [vaults, setVaults] = useState<VaultForTracking[]>([]);
+  const [transactionStatus, setTransactionStatus] = useState<string>('');
+  const [depositAmount, setDepositAmount] = useState<string>('1');
+  const [selectedVault, setSelectedVault] = useState<VaultForTracking | null>(null);
+
+  // Initialize Compass API SDK
+  const compassApiSDK = new CompassApiSDK({
+    apiKeyAuth: import.meta.env.VITE_COMPASS_API_KEY
+  });
+  const RPC_URL = import.meta.env.VITE_RPC_URL;
  
-  const usdcAddress = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+  const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
  
   const { data: balance } = useReadContract({
     abi: erc20Abi,
     address: usdcAddress,
-    chainId: arbitrum.id,
+    chainId: base.id,
     functionName: 'balanceOf',
     args: account ? [account as Hex] : undefined,
     query: { enabled: !!account }
@@ -45,7 +60,7 @@ export default function App() {
     }
  
     const wallet = createWalletClient({
-      chain: arbitrum,
+      chain: base,
       transport: custom((window as any).ethereum)
     });
     setWalletClient(wallet);
@@ -54,8 +69,8 @@ export default function App() {
     setAccount(address);
  
     const multiAccount = await toMultichainNexusAccount({
-      chains: [arbitrum],
-      transports: [http()],
+      chains: [base],
+      transports: [http(RPC_URL)],
       signer: createWalletClient({
         account: address,
         transport: custom((window as any).ethereum)
@@ -67,61 +82,68 @@ export default function App() {
     setMeeClient(mee);
   };
  
-  const executeTransfers = async () => {
-    if (!orchestrator || !meeClient || !account) {
-      alert('Account not initialized');
+    const executeVaultDeposit = async () => {
+    if (!orchestrator || !meeClient || !account || !selectedVault) {
+      alert('Account not initialized or no vault selected');
       return;
     }
- 
+
     try {
-      setStatus('Encoding instructions…');
- 
-      await walletClient?.addChain({ chain: arbitrum });
-      await walletClient?.switchChain({ id: arbitrum.id });
- 
-      const transfers = await Promise.all(
-        recipients
-          .filter((r) => r)
-          .map((recipient) =>
-            orchestrator.buildComposable({
-              type: 'default',
-              data: {
-                abi: erc20Abi,
-                chainId: arbitrum.id,
-                to: usdcAddress,
-                functionName: 'transfer',
-                args: [recipient as Hex, 1n * 10n ** 6n] // 1 USDC
-              }
-            })
-          )
+      setStatus('Preparing vault deposit…');
+
+    //   await walletClient?.addChain({ chain: base });
+    //   await walletClient?.switchChain({ id: base.id });
+
+      // Get deposit transaction from Compass API
+      const depositTx = await deposit(
+        compassApiSDK,
+        selectedVault,
+        parseFloat(depositAmount),
+        account,
+        setTransactionStatus
       );
- 
-      const totalAmount = BigInt(transfers.length) * 1_000_000n;
- 
+
+      setStatus('Building user operations…');
+
+      const userOperations = await Promise.all(depositTx.operations.map(async (operation) => {
+        return orchestrator.buildComposable({
+          type: 'rawCalldata',
+          data: {
+            chainId: base.id,
+            to: operation.to as `0x${string}`,
+            calldata: operation.data as `0x${string}`,
+            value: BigInt(operation.value || 0)
+          }
+        })
+      }));
+
       setStatus('Requesting quote…');
+    //   console.log(JSON.stringify(userOperations, null, 2));
       const fusionQuote = await meeClient.getFusionQuote({
-        instructions: transfers,
+        instructions: userOperations,
         trigger: {
-          chainId: arbitrum.id,
+          chainId: base.id,
           tokenAddress: usdcAddress,
-          amount: totalAmount
+          amount: BigInt(parseFloat(depositAmount) * 10 ** 6),
         },
         feeToken: {
           address: usdcAddress,
-          chainId: arbitrum.id
+          chainId: base.id
         }
       });
- 
+
+      console.log(fusionQuote);
+
       setStatus('Executing quote…');
       const { hash } = await meeClient.executeFusionQuote({ fusionQuote });
- 
+
       const link = getMeeScanLink(hash);
       setMeeScanLink(link);
       setStatus('Waiting for completion…');
- 
+
       await meeClient.waitForSupertransactionReceipt({ hash });
- 
-      setStatus('✅ Transaction completed!');
+
+      setStatus('✅ Vault deposit completed!');
     } catch (err: any) {
       console.error(err);
       setStatus(`❌ Error: ${err.message ?? err}`);
@@ -130,7 +152,7 @@ export default function App() {
  
   return (
     <main style={{ padding: 40, fontFamily: 'sans-serif', color: 'orangered' }}>
-      <h1>Biconomy MEE Quickstart </h1>
+      <h1>Compass Vaults </h1>
  
       <button
         style={{ padding: '10px 20px', fontSize: '1rem' }}
@@ -140,50 +162,77 @@ export default function App() {
         {account ? `Connected` : 'Connect Wallet'}
       </button>
  
-      {account && (
+            {account && (
         <div style={{ marginTop: 20 }}>
           <p><strong>Address:</strong> {account}</p>
           <p>USDC Balance: {balance ? `${formatUnits(balance, 6)} USDC` : '–'}</p>
- 
-          <h3>Recipients</h3>
-          {recipients.map((recipient, idx) => (
-            <input
-              key={idx}
-              type="text"
-              value={recipient}
-              onChange={(e) => {
-                const updated = [...recipients];
-                updated[idx] = e.target.value;
-                setRecipients(updated);
-              }}
-              placeholder="0x..."
-              style={{ display: 'block', margin: '8px 0', padding: '6px', width: '100%' }}
-            />
-          ))}
- 
-          <button onClick={() => setRecipients([...recipients, ''])}>
-            ➕ Add Recipient
-          </button>
+
+          <VaultTracker
+            compassApiSDK={compassApiSDK}
+            vaults={vaults}
+            setVaults={setVaults}
+            walletAddress={account}
+          />
+
+          {vaults.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <h3>Deposit to Vault</h3>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: 'block', marginBottom: 5 }}>Select Vault:</label>
+                <select
+                  value={selectedVault?.address || ''}
+                  onChange={(e) => {
+                    const vault = vaults.find(v => v.address === e.target.value);
+                    setSelectedVault(vault || null);
+                  }}
+                  style={{ padding: '6px', width: '100%', marginBottom: 10 }}
+                >
+                  <option value="">Select a vault...</option>
+                  {vaults.map((vault) => (
+                    <option key={vault.address} value={vault.address}>
+                      {vault.name || vault.address} - {vault.asset?.symbol || 'Unknown Asset'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: 'block', marginBottom: 5 }}>Deposit Amount (USDC):</label>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="1.0"
+                  min="0.01"
+                  step="0.01"
+                  style={{ padding: '6px', width: '100%' }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
  
-      {meeClient && (
+            {meeClient && selectedVault && (
         <>
           <p style={{ marginTop: 20 }}>
             🟢 <strong>MEE client ready</strong> – you can now orchestrate multichain transactions!
           </p>
- 
+
           <button
             style={{ padding: '10px 20px', fontSize: '1rem' }}
-            onClick={executeTransfers}
+            onClick={executeVaultDeposit}
+            disabled={!selectedVault || !depositAmount || parseFloat(depositAmount) <= 0}
           >
-            Send 1 USDC to each recipient
+            Deposit {depositAmount} USDC to {selectedVault.name || 'Vault'}
           </button>
         </>
       )}
  
-      {status && <p style={{ marginTop: 20 }}>{status}</p>}
- 
+            {status && <p style={{ marginTop: 20 }}>{status}</p>}
+      
+      {transactionStatus && <p style={{ marginTop: 10, color: 'blue' }}>{transactionStatus}</p>}
+
       {meeScanLink && (
         <p style={{ marginTop: 10 }}>
           <a href={meeScanLink} target='_blank' rel='noopener noreferrer'>
