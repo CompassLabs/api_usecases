@@ -80,7 +80,7 @@ export default function Home() {
     const signedAuth = await signAuthorization({
         contractAddress: auth.address as `0x${string}`,
         chainId: auth.chainId,
-        nonce: auth.nonce + 1,
+        nonce: auth.nonce,
     }, {
         address: privyWallet?.address as string,
     });
