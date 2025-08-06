@@ -1,8 +1,10 @@
 'use client';
 
-import {usePrivy, useSendTransaction, useWallets, useSign7702Authorization} from '@privy-io/react-auth';
+import {usePrivy, useSendTransaction, useWallets, useSign7702Authorization, useCreateWallet, Wallet} from '@privy-io/react-auth';
 import {CompassApiSDK} from '@compass-labs/api-sdk';
-// import {PrivyClient} from '@privy-io/server-auth';
+import { useEffect, useState } from 'react';
+import {createWalletClient, custom, Hex, TransactionRequest} from 'viem';
+import {base} from 'viem/chains';
 
 
 const sdk = new CompassApiSDK({
@@ -11,18 +13,66 @@ const sdk = new CompassApiSDK({
 
 export default function Home() {
   const {ready, authenticated, user, login, logout} = usePrivy();
-  const {wallets} = useWallets();
+  const {createWallet} = useCreateWallet({
+        onSuccess: ({wallet}) => {
+            console.log('Created privyWallet ', wallet);
+        },
+        onError: (error) => {
+            console.error('Failed to create privyWallet with error ', error)
+        }
+    })
   const {signAuthorization} = useSign7702Authorization();
   const {sendTransaction} = useSendTransaction();
-//   const privyClient = new PrivyClient(process.env.NEXT_PUBLIC_PRIVY_API_KEY!, process.env.NEXT_PUBLIC_PRIVY_SECRET_KEY!);
+  const [privyWallet, setPrivyWallet] = useState<Wallet | null>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const {wallets, ready: walletsReady} = useWallets();
+  
+
+  const makeWallet = async () => {
+    console.log('Creating privyWallet');
+    const w = await createWallet();
+    
+    console.log(w);
+  }
+
+  const fundWallet = async () => {
+
+    const eth_tx = await sdk.token.transfer({
+      chain: "base:mainnet",
+      sender: wallet?.address as string,
+      to: privyWallet?.address as string,
+      amount: "0.0001",
+      token: "ETH",
+    });
+
+    const eth_tx_hash = await sendTransaction(eth_tx);
+
+    const tx = await sdk.token.transfer({
+      chain: "base:mainnet",
+      sender: wallet?.address as string,
+      to: privyWallet?.address as string,
+      amount: "1",
+      token: "USDC",
+    });
+
+    const usdc_tx_hash = await sendTransaction(tx);
+
+    console.log(eth_tx_hash);
+    console.log(usdc_tx_hash);
+  }
+  
+  useEffect(() => {
+    if (walletsReady) {
+        setWallet(wallets[1] as unknown as Wallet);
+        wallets[0].switchChain(8453);
+        setPrivyWallet(wallets[0] as unknown as Wallet);
+    }
+  }, [walletsReady]);
 
   const aave_supply = async () => {
-    const wallet = wallets[0];
-    await wallet.switchChain(8453);
-
-    const auth = await sdk.transactionBundler.transactionBundlerAuthorization({
-        chain: "base",
-        sender: wallet.address,
+    const auth = await sdk.transactionBundler.bundlerAuthorization({
+        chain: "base:mainnet",
+        sender: privyWallet?.address as string,
       });
 
     console.log(auth);
@@ -30,27 +80,23 @@ export default function Home() {
     const signedAuth = await signAuthorization({
         contractAddress: auth.address as `0x${string}`,
         chainId: auth.chainId,
+        nonce: auth.nonce + 1,
     }, {
-        address: wallet.address
+        address: privyWallet?.address as string,
     });
-    // const signedAuth = await privyClient.walletApi.ethereum.sign7702Authorization({
-    //     contractAddress: auth.address as `0x${string}`,
-    //     chainId: auth.chainId,
-    //     walletId: wallet.
-    // });
 
     console.log(signedAuth);
     
-    const tx = await sdk.transactionBundler.transactionBundlerExecute({
-        chain: "base",
-        sender: wallet.address,
+    const tx = await sdk.transactionBundler.bundlerExecute({
+        chain: "base:mainnet",
+        sender: privyWallet?.address as string,
         signedAuthorization: signedAuth,
         actions: [
             {
                 body: {
                     actionType: "SET_ALLOWANCE",
                     token: "USDC",
-                    contract: "AAVE_V3_POOL",
+                    contract: "AaveV3Pool",
                     amount: "1000",
                 },
             },
@@ -66,11 +112,17 @@ export default function Home() {
 
     console.log(tx);
 
-    const txHash = await sendTransaction(tx.transaction);
+    const walletClient = createWalletClient({
+        account: privyWallet?.address as Hex,
+        chain: base,
+        transport: custom(await wallets[0].getEthereumProvider()),
+    });
+
+    const txHash = await walletClient.sendTransaction(tx as unknown as TransactionRequest);
     console.log(txHash);
   }
 
-  if (!ready) {
+  if (!ready || !walletsReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -91,13 +143,13 @@ export default function Home() {
               Privy Wallet Demo
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Connect your wallet or create an embedded wallet to get started with Privy authentication
+              Connect your privyWallet or create an embedded privyWallet to get started with Privy authentication
             </p>
           </div>
 
           {/* Main Content */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            {!authenticated ? (
+            {!authenticated && !privyWallet ? (
               <div className="text-center">
                 <div className="mb-8">
                   <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -109,7 +161,7 @@ export default function Home() {
                     Welcome to Privy
                   </h2>
                   <p className="text-gray-600 mb-8">
-                    Sign in to access your wallet and start using the app
+                    Sign in to access your privyWallet and start using the app
                   </p>
                 </div>
                 
@@ -164,43 +216,62 @@ export default function Home() {
                 {/* Wallets Section */}
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Connected Wallets</h3>
-                  {wallets.length > 0 ? (
+                  {privyWallet ? (
                     <div className="space-y-3">
-                      {wallets.map((wallet, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                              <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {privyWallet.walletClientType === 'privy' ? 'Embedded Wallet' : 'External Wallet'}
+                                </p>
+                                <p className="text-sm text-gray-600 font-mono">
+                                  {privyWallet.address}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {wallet.walletClientType === 'privy' ? 'Embedded Wallet' : 'External Wallet'}
-                              </p>
-                              <p className="text-sm text-gray-600 font-mono">
-                                {wallet.address}
-                              </p>
-                            </div>
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                              Connected
+                            </span>
                           </div>
-                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                            Connected
-                          </span>
+                          <button
+                            onClick={fundWallet}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                            <span>Fund Wallet</span>
+                          </button>
                         </div>
-                      ))}
                     </div>
                   ) : (
+                    
                     <div className="text-center py-8 bg-gray-50 rounded-lg">
                       <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
-                      <p className="text-gray-600">No wallets connected</p>
+                      <p className="text-gray-600 mb-4">No wallets connected</p>
+                      <button
+                        onClick={makeWallet}
+                        className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 mx-auto"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>Create Embedded Wallet</span>
+                      </button>
                     </div>
                   )}
                 </div>
 
                 {/* AAVE Supply Section */}
-                {wallets.length > 0 && (
+                {privyWallet && (
                   <div className="mt-8 pt-6 border-t border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">AAVE Operations</h3>
                     <div className="bg-blue-50 rounded-lg p-6">
