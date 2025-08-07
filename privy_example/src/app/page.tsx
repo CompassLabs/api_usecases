@@ -1,10 +1,12 @@
 'use client';
 
-import {usePrivy, useSendTransaction, useWallets, useSign7702Authorization, useCreateWallet, Wallet} from '@privy-io/react-auth';
+import {usePrivy, useSendTransaction, useWallets, useSign7702Authorization, useCreateWallet, ConnectedWallet} from '@privy-io/react-auth';
 import {CompassApiSDK} from '@compass-labs/api-sdk';
 import { useEffect, useState } from 'react';
-import {createWalletClient, custom, Hex, TransactionRequest} from 'viem';
-import {base} from 'viem/chains';
+import {createWalletClient, custom, Hex, SignedAuthorization, TransactionRequest} from 'viem';
+import {base, alchemy} from '@account-kit/infra';
+import {AuthorizationRequest, SmartAccountSigner, WalletClientSigner} from '@aa-sdk/core';
+import { useSmartAccountClient } from "@account-kit/react";
 
 
 const sdk = new CompassApiSDK({
@@ -23,9 +25,43 @@ export default function Home() {
     })
   const {signAuthorization} = useSign7702Authorization();
   const {sendTransaction} = useSendTransaction();
-  const [privyWallet, setPrivyWallet] = useState<Wallet | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [privyWallet, setPrivyWallet] = useState<ConnectedWallet | null>(null);
+  const [wallet, setWallet] = useState<ConnectedWallet | null>(null);
   const {wallets, ready: walletsReady} = useWallets();
+  
+//   async function create7702Signer(){
+//     const baseSigner = new WalletClientSigner(createWalletClient({
+//         chain: base,
+//         account: privyWallet?.address as Hex,
+//         transport: custom(await wallets[0].getEthereumProvider()),
+//     }), 'privy');
+
+//     const signer: SmartAccountSigner = {
+//         signerType: 'privy',
+//         getAddress: baseSigner.getAddress,
+//         signMessage: baseSigner.signMessage,
+//         signTypedData: baseSigner.signTypedData,
+//         inner: baseSigner.inner,
+//         signAuthorization: async (unsignedAuthorization: AuthorizationRequest<number>) => {
+//             const signedAuth = await signAuthorization({
+//                 contractAddress: unsignedAuthorization.address as `0x${string}`,
+//                 chainId: unsignedAuthorization.chainId,
+//                 nonce: unsignedAuthorization.nonce,
+//             });
+
+//             return {
+//                 address: unsignedAuthorization.address,
+//                 chainId: unsignedAuthorization.chainId,
+//                 nonce: unsignedAuthorization.nonce,
+//                 r: signedAuth.r,
+//                 s: signedAuth.s,
+//                 v: signedAuth.v || 0,
+//                 yParity: signedAuth.yParity,
+//             } as SignedAuthorization<number>
+//         }
+//     }
+//     return signer;
+//   }
   
 
   const makeWallet = async () => {
@@ -34,44 +70,19 @@ export default function Home() {
     
     console.log(w);
   }
-
-  const fundWallet = async () => {
-
-    const eth_tx = await sdk.token.transfer({
-      chain: "base:mainnet",
-      sender: wallet?.address as string,
-      to: privyWallet?.address as string,
-      amount: "0.0001",
-      token: "ETH",
-    });
-
-    const eth_tx_hash = await sendTransaction(eth_tx);
-
-    const tx = await sdk.token.transfer({
-      chain: "base:mainnet",
-      sender: wallet?.address as string,
-      to: privyWallet?.address as string,
-      amount: "1",
-      token: "USDC",
-    });
-
-    const usdc_tx_hash = await sendTransaction(tx);
-
-    console.log(eth_tx_hash);
-    console.log(usdc_tx_hash);
-  }
   
   useEffect(() => {
     if (walletsReady) {
-        setWallet(wallets[1] as unknown as Wallet);
+        setWallet(wallets[1]);
         wallets[0].switchChain(8453);
-        setPrivyWallet(wallets[0] as unknown as Wallet);
+        setPrivyWallet(wallets[0]);
+        console.log("wallets", wallets);
     }
   }, [walletsReady]);
 
   const aave_supply = async () => {
     const auth = await sdk.transactionBundler.bundlerAuthorization({
-        chain: "base:mainnet",
+        chain: "ethereum:mainnet",
         sender: privyWallet?.address as string,
       });
 
@@ -88,7 +99,7 @@ export default function Home() {
     console.log(signedAuth);
     
     const tx = await sdk.transactionBundler.bundlerExecute({
-        chain: "base:mainnet",
+        chain: "ethereum:mainnet",
         sender: privyWallet?.address as string,
         signedAuthorization: signedAuth,
         actions: [
@@ -112,17 +123,14 @@ export default function Home() {
 
     console.log(tx);
 
-    const walletClient = createWalletClient({
-        account: privyWallet?.address as Hex,
-        chain: base,
-        transport: custom(await wallets[0].getEthereumProvider()),
-    });
 
-    const txHash = await walletClient.sendTransaction(tx as unknown as TransactionRequest);
+
+    // const txHash = await walletClient.sendTransaction(tx as unknown as TransactionRequest);
+    const txHash = await sendTransaction(tx);
     console.log(txHash);
   }
 
-  if (!ready || !walletsReady) {
+  if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -239,15 +247,6 @@ export default function Home() {
                               Connected
                             </span>
                           </div>
-                          <button
-                            onClick={fundWallet}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                            </svg>
-                            <span>Fund Wallet</span>
-                          </button>
                         </div>
                     </div>
                   ) : (
