@@ -1,7 +1,7 @@
 'use client';
 
 import {PrivyProvider} from '@privy-io/react-auth';
-import { base } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 export default function Providers({children}: {children: React.ReactNode}) {
   return (
@@ -12,8 +12,8 @@ export default function Providers({children}: {children: React.ReactNode}) {
             showWalletUIs: false,
             createOnLogin: 'users-without-wallets'
         },
-        defaultChain: base,
-        supportedChains: [base],
+        defaultChain: mainnet,
+        supportedChains: [mainnet],
         }
       }
     >

@@ -4,7 +4,7 @@ import {usePrivy, useSendTransaction, useWallets, useSign7702Authorization, useC
 import {CompassApiSDK} from '@compass-labs/api-sdk';
 import { useEffect, useState } from 'react';
 import {createWalletClient, custom, Hex, SignedAuthorization, TransactionRequest} from 'viem';
-import {base, alchemy} from '@account-kit/infra';
+import {base, alchemy, mainnet} from '@account-kit/infra';
 import {AuthorizationRequest, SmartAccountSigner, WalletClientSigner} from '@aa-sdk/core';
 import { useSmartAccountClient } from "@account-kit/react";
 
@@ -28,12 +28,14 @@ export default function Home() {
   const [privyWallet, setPrivyWallet] = useState<ConnectedWallet | null>(null);
   const [wallet, setWallet] = useState<ConnectedWallet | null>(null);
   const {wallets, ready: walletsReady} = useWallets();
+  console.log("wallets", wallets);
+  console.log("walletsReady", walletsReady);
   
 //   async function create7702Signer(){
 //     const baseSigner = new WalletClientSigner(createWalletClient({
 //         chain: base,
 //         account: privyWallet?.address as Hex,
-//         transport: custom(await wallets[0].getEthereumProvider()),
+//         transport: custom(await wallets[0].getethereumProvider()),
 //     }), 'privy');
 
 //     const signer: SmartAccountSigner = {
@@ -72,10 +74,11 @@ export default function Home() {
   }
   
   useEffect(() => {
-    if (walletsReady) {
-        setWallet(wallets[1]);
-        wallets[0].switchChain(8453);
-        setPrivyWallet(wallets[0]);
+    if (walletsReady && wallets.length > 1) {
+        wallets[0].switchChain(0);
+        setWallet(wallets[0]);
+        wallets[1].switchChain(1);
+        setPrivyWallet(wallets[1]);
         console.log("wallets", wallets);
     }
   }, [walletsReady]);
