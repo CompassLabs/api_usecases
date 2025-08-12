@@ -32,9 +32,13 @@ jobs:
         working-directory: v1/pendle/typescript
         run: npm install
 
+      - name: Build application
+        working-directory: v1/pendle/typescript
+        run: npm run build
+
       - name: Run application
         working-directory: v1/pendle/typescript
-        run: npm run dev
+        run: npm run start
 
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
