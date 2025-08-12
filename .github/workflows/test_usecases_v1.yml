@@ -3,154 +3,179 @@ name: test_usecases_v_one
 on:
   schedule:
     # Runs at 00:00 UTC every day
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   # Allow manual triggering
   workflow_dispatch:
 
 jobs:
-  run-zero-dev:
+  run-pendle:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      PRIVATE_KEY:  ${{ secrets.PRIVATE_KEY }}
-      ZERODEV_RPC:  ${{ secrets.ZERODEV_RPC }}
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
-    - name: Change directory
-      run: cd smart_accounts
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-    
-    - name: PWD
-      working-directory: smart_accounts/zerodev
-      run: pwd
-    
-    - name: Install dependencies
-      working-directory: smart_accounts/zerodev
-      run: npm install
-    
-    - name: Run application
-      working-directory: smart_accounts/zerodev
-      run: npm run start
-
-  run-safe:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
-      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
-      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-    - name: PWD
-      working-directory: v1/smart_accounts/safe
-      run: pwd
+      - name: PWD
+        working-directory: v1/pendle/typescript
+        run: pwd
 
-    - name: Install dependencies
-      working-directory: v1/smart_accounts/safe
-      run: npm install
+      - name: Install dependencies
+        working-directory: v1/pendle/typescript
+        run: npm install
 
-    - name: Run application
-      working-directory: v1/smart_accounts/safe
-      run: npm run start
+      - name: Run application
+        working-directory: v1/pendle/typescript
+        run: npm run dev
+  # run-zero-dev:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+  #     PRIVATE_KEY:  ${{ secrets.PRIVATE_KEY }}
+  #     ZERODEV_RPC:  ${{ secrets.ZERODEV_RPC }}
 
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
 
-  run-wallet:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
-      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
-      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
-      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
+  #   - name: Change directory
+  #     run: cd smart_accounts
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '20'
 
+  #   - name: PWD
+  #     working-directory: smart_accounts/zerodev
+  #     run: pwd
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+  #   - name: Install dependencies
+  #     working-directory: smart_accounts/zerodev
+  #     run: npm install
 
-    - name: PWD
-      working-directory: v1/wallet
-      run: pwd
+  #   - name: Run application
+  #     working-directory: smart_accounts/zerodev
+  #     run: npm run start
 
-    - name: Install dependencies
-      working-directory: v1/wallet
-      run: npm install
+  # run-safe:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+  #     SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
+  #     SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+  #     ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+  #     SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
+  #     SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
 
-    - name: Run application
-      working-directory: v1/wallet
-      run: npm run build
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
 
-    - name: Start web application
-      working-directory: v1/wallet
-      run: npm run start & # The '&' runs the command in the background
-      # Give the server some time to start up before running tests
-      # You might need to adjust this delay based on your application's startup time
-    - name: Wait for application to start
-      run: sleep 10 # Wait for 10 seconds. Adjust as needed.
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '20'
 
-    - name: Run Tests
-      working-directory: v1/wallet
-      run: npx cypress run
+  #   - name: PWD
+  #     working-directory: v1/smart_accounts/safe
+  #     run: pwd
 
-    - name: Upload Cypress Artifacts
-      if: always()  # <-- important: runs even if previous step failed
-      uses: actions/upload-artifact@v4
-      with:
-        name: cypress-artifacts
-        path: |
-          ./cypress/screenshots
-          ./cypress/videos
-        retention-days: 7
+  #   - name: Install dependencies
+  #     working-directory: v1/smart_accounts/safe
+  #     run: npm install
 
-  run-compass_agent:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  #   - name: Run application
+  #     working-directory: v1/smart_accounts/safe
+  #     run: npm run start
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+  # run-wallet:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+  #     SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
+  #     SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
+  #     ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+  #     SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
+  #     SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
 
-    - name: PWD
-      working-directory: v1/compass_agent
-      run: pwd
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
 
-    - name: Install uv
-      working-directory: v1/compass_agent
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '20'
 
-    - name: Run application
-      working-directory: v1/compass_agent
-      run: uv sync
+  #   - name: PWD
+  #     working-directory: v1/wallet
+  #     run: pwd
 
-    - name: Start web application
-      working-directory: v1/compass_agent
-      run: |
-        .venv/bin/python agent.py
+  #   - name: Install dependencies
+  #     working-directory: v1/wallet
+  #     run: npm install
+
+  #   - name: Run application
+  #     working-directory: v1/wallet
+  #     run: npm run build
+
+  #   - name: Start web application
+  #     working-directory: v1/wallet
+  #     run: npm run start & # The '&' runs the command in the background
+  #     # Give the server some time to start up before running tests
+  #     # You might need to adjust this delay based on your application's startup time
+  #   - name: Wait for application to start
+  #     run: sleep 10 # Wait for 10 seconds. Adjust as needed.
+
+  #   - name: Run Tests
+  #     working-directory: v1/wallet
+  #     run: npx cypress run
+
+  #   - name: Upload Cypress Artifacts
+  #     if: always()  # <-- important: runs even if previous step failed
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: cypress-artifacts
+  #       path: |
+  #         ./cypress/screenshots
+  #         ./cypress/videos
+  #       retention-days: 7
+
+  # run-compass_agent:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+  #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v3
+
+  #   - name: PWD
+  #     working-directory: v1/compass_agent
+  #     run: pwd
+
+  #   - name: Install uv
+  #     working-directory: v1/compass_agent
+  #     run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+  #   - name: Run application
+  #     working-directory: v1/compass_agent
+  #     run: uv sync
+
+  #   - name: Start web application
+  #     working-directory: v1/compass_agent
+  #     run: |
+  #       .venv/bin/python agent.py
 
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron

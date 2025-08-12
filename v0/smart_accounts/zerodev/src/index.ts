@@ -1,5 +1,5 @@
 // SNIPPET START 1
-import { Call, createPublicClient, http } from 'viem';
+import { type Call, createPublicClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum } from 'viem/chains';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
@@ -116,11 +116,10 @@ const main = async () => {
     });
     console.log('Batched transaction confirmed:', operationReceipt.receipt.transactionHash);
   } catch (error) {
-    console.error("An error occurred while processing the batched transaction:", error);
+    console.error('An error occurred while processing the batched transaction:', error);
   }
 
   // SNIPPET END 4
-
 };
 
 main();
