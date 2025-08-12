@@ -39,7 +39,7 @@ jobs:
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
     runs-on: ubuntu-latest
-    needs: [run-zero-dev, run-safe, run-wallet]
+    needs: [run-pendle]
     steps:
       - name: Send failure notification
         run: |
