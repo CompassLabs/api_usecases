@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-zero-dev:
+  run-pendle-python:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -19,143 +19,28 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Change directory
-      run: cd smart_accounts
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-    
-    - name: PWD
-      working-directory: smart_accounts/zerodev
-      run: pwd
-    
-    - name: Install dependencies
-      working-directory: smart_accounts/zerodev
-      run: npm install
-    
-    - name: Run application
-      working-directory: smart_accounts/zerodev
-      run: npm run start
-
-  run-safe:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
-      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
-      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
-      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
-    - name: PWD
-      working-directory: v1/smart_accounts/safe
-      run: pwd
-
-    - name: Install dependencies
-      working-directory: v1/smart_accounts/safe
-      run: npm install
-
-    - name: Run application
-      working-directory: v1/smart_accounts/safe
-      run: npm run start
-
-
-  run-wallet:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      SIGNER_ADDRESS: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511"
-      SIGNER_PRIVATE_KEY: ${{ secrets.SIGNER_PRIVATE_KEY }}
-      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SAFE_ADDRESS: "0xd6C05083ebA87Cef07652f81b0c836c500c2db92"
-      SAFE_TX_SERVICE_URL: "https://safe-transaction-arbitrum.safe.global"
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
-    - name: PWD
-      working-directory: v1/wallet
-      run: pwd
-
-    - name: Install dependencies
-      working-directory: v1/wallet
-      run: npm install
-
-    - name: Run application
-      working-directory: v1/wallet
-      run: npm run build
-
-    - name: Start web application
-      working-directory: v1/wallet
-      run: npm run start & # The '&' runs the command in the background
-      # Give the server some time to start up before running tests
-      # You might need to adjust this delay based on your application's startup time
-    - name: Wait for application to start
-      run: sleep 10 # Wait for 10 seconds. Adjust as needed.
-
-    - name: Run Tests
-      working-directory: v1/wallet
-      run: npx cypress run
-
-    - name: Upload Cypress Artifacts
-      if: always()  # <-- important: runs even if previous step failed
-      uses: actions/upload-artifact@v4
-      with:
-        name: cypress-artifacts
-        path: |
-          ./cypress/screenshots
-          ./cypress/videos
-        retention-days: 7
-
-  run-compass_agent:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: PWD
-      working-directory: v1/compass_agent
-      run: pwd
-
     - name: Install uv
-      working-directory: v1/compass_agent
+      working-directory: v0/compass_agent
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    - name: Run application
-      working-directory: v1/compass_agent
+    
+    - name: PWD
+      working-directory: v1/pendle/python
+      run: pwd
+    
+    - name: Install dependencies
+      working-directory: v1/pendle/python
       run: uv sync
+    
+    - name: Run application
+      working-directory: v1/pendle/python
+      run: ./venv/bin/python src/main.py
 
-    - name: Start web application
-      working-directory: v1/compass_agent
-      run: |
-        .venv/bin/python agent.py
+
 
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
     runs-on: ubuntu-latest
-    needs: [run-zero-dev, run-safe, run-wallet]
+    needs: [run-pendle]
     steps:
       - name: Send failure notification
         run: |
