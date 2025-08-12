@@ -1,4 +1,4 @@
-name: test_usecases_v0
+name: test_usecases_v_zero
 
 on:
   schedule:
@@ -25,15 +25,15 @@ jobs:
         node-version: '20'
     
     - name: PWD
-      working-directory: smart_accounts/zerodev
+      working-directory: v0/smart_accounts/zerodev
       run: pwd
     
     - name: Install dependencies
-      working-directory: smart_accounts/zerodev
+      working-directory: v0/smart_accounts/zerodev
       run: npm install
     
     - name: Run application
-      working-directory: smart_accounts/zerodev
+      working-directory: v0/smart_accounts/zerodev
       run: npm run start
 
   run-safe:
