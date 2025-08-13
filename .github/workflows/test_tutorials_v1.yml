@@ -10,6 +10,10 @@ on:
   # Allow manual triggering
   workflow_dispatch:
 
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: write # This is required for actions/checkout
+
 jobs:
   run-pendle:
     runs-on: ubuntu-latest
@@ -81,6 +85,24 @@ jobs:
             echo "Balance verification failed: Wallet balance is less than expected"
             exit 1
           fi
+
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.MONOREPOAPP_ID }}
+          private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
+          repository: "CompassLabs/mono"
+          path: "mono"
+
+      - name: list current folder
+        run: ls
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
