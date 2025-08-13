@@ -96,7 +96,7 @@ jobs:
           --block-time 0.05 \
           --hardfork prague \
           --host 0.0.0.0 \
-          --fork-url ${{ secrets.ETHEREUM_RPC_URL }} \
+          --fork-url ${{ secrets.ETHEREUM_MAINNET_RPC_URL }} \
           --port 8545 \
           --chain-id 1 \
           --no-rate-limit &
@@ -107,7 +107,7 @@ jobs:
           --block-time 0.05 \
           --hardfork prague \
           --host 0.0.0.0 \
-          --fork-url ${{ secrets.ARBITRUM_RPC_URL }} \
+          --fork-url ${{ secrets.ARBITRUM_MAINNET_RPC_URL }} \
           --port 8547 \
           --chain-id 42161 \
           --no-rate-limit &
@@ -118,7 +118,7 @@ jobs:
           --block-time 0.05 \
           --hardfork prague \
           --host 0.0.0.0 \
-          --fork-url ${{ secrets.BASE_RPC_URL }} \
+          --fork-url ${{ secrets.BASE_MAINNET_RPC_URL }} \
           --port 8546 \
           --chain-id 8453 \
           --no-rate-limit &
