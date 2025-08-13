@@ -104,6 +104,14 @@ jobs:
       - name: list current folder
         run: ls
 
+      - name: Start API
+        working-directory: mono/api
+        env:
+          ETHEREUM_MAINNET_RPC_URL: http://localhost:8546
+          ARBITRUM_MAINNET_RPC_URL: http://localhost:8546
+          BASE_MAINNET_RPC_URL: http://localhost:8546
+        run: make run
+
       - name: Install dependencies
         working-directory: v1/pendle/typescript
         run: npm install
