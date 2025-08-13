@@ -104,13 +104,16 @@ jobs:
       - name: list current folder
         run: ls
 
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
       - name: Start API
         working-directory: mono/api
         env:
           ETHEREUM_MAINNET_RPC_URL: http://localhost:8546
           ARBITRUM_MAINNET_RPC_URL: http://localhost:8546
           BASE_MAINNET_RPC_URL: http://localhost:8546
-        run: make run &
+        run: make install && make run &
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
