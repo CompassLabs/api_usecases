@@ -124,12 +124,16 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   maxSlippagePercent: 0.3,
 });
 
+console.log("YES 1");
+
 let txHash = await walletClient.sendTransaction(buyPtTx.transaction as any);
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
 // SNIPPET END 6
+
+console.log("YES 2");
 
 // SNIPPET START 7
 let { userPosition } = await compassApiSDK.pendle.pendleMarket({
@@ -138,6 +142,8 @@ let { userPosition } = await compassApiSDK.pendle.pendleMarket({
   marketAddress,
 });
 // SNIPPET END 7
+
+console.log("YES 3", userPosition);
 
 if (!userPosition) throw Error();
 
@@ -148,6 +154,8 @@ const pTAllowance = await compassApiSDK.universal.genericAllowance({
   token: ptAddress,
   contract: Contract.PendleRouter,
 });
+
+console.log("YES 4");
 
 if (pTAllowance.amount < userPosition.ptBalance) {
   // Set new allowance if current PT allowance for Pendle Router is insufficient
