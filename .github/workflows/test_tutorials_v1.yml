@@ -179,9 +179,9 @@ jobs:
       - name: Start API
         working-directory: mono/api
         env:
-          ETHEREUM_MAINNET_RPC_URL: http://localhost:8546
+          ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
           ARBITRUM_MAINNET_RPC_URL: http://localhost:8547
-          BASE_MAINNET_RPC_URL: http://localhost:8548
+          BASE_MAINNET_RPC_URL: http://localhost:8546
         run: |
           make install && make run
           # Wait for API to be ready
@@ -202,7 +202,7 @@ jobs:
       - name: Run application
         working-directory: v1/pendle/typescript
         env:
-          RPC_URL: http://localhost:8546
+          RPC_URL: http://localhost:8547
         run: npm run start
 
   failure_alert:
