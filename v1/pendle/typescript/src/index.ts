@@ -59,8 +59,8 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   sender: WALLET_ADDRESS,
   tokenIn: "ETH",
   tokenOut: "USDC",
-  amount: 2,
-  maxSlippagePercent: 0.3,
+  amount: 1,
+  maxSlippagePercent: 1,
 });
 
 console.log("swapTX", swapTX);
@@ -70,9 +70,12 @@ const swapTxHash = await walletClient.sendTransaction({
   value: BigInt(swapTX.transaction.value), // Convert to BigInt
 });
 
-await publicClient.waitForTransactionReceipt({
-  hash: swapTxHash,
-});
+console.log(
+  "yep",
+  await publicClient.waitForTransactionReceipt({
+    hash: swapTxHash,
+  })
+);
 
 const USDCBalance = await compassApiSDK.token.tokenBalance({
   chain: "arbitrum",
