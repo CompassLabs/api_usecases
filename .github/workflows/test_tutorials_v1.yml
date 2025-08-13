@@ -28,6 +28,51 @@ jobs:
         working-directory: v1/pendle/typescript
         run: pwd
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          cache: false
+
+      - name: Anvil Fork Base
+        run: |
+          anvil \
+          --block-time 0.05 \
+          --hardfork prague \
+          --host 0.0.0.0 \
+          --fork-url ${{ secrets.ARBITRUM_RPC_URL }} \
+          --port 8546 \
+          --chain-id 42161 \
+          --no-rate-limit &
+          sleep 5
+
+      - name: Fund Wallet with Unlimited ETH
+        run: |
+          # Derive the wallet address from the private key
+          WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
+          echo "Funding wallet: $WALLET_ADDRESS"
+
+          # Set balance to 1,000,000 ETH (in wei: 1,000,000 * 10^18)
+          cast rpc anvil_setBalance $WALLET_ADDRESS 1000000000000000000000000 --rpc-url http://localhost:8546
+          echo "Wallet funded with 1,000,000 ETH"
+
+      - name: Verify Wallet Balance
+        run: |
+          # Derive the wallet address from the private key
+          WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
+          # Check the balance of the EOA
+          BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8546)
+          echo "Wallet balance: $BALANCE wei"
+          # Convert to ETH for readability (using bc for calculation)
+          BALANCE_ETH=$(echo "scale=2; $BALANCE / 1000000000000000000" | bc)
+          echo "Wallet balance: $BALANCE_ETH ETH"
+          # Verify the balance is as expected
+          if [ "$BALANCE" -ge 1000000000000000000000000 ]; then
+            echo "Balance verification passed: Wallet has sufficient ETH"
+          else
+            echo "Balance verification failed: Wallet balance is less than expected"
+            exit 1
+          fi
+
       - name: Install dependencies
         working-directory: v1/pendle/typescript
         run: npm install
