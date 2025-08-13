@@ -52,17 +52,17 @@ jobs:
       - name: Run example
         working-directory: v0/basic_examples/deposit_on_aave/python_example
         run:
-          ./.venv/bin/python deposit_on_morpho.py
+          ./.venv/bin/python main.py
 
-      - name: Install dependencies
-        working-directory: v0/basic_examples/deposit_on_morpho/python_example
-        run:
-          uv sync
-
-      - name: Run example
-        working-directory: v0/basic_examples/deposit_on_morpho/python_example
-        run:
-          ./.venv/bin/python deposit_on_morpho.py
+#      - name: Install dependencies
+#        working-directory: v0/basic_examples/deposit_on_morpho/python_example
+#        run:
+#          uv sync
+#
+#      - name: Run example
+#        working-directory: v0/basic_examples/deposit_on_morpho/python_example
+#        run:
+#          ./.venv/bin/python deposit_on_morpho.py
 
 
 
