@@ -169,6 +169,8 @@ if (pTAllowance.amount < userPosition.ptBalance) {
 }
 // SNIPPET END 8
 
+console.log("2");
+
 // SNIPPET START 9
 const sellPtTx = await compassApiSDK.pendle.pendlePt({
   chain: "arbitrum",
@@ -179,6 +181,8 @@ const sellPtTx = await compassApiSDK.pendle.pendlePt({
   amountIn: userPosition.ptBalance,
   maxSlippagePercent: 0.3,
 });
+
+console.log("3");
 
 txHash = await walletClient.sendTransaction(sellPtTx.transaction as any);
 
