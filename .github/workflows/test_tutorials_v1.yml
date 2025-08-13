@@ -23,6 +23,11 @@ jobs:
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
       SERVER_URL: http://localhost:8000
       PENDLE_API_URL: https://api-v2.pendle.finance
+      MORPHO_GRAPHQL_API_URL: https://blue-api.morpho.org/graphql
+      THE_GRAPH_URL_AAVE_ARBITRUM: https://gateway.thegraph.com/api/subgraphs/id/DLu
+      THE_GRAPH_URL_AAVE_ETHEREUM: https://gateway.thegraph.com/api/subgraphs/id/Cd2gED
+      THE_GRAPH_URL_AAVE_BASE: https://gateway.thegraph.com/api/subgraphs/id/GQFb
+      THE_GRAPH_API_KEY: 815da
       ENV: "production"
 
     steps:
