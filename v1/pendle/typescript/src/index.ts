@@ -60,7 +60,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   tokenIn: "ETH",
   tokenOut: "USDC",
   amount: 1,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 console.log("swapTX", swapTX);
@@ -124,7 +124,7 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   action: "BUY",
   token: "USDC",
   amountIn: 1000,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 console.log("YES 1");
@@ -192,7 +192,7 @@ const sellPtTx = await compassApiSDK.pendle.pendlePt({
   action: "SELL",
   token: underlyingAssetAddress,
   amountIn: userPosition.ptBalance,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 console.log("3");
@@ -259,7 +259,7 @@ const buyYtTx = await compassApiSDK.pendle.pendleYt({
   action: "BUY",
   token: underlyingAssetAddress,
   amountIn: userPosition.underlyingTokenBalance,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 console.log("8");
@@ -340,7 +340,7 @@ const sellYtTx = await compassApiSDK.pendle.pendleYt({
   action: "SELL",
   token: "USDT",
   amountIn: userPosition.ytBalance,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 txHash = await walletClient.sendTransaction(sellYtTx.transaction as any);
@@ -403,7 +403,7 @@ const supplyLiquidityTx = await compassApiSDK.pendle.pendleLiquidity({
   action: "SUPPLY",
   token: "USDT",
   amountIn: UsdtBalance.amount,
-  maxSlippagePercent: 20,
+  maxSlippagePercent: 10,
 });
 
 txHash = await walletClient.sendTransaction(
