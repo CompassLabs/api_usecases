@@ -131,7 +131,7 @@ jobs:
           echo "Funding wallet: $WALLET_ADDRESS"
 
           # Set balance to 10 ETH
-          cast rpc anvil_setBalance $WALLET_ADDRESS 10000000000000000000 --rpc-url http://localhost:8546 || {
+          cast rpc anvil_setBalance $WALLET_ADDRESS 10000000000000000000 --rpc-url http://localhost:8547 || {
             echo "Error: Failed to set balance"
             exit 1
           }
@@ -142,7 +142,7 @@ jobs:
           # Derive the wallet address from the private key
           WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
           # Check the balance of the EOA
-          BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8546)
+          BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
           echo "Wallet balance: $BALANCE wei"
           # Convert to ETH for readability (using bc for calculation)
           BALANCE_ETH=$(echo "scale=2; $BALANCE / 1000000000000000000" | bc)
