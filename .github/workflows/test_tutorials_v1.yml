@@ -14,6 +14,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+      RPC_URL: http://localhost:8546
 
     steps:
       - name: Checkout repository
@@ -43,7 +44,9 @@ jobs:
           --port 8546 \
           --chain-id 42161 \
           --no-rate-limit &
-          sleep 5
+          # Wait for Anvil to be ready
+          until curl -s http://localhost:8546 >/dev/null; do sleep 1; done
+          echo "Anvil is running"
 
       - name: Fund Wallet with Unlimited ETH
         run: |
@@ -52,8 +55,11 @@ jobs:
           echo "Funding wallet: $WALLET_ADDRESS"
 
           # Set balance to 10,000 ETH (in wei: 10,000 * 10^18 = 0x9184e72a000000000000)
-          cast rpc anvil_setBalance $WALLET_ADDRESS 0x9184e72a000000000000 --rpc-url http://localhost:8546
-          echo "Wallet funded with 1,000,000 ETH"
+          cast rpc anvil_setBalance $WALLET_ADDRESS 0x9184e72a000000000000 --rpc-url http://localhost:8546 || {
+            echo "Error: Failed to set balance"
+            exit 1
+          }
+          echo "Wallet funded with 10,000 ETH"
 
       - name: Verify Wallet Balance
         run: |
@@ -71,6 +77,7 @@ jobs:
           else
             echo "Balance verification failed: Wallet balance is less than expected"
             exit 1
+          fi
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
@@ -82,10 +89,12 @@ jobs:
 
       - name: Run application
         working-directory: v1/pendle/typescript
+        env:
+          RPC_URL: http://localhost:8546
         run: npm run start
 
   failure_alert:
-    if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
+    if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     needs: [run-pendle]
     steps:
