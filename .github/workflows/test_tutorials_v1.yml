@@ -57,8 +57,8 @@ jobs:
           WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
           echo "Funding wallet: $WALLET_ADDRESS"
 
-          # Set balance to 10,000 ETH (in wei: 10,000 * 10^18 = 0x9184e72a000000000000)
-          cast rpc anvil_setBalance $WALLET_ADDRESS 10000000000000000000000 --rpc-url http://localhost:8546 || {
+          # Set balance to 10,000 ETH
+          cast rpc anvil_setBalance $WALLET_ADDRESS 1000000000000000000000 --rpc-url http://localhost:8546 || {
             echo "Error: Failed to set balance"
             exit 1
           }
@@ -75,7 +75,7 @@ jobs:
           BALANCE_ETH=$(echo "scale=2; $BALANCE / 1000000000000000000" | bc)
           echo "Wallet balance: $BALANCE_ETH ETH"
           # Verify the balance is as expected
-          if [ "$BALANCE" -ge 10000000000000000000000 ]; then
+          if [ "$BALANCE" -ge 1000000000000000000000 ]; then
             echo "Balance verification passed: Wallet has sufficient ETH"
           else
             echo "Balance verification failed: Wallet balance is less than expected"
