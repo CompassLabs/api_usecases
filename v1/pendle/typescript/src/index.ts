@@ -92,6 +92,10 @@ const UsdcAllowance = await compassApiSDK.universal.genericAllowance({
   contract: Contract.PendleRouter,
 });
 
+console.log("UsdcAllowance", UsdcAllowance);
+
+console.log(BigInt(UsdcAllowance.amount) < 1000);
+
 if (BigInt(UsdcAllowance.amount) < 1000) {
   // Set new allowance if current USDC allowance for Pendle Router is insufficient
   const setAllowanceForUsdcTx =
@@ -110,6 +114,7 @@ if (BigInt(UsdcAllowance.amount) < 1000) {
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
   });
+  console.log("YES");
 }
 // SNIPPET END 5
 
