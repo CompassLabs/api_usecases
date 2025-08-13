@@ -4,17 +4,17 @@ from compass_api_sdk import CompassAPI, models
 from dotenv import load_dotenv
 import os
 from web3 import Web3, HTTPProvider
+from web3 import Account
+
 
 load_dotenv()
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 assert COMPASS_API_KEY, "Compass API requires an API key. You can sign up for free"
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 assert PRIVATE_KEY
-WALLET_ADDRESS = os.getenv("WALLET_ADDRESS")
-assert WALLET_ADDRESS
 SPECIFIC_MORPHO_VAULT = "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738" #Seamless USDC vault
 BASE_RPC_URL = os.getenv("BASE_RPC_URL","https://base-rpc.publicnode.com")
-
+WALLET_ADDRESS = Account.from_key(PRIVATE_KEY).address
 
 w3 = Web3(HTTPProvider(BASE_RPC_URL))
 compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
