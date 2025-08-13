@@ -60,7 +60,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   tokenIn: "ETH",
   tokenOut: "USDC",
   amount: 1,
-  maxSlippagePercent: 1,
+  maxSlippagePercent: 2,
 });
 
 console.log("swapTX", swapTX);
