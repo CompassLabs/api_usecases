@@ -104,7 +104,7 @@ if (BigInt(UsdcAllowance.amount) < 1000) {
       sender: WALLET_ADDRESS,
       token: "USDC",
       contract: Contract.PendleRouter,
-      amount: 1,
+      amount: 1000,
     });
 
   const txHash = await walletClient.sendTransaction(
