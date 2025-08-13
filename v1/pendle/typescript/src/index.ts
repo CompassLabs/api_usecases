@@ -15,10 +15,12 @@ const WALLET_ADDRESS = account.address;
 // SNIPPET END 21
 
 console.log("RPC_URL", RPC_URL);
+console.log("process.env.SERVER_URL", process.env.SERVER_URL);
 
 // SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
+  serverURL: process.env.SERVER_URL || undefined, // do not set this
 });
 
 const walletClient = createWalletClient({
