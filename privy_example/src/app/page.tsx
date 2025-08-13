@@ -10,7 +10,7 @@ import { useSmartAccountClient } from "@account-kit/react";
 
 
 const sdk = new CompassApiSDK({
-  apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY!,
+  apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY!
 });
 
 export default function Home() {
@@ -75,17 +75,17 @@ export default function Home() {
   
   useEffect(() => {
     if (walletsReady && wallets.length > 1) {
-        wallets[0].switchChain(0);
-        setWallet(wallets[0]);
-        wallets[1].switchChain(1);
-        setPrivyWallet(wallets[1]);
+        wallets[0].switchChain(42161);
+        setWallet(wallets[1]);
+        wallets[1].switchChain(42161);
+        setPrivyWallet(wallets[0]);
         console.log("wallets", wallets);
     }
   }, [walletsReady]);
 
   const aave_supply = async () => {
     const auth = await sdk.transactionBundler.bundlerAuthorization({
-        chain: "ethereum:mainnet",
+        chain: "base:mainnet",
         sender: privyWallet?.address as string,
       });
 
@@ -102,7 +102,7 @@ export default function Home() {
     console.log(signedAuth);
     
     const tx = await sdk.transactionBundler.bundlerExecute({
-        chain: "ethereum:mainnet",
+        chain: "base:mainnet",
         sender: privyWallet?.address as string,
         signedAuthorization: signedAuth,
         actions: [
