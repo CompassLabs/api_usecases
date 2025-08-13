@@ -124,7 +124,7 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   action: "BUY",
   token: "USDC",
   amountIn: 1000,
-  maxSlippagePercent: 0.3,
+  maxSlippagePercent: 2,
 });
 
 console.log("YES 1");
@@ -192,7 +192,7 @@ const sellPtTx = await compassApiSDK.pendle.pendlePt({
   action: "SELL",
   token: underlyingAssetAddress,
   amountIn: userPosition.ptBalance,
-  maxSlippagePercent: 0.3,
+  maxSlippagePercent: 2,
 });
 
 console.log("3");
@@ -259,7 +259,7 @@ const buyYtTx = await compassApiSDK.pendle.pendleYt({
   action: "BUY",
   token: underlyingAssetAddress,
   amountIn: userPosition.underlyingTokenBalance,
-  maxSlippagePercent: 0.3,
+  maxSlippagePercent: 2,
 });
 
 console.log("8");
@@ -340,7 +340,7 @@ const sellYtTx = await compassApiSDK.pendle.pendleYt({
   action: "SELL",
   token: "USDT",
   amountIn: userPosition.ytBalance,
-  maxSlippagePercent: 0.3,
+  maxSlippagePercent: 2,
 });
 
 txHash = await walletClient.sendTransaction(sellYtTx.transaction as any);
@@ -403,7 +403,7 @@ const supplyLiquidityTx = await compassApiSDK.pendle.pendleLiquidity({
   action: "SUPPLY",
   token: "USDT",
   amountIn: UsdtBalance.amount,
-  maxSlippagePercent: 0.1,
+  maxSlippagePercent: 2,
 });
 
 txHash = await walletClient.sendTransaction(
