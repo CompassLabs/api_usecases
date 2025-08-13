@@ -20,6 +20,7 @@ console.log("process.env.SERVER_URL", process.env.SERVER_URL);
 // SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
+  // serverURL: "http://localhost:8000",
   serverURL: process.env.SERVER_URL || undefined, // do not set this
 });
 
@@ -69,6 +70,8 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   maxSlippagePercent: 0.3,
 });
 
+console.log("swapTX", swapTX);
+
 const swapTxHash = await walletClient.sendTransaction(
   swapTX.transaction as any
 );
@@ -76,6 +79,8 @@ const swapTxHash = await walletClient.sendTransaction(
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
+
+console.log("HELLO");
 
 // SNIPPET START 5
 const UsdcAllowance = await compassApiSDK.universal.genericAllowance({
@@ -85,7 +90,7 @@ const UsdcAllowance = await compassApiSDK.universal.genericAllowance({
   contract: Contract.PendleRouter,
 });
 
-if (Number(UsdcAllowance.amount) < 1000) {
+if (UsdcAllowance.amount < `${1000}`) {
   // Set new allowance if current USDC allowance for Pendle Router is insufficient
   const setAllowanceForUsdcTx =
     await compassApiSDK.universal.genericAllowanceSet({
