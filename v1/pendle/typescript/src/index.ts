@@ -128,12 +128,12 @@ console.log("YES 1");
 
 let txHash = await walletClient.sendTransaction(buyPtTx.transaction as any);
 
-await publicClient.waitForTransactionReceipt({
+const yes = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
 // SNIPPET END 6
 
-console.log("YES 2");
+console.log("YES 2", yes);
 
 // SNIPPET START 7
 let { userPosition } = await compassApiSDK.pendle.pendleMarket({
