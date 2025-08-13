@@ -358,6 +358,8 @@ await publicClient.waitForTransactionReceipt({
 }));
 // SNIPPET END 17
 
+console.log("12", userPosition);
+
 if (!userPosition) throw Error();
 
 // SNIPPET START 18
@@ -366,6 +368,8 @@ const UsdtBalance = await compassApiSDK.token.tokenBalance({
   token: "USDT",
   user: WALLET_ADDRESS,
 });
+
+console.log("13", UsdtBalance);
 
 const UsdtAllowance = await compassApiSDK.universal.genericAllowance({
   chain: "arbitrum",
