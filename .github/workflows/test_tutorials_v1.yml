@@ -110,7 +110,7 @@ jobs:
           ETHEREUM_MAINNET_RPC_URL: http://localhost:8546
           ARBITRUM_MAINNET_RPC_URL: http://localhost:8546
           BASE_MAINNET_RPC_URL: http://localhost:8546
-        run: make run
+        run: make run &
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
