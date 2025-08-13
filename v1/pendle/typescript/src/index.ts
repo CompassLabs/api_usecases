@@ -37,14 +37,6 @@ const publicClient = createPublicClient({
 });
 // SNIPPET END 20
 
-const ETHBalance = await compassApiSDK.token.tokenBalance({
-  chain: "arbitrum",
-  token: "ETH",
-  user: WALLET_ADDRESS,
-});
-
-console.log("ETHBalance", ETHBalance);
-
 // SNIPPET START 1
 const { markets } = await compassApiSDK.pendle.pendleMarkets({
   chain: "arbitrum",
@@ -81,6 +73,14 @@ const swapTxHash = await walletClient.sendTransaction({
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
+
+const USDCBalance = await compassApiSDK.token.tokenBalance({
+  chain: "arbitrum",
+  token: "USDC",
+  user: WALLET_ADDRESS,
+});
+
+console.log("USDCBalance", USDCBalance);
 
 // SNIPPET START 5
 const UsdcAllowance = await compassApiSDK.universal.genericAllowance({

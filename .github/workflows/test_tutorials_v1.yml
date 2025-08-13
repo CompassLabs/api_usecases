@@ -188,9 +188,6 @@ jobs:
           until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
           echo "API is running"
 
-      - name: Wait
-        run: sleep 5
-
       - name: Install dependencies
         working-directory: v1/pendle/typescript
         run: npm install
