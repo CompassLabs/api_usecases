@@ -113,6 +113,8 @@ if (BigInt(UsdcAllowance.amount) < 1000) {
 }
 // SNIPPET END 5
 
+console.log("1");
+
 // SNIPPET START 6
 const buyPtTx = await compassApiSDK.pendle.pendlePt({
   chain: "arbitrum",
@@ -123,6 +125,8 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   amountIn: 1000,
   maxSlippagePercent: 0.3,
 });
+
+console.log("2");
 
 let txHash = await walletClient.sendTransaction(buyPtTx.transaction as any);
 
@@ -171,6 +175,8 @@ if (pTAllowance.amount < userPosition.ptBalance) {
 }
 // SNIPPET END 8
 
+console.log("3");
+
 // SNIPPET START 9
 const sellPtTx = await compassApiSDK.pendle.pendlePt({
   chain: "arbitrum",
@@ -198,6 +204,8 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 10
 
 if (!userPosition) throw Error();
+
+console.log("4");
 
 // SNIPPET START 11
 const underlyingAssetAllowance = await compassApiSDK.universal.genericAllowance(
