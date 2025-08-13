@@ -5,14 +5,12 @@ on:
     # Runs at 00:00 UTC every day
     - cron: "0 0 * * *"
   # Allow manual triggering
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
-
-
   run-basic-examples:
     runs-on: ubuntu-latest
     env:
@@ -21,7 +19,6 @@ jobs:
       ZERODEV_RPC: ${{ secrets.ZERODEV_RPC }}
       WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,12 +26,10 @@ jobs:
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           cache: false
-
 
       - name: Anvil Fork Base
         run: |
@@ -50,13 +45,11 @@ jobs:
 
       - name: Install dependencies
         working-directory: v1/basic_examples/deposit_on_aave/python_example
-        run:
-          uv sync
+        run: uv sync
 
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_aave/python_example
-        run:
-          ./.venv/bin/python main.py
+        run: ./.venv/bin/python main.py
 
   failure-alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron

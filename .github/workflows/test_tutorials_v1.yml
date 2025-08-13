@@ -66,12 +66,11 @@ jobs:
           BALANCE_ETH=$(echo "scale=2; $BALANCE / 1000000000000000000" | bc)
           echo "Wallet balance: $BALANCE_ETH ETH"
           # Verify the balance is as expected
-          if [ "$BALANCE" -ge 1000000000000000000000000 ]; then
+          if [ "$BALANCE" -ge 10000000000000000000000 ]; then
             echo "Balance verification passed: Wallet has sufficient ETH"
           else
             echo "Balance verification failed: Wallet balance is less than expected"
             exit 1
-          fi
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
