@@ -50,6 +50,14 @@ const ptAddress = selectedMarket.pt.split("-")[1];
 const ytAddress = selectedMarket.yt.split("-")[1];
 // SNIPPET END 3
 
+const ETHBalance = await compassApiSDK.token.tokenBalance({
+  chain: "arbitrum",
+  token: "ETH",
+  user: WALLET_ADDRESS,
+});
+
+console.log("ETHBalance", ETHBalance);
+
 const swapTX = await compassApiSDK.swap.swapOdos({
   chain: "arbitrum",
   sender: WALLET_ADDRESS,
