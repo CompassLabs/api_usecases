@@ -114,7 +114,7 @@ if (BigInt(UsdcAllowance.amount) < 1000) {
 }
 // SNIPPET END 5
 
-console.log("YES");
+console.log("YES", WALLET_ADDRESS);
 
 // SNIPPET START 6
 const buyPtTx = await compassApiSDK.pendle.pendlePt({
