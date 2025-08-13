@@ -266,10 +266,15 @@ console.log("8");
 
 txHash = await walletClient.sendTransaction(buyYtTx.transaction as any);
 
-await publicClient.waitForTransactionReceipt({
-  hash: txHash,
-});
+console.log(
+  "9",
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  })
+);
 // SNIPPET END 12
+
+console.log("10");
 
 // SNIPPET START 13
 const redeemYieldTx = await compassApiSDK.pendle.pendleRedeemYield({
@@ -292,6 +297,8 @@ await publicClient.waitForTransactionReceipt({
   marketAddress,
 }));
 // SNIPPET END 14
+
+console.log("11", userPosition);
 
 if (!userPosition) throw Error();
 
