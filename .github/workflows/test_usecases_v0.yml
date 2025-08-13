@@ -8,6 +8,47 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  run-basic-examples:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ZERODEV_RPC: ${{ secrets.ZERODEV_RPC }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        working-directory: v0/basic_examples/deposit_on_aave/python_example
+        run:
+          uv sync
+
+      - name: Run example
+        working-directory: v0/basic_examples/deposit_on_aave/python_example
+        run:
+          ../venv/bin/python deposit_on_morpho.py
+
+      - name: Install dependencies
+        working-directory: v0/basic_examples/deposit_on_morpho/python_example
+        run:
+          uv sync
+
+      - name: Run example
+        working-directory: v0/basic_examples/deposit_on_morpho/python_example
+        run:
+          ../venv/bin/python deposit_on_morpho.py
+
+
+
+
+
+
+
   run-zero-dev:
     runs-on: ubuntu-latest
     env:
@@ -122,32 +163,6 @@ jobs:
           ./cypress/videos
         retention-days: 7
 
-  run-compass_agent:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: PWD
-      working-directory: v0/compass_agent
-      run: pwd
-
-    - name: Install uv
-      working-directory: v0/compass_agent
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    - name: Run application
-      working-directory: v0/compass_agent
-      run: uv sync
-
-    - name: Start web application
-      working-directory: v0/compass_agent
-      run: |
-        .venv/bin/python agent.py
 
   failure_alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
