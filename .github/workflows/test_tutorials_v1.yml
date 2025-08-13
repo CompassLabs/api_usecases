@@ -115,7 +115,13 @@ jobs:
           ETHEREUM_MAINNET_RPC_URL: http://localhost:8546
           ARBITRUM_MAINNET_RPC_URL: http://localhost:8546
           BASE_MAINNET_RPC_URL: http://localhost:8546
-        run: make install && make run &
+        run: make install && make run
+            # Wait for API to be ready
+            until curl -s http://localhost:8000 >/dev/null; do sleep 1; done
+            echo "API is running"
+
+      - name: Wait
+        run: sleep 5
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
