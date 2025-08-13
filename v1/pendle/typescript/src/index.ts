@@ -14,6 +14,8 @@ const account = privateKeyToAccount(PRIVATE_KEY);
 const WALLET_ADDRESS = account.address;
 // SNIPPET END 21
 
+console.log("RPC_URL", RPC_URL);
+
 // SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
