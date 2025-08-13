@@ -4,6 +4,9 @@ on:
   schedule:
     # Runs at 00:00 UTC every day
     - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
   # Allow manual triggering
   workflow_dispatch:
 
@@ -48,18 +51,18 @@ jobs:
           until curl -s http://localhost:8546 >/dev/null; do sleep 1; done
           echo "Anvil is running"
 
-      # - name: Fund Wallet with Unlimited ETH
-      #   run: |
-      #     # Derive the wallet address from the private key
-      #     WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
-      #     echo "Funding wallet: $WALLET_ADDRESS"
+      - name: Fund Wallet with Unlimited ETH
+        run: |
+          # Derive the wallet address from the private key
+          WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
+          echo "Funding wallet: $WALLET_ADDRESS"
 
-      #     # Set balance to 10,000 ETH (in wei: 10,000 * 10^18 = 0x9184e72a000000000000)
-      #     cast rpc anvil_setBalance $WALLET_ADDRESS 0x9184e72a000000000000 --rpc-url http://localhost:8546 || {
-      #       echo "Error: Failed to set balance"
-      #       exit 1
-      #     }
-      #     echo "Wallet funded with 10,000 ETH"
+          # Set balance to 10,000 ETH (in wei: 10,000 * 10^18 = 0x9184e72a000000000000)
+          cast rpc anvil_setBalance $WALLET_ADDRESS 0x9184e72a000000000000 --rpc-url http://localhost:8546 || {
+            echo "Error: Failed to set balance"
+            exit 1
+          }
+          echo "Wallet funded with 10,000 ETH"
 
       - name: Verify Wallet Balance
         run: |
