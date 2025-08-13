@@ -21,7 +21,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      SERVER_URL: http://localhost:8546
+      SERVER_URL: http://localhost:8000
       PENDLE_API_URL: https://api-v2.pendle.finance
       ENV: "production"
 
