@@ -30,41 +30,6 @@ export default function Home() {
   const {wallets, ready: walletsReady} = useWallets();
   console.log("wallets", wallets);
   console.log("walletsReady", walletsReady);
-  
-//   async function create7702Signer(){
-//     const baseSigner = new WalletClientSigner(createWalletClient({
-//         chain: base,
-//         account: privyWallet?.address as Hex,
-//         transport: custom(await wallets[0].getethereumProvider()),
-//     }), 'privy');
-
-//     const signer: SmartAccountSigner = {
-//         signerType: 'privy',
-//         getAddress: baseSigner.getAddress,
-//         signMessage: baseSigner.signMessage,
-//         signTypedData: baseSigner.signTypedData,
-//         inner: baseSigner.inner,
-//         signAuthorization: async (unsignedAuthorization: AuthorizationRequest<number>) => {
-//             const signedAuth = await signAuthorization({
-//                 contractAddress: unsignedAuthorization.address as `0x${string}`,
-//                 chainId: unsignedAuthorization.chainId,
-//                 nonce: unsignedAuthorization.nonce,
-//             });
-
-//             return {
-//                 address: unsignedAuthorization.address,
-//                 chainId: unsignedAuthorization.chainId,
-//                 nonce: unsignedAuthorization.nonce,
-//                 r: signedAuth.r,
-//                 s: signedAuth.s,
-//                 v: signedAuth.v || 0,
-//                 yParity: signedAuth.yParity,
-//             } as SignedAuthorization<number>
-//         }
-//     }
-//     return signer;
-//   }
-  
 
   const makeWallet = async () => {
     console.log('Creating privyWallet');
@@ -75,13 +40,24 @@ export default function Home() {
   
   useEffect(() => {
     if (walletsReady && wallets.length > 1) {
-        wallets[0].switchChain(42161);
-        setWallet(wallets[1]);
-        wallets[1].switchChain(42161);
-        setPrivyWallet(wallets[0]);
-        console.log("wallets", wallets);
+        
+        const privyWallet = wallets.find(wallet => wallet.walletClientType === 'privy');
+        const nonPrivyWallet = wallets.find(wallet => wallet.walletClientType !== 'privy');
+        
+        if (privyWallet && nonPrivyWallet) {
+            privyWallet.switchChain(8453);
+            nonPrivyWallet.switchChain(8453);
+            
+            setWallet(nonPrivyWallet);
+            setPrivyWallet(privyWallet);
+            
+            console.log("Privy wallet:", privyWallet);
+            console.log("Non-Privy wallet:", nonPrivyWallet);
+        } else {
+            console.log("Could not find both Privy and non-Privy wallets");
+        }
     }
-  }, [walletsReady]);
+  }, [walletsReady, wallets]);
 
   const aave_supply = async () => {
     const auth = await sdk.transactionBundler.bundlerAuthorization({
@@ -126,9 +102,6 @@ export default function Home() {
 
     console.log(tx);
 
-
-
-    // const txHash = await walletClient.sendTransaction(tx as unknown as TransactionRequest);
     const txHash = await sendTransaction(tx);
     console.log(txHash);
   }
