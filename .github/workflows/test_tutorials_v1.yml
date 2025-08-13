@@ -21,7 +21,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-      RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:8546
 
     steps:
       - name: Checkout repository
