@@ -16,6 +16,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ZERODEV_RPC: ${{ secrets.ZERODEV_RPC }}
+      WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
 
 
     steps:
