@@ -9,46 +9,6 @@ on:
 
 jobs:
 
-  run-basic-examples:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-      ZERODEV_RPC: ${{ secrets.ZERODEV_RPC }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Install dependencies
-        working-directory: v0/basic_examples/deposit_on_aave/python_example
-        run:
-          uv sync
-
-      - name: Run example
-        working-directory: v0/basic_examples/deposit_on_aave/python_example
-        run:
-          ./.venv/bin/python deposit_on_morpho.py
-
-      - name: Install dependencies
-        working-directory: v0/basic_examples/deposit_on_morpho/python_example
-        run:
-          uv sync
-
-      - name: Run example
-        working-directory: v0/basic_examples/deposit_on_morpho/python_example
-        run:
-          ./.venv/bin/python deposit_on_morpho.py
-
-
-
-
-
-
-
   run-zero-dev:
     runs-on: ubuntu-latest
     env:
