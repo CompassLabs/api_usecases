@@ -16,7 +16,8 @@ const WALLET_ADDRESS = account.address;
 
 console.log("RPC_URL", RPC_URL);
 console.log("process.env.SERVER_URL", process.env.SERVER_URL);
-
+9007199254740991;
+2000000000000000000;
 // SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -72,9 +73,10 @@ const swapTX = await compassApiSDK.swap.swapOdos({
 
 console.log("swapTX", swapTX);
 
-const swapTxHash = await walletClient.sendTransaction(
-  swapTX.transaction as any
-);
+const swapTxHash = await walletClient.sendTransaction({
+  ...(swapTX.transaction as any),
+  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
@@ -90,7 +92,7 @@ const UsdcAllowance = await compassApiSDK.universal.genericAllowance({
   contract: Contract.PendleRouter,
 });
 
-if (UsdcAllowance.amount < `${1000}`) {
+if (BigInt(UsdcAllowance.amount) < 1000) {
   // Set new allowance if current USDC allowance for Pendle Router is insufficient
   const setAllowanceForUsdcTx =
     await compassApiSDK.universal.genericAllowanceSet({
