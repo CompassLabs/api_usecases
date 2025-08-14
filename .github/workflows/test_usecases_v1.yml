@@ -71,9 +71,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: PWD
-        working-directory: v1/pendle/typescript
-        run: pwd
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Start up full local API and anvil
         uses: ./.github/actions/local_anvil_and_api
@@ -86,6 +85,10 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+
+      - name: PWD
+        working-directory: v1/pendle/typescript
+        run: pwd
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
@@ -100,6 +103,18 @@ jobs:
         env:
           RPC_URL: ${{ steps.local_anvil_and_api.outputs.arbitrum_local_url }}
         run: npm run start
+
+      - name: PWD
+        working-directory: v1/pendle/python
+        run: pwd
+
+      - name: Install dependencies
+        working-directory: v1/pendle/python
+        run: uv sync
+
+      - name: Run example
+        working-directory: v1/pendle/python
+        run: ./.venv/bin/python src/main.py
 
   failure-alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
