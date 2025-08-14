@@ -77,6 +77,7 @@ bundler_transaction = res.transaction.model_dump(by_alias=True)
 signed_transaction = w3.eth.account.sign_transaction(bundler_transaction, PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+print("receipt", receipt)
 # SNIPPET END 4
 
 if receipt.status != "success":
