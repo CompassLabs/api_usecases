@@ -251,7 +251,7 @@ market = compass_api_sdk.pendle.pendle_market(
 
 usdt_balance = compass_api_sdk.token.token_balance(
     chain="arbitrum",
-    token="USDT"
+    token="USDT",
     user=WALLET_ADDRESS,
 )
 
