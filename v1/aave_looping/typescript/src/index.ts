@@ -40,12 +40,36 @@ const auth =
     sender: account.address,
   });
 
+console.log("1");
+
 const signedAuth = await walletClient.signAuthorization({
   account,
   contractAddress: auth.address as `0x${string}`,
   nonce: auth.nonce,
 });
 // SNIPPET END 3
+
+const swapTX = await compassApiSDK.swap.swapOdos({
+  chain: "ethereum",
+  sender: account.address,
+  tokenIn: "ETH",
+  tokenOut: "USDC",
+  amount: 1,
+  maxSlippagePercent: 1,
+});
+
+console.log("2");
+
+const swapTxHash = await walletClient.sendTransaction({
+  ...(swapTX.transaction as any),
+  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+});
+
+await publicClient.waitForTransactionReceipt({
+  hash: swapTxHash,
+});
+
+console.log("3");
 
 // SNIPPET START 4
 const loopingTx =
@@ -62,12 +86,12 @@ const loopingTx =
     },
     collateralToken: "USDC",
     borrowToken: "WETH",
-    initialCollateralAmount: 4,
+    initialCollateralAmount: 100,
     multiplier: 1.5,
     maxSlippagePercent: 2.5,
     loanToValue: 70,
   })) as BundlerTransactionResponse;
-
+console.log("4");
 // SNIPPET END 4
 
 // SNIPPET START 5
@@ -75,7 +99,11 @@ const bunderTx = await walletClient.sendTransaction(
   loopingTx.transaction as any
 );
 
+console.log("5");
+
 const txHash = await walletClient.sendTransaction(bunderTx as any);
+
+console.log("6");
 
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
