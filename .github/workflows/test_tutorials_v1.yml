@@ -43,150 +43,22 @@ jobs:
         working-directory: v1/pendle/typescript
         run: pwd
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+
+
+
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
         with:
-          cache: false
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
 
-      # - name: Anvil Fork Base
-      #   run: |
-      #     anvil \
-      #     --block-time 0.05 \
-      #     --hardfork prague \
-      #     --host 0.0.0.0 \
-      #     --fork-url ${{ secrets.ETHEREUM_RPC_URL }} \
-      #     --port 8546 \
-      #     --chain-id 1 \
-      #     --no-rate-limit &
-      #     # Wait for Anvil to be ready
-      #     until curl -s http://localhost:8546 >/dev/null; do sleep 1; done
-      #     echo "Anvil is running"
 
-      # - name: Anvil Fork Base
-      #   run: |
-      #     anvil \
-      #     --block-time 0.05 \
-      #     --hardfork prague \
-      #     --host 0.0.0.0 \
-      #     --fork-url ${{ secrets.ARBITRUM_RPC_URL }} \
-      #     --port 8547 \
-      #     --chain-id 42161 \
-      #     --no-rate-limit &
-      #     # Wait for Anvil to be ready
-      #     until curl -s http://localhost:8547 >/dev/null; do sleep 1; done
-      #     echo "Anvil is running"
 
-      # - name: Anvil Fork Base
-      #   run: |
-      #     anvil \
-      #     --block-time 0.05 \
-      #     --hardfork prague \
-      #     --host 0.0.0.0 \
-      #     --fork-url ${{ secrets.BASE_RPC_URL }} \
-      #     --port 8548 \
-      #     --chain-id 8546 \
-      #     --no-rate-limit &
-      #     # Wait for Anvil to be ready
-      #     until curl -s http://localhost:8548 >/dev/null; do sleep 1; done
-      #     echo "Anvil is running"
-
-      - name: Anvil Fork Ethereum
-        run: |
-          anvil \
-          --block-time 0.05 \
-          --hardfork prague \
-          --host 0.0.0.0 \
-          --fork-url ${{ secrets.ETHEREUM_MAINNET_RPC_URL }} \
-          --port 8545 \
-          --chain-id 1 \
-          --no-rate-limit &
-
-      - name: Anvil Fork Arbitrum
-        run: |
-          anvil \
-          --block-time 0.05 \
-          --hardfork prague \
-          --host 0.0.0.0 \
-          --fork-url ${{ secrets.ARBITRUM_MAINNET_RPC_URL }} \
-          --port 8547 \
-          --chain-id 42161 \
-          --no-rate-limit &
-
-      - name: Anvil Fork Base
-        run: |
-          anvil \
-          --block-time 0.05 \
-          --hardfork prague \
-          --host 0.0.0.0 \
-          --fork-url ${{ secrets.BASE_MAINNET_RPC_URL }} \
-          --port 8546 \
-          --chain-id 8453 \
-          --no-rate-limit &
-          sleep 5
-
-      - name: Fund Wallet with 10 ETH
-        run: |
-          # Derive the wallet address from the private key
-          WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
-          echo "Funding wallet: $WALLET_ADDRESS"
-
-          # Set balance to 10 ETH
-          cast rpc anvil_setBalance $WALLET_ADDRESS 10000000000000000000 --rpc-url http://localhost:8547 || {
-            echo "Error: Failed to set balance"
-            exit 1
-          }
-          echo "Wallet funded with 10 ETH"
-
-      - name: Verify Wallet Balance
-        run: |
-          # Derive the wallet address from the private key
-          WALLET_ADDRESS=$(cast wallet address --private-key ${{ secrets.PRIVATE_KEY }})
-          # Check the balance of the EOA
-          BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
-          echo "Wallet balance: $BALANCE wei"
-          # Convert to ETH for readability (using bc for calculation)
-          BALANCE_ETH=$(echo "scale=2; $BALANCE / 1000000000000000000" | bc)
-          echo "Wallet balance: $BALANCE_ETH ETH"
-          # Verify the balance is as expected using bc
-          if [ $(echo "$BALANCE >= 10000000000000000000" | bc) -eq 1 ]; then
-            echo "Balance verification passed: Wallet has sufficient ETH"
-          else
-            echo "Balance verification failed: Wallet balance is less than expected"
-            exit 1
-          fi
-
-      - name: Generate GitHub App Token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{ secrets.MONOREPOAPP_ID }}
-          private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ steps.generate_token.outputs.token }}
-          repository: "CompassLabs/mono"
-          path: "mono"
-
-      - name: list current folder
-        run: ls
-
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Start API
-        working-directory: mono/api
-        env:
-          ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
-          ARBITRUM_MAINNET_RPC_URL: http://localhost:8547
-          BASE_MAINNET_RPC_URL: http://localhost:8546
-        run: |
-          make install && make run &
-          # Wait for API to be ready
-          until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
-          echo "API is running"
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
@@ -199,7 +71,7 @@ jobs:
       - name: Run application
         working-directory: v1/pendle/typescript
         env:
-          RPC_URL: http://localhost:8547
+          RPC_URL: ${{ steps.anvil.outputs.arbitrum_local_url }}
         run: npm run start
 
   failure_alert:

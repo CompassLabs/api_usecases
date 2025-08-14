@@ -1,0 +1,132 @@
+name: "Start Anvil forks, fund wallet, and launch API"
+description: "Starts Ethereum, Arbitrum, and Base Anvil forks, funds a wallet, clones mono repo, and runs the API."
+
+inputs:
+  ethereum_rpc_url:
+    description: "Ethereum Mainnet RPC URL"
+    required: true
+  arbitrum_rpc_url:
+    description: "Arbitrum Mainnet RPC URL"
+    required: true
+  base_rpc_url:
+    description: "Base Mainnet RPC URL"
+    required: true
+  private_key:
+    description: "Private key of the wallet to fund"
+    required: true
+  mono_app_id:
+    description: "GitHub App ID for mono repo"
+    required: true
+  mono_app_private_key:
+    description: "Private key for the GitHub App for mono repo"
+    required: true
+  fund_amount_eth:
+    description: "ETH amount to fund the wallet with"
+    default: "10"
+
+outputs:
+  ethereum_local_url:
+    description: "Localhost RPC URL for Ethereum Anvil instance"
+  arbitrum_local_url:
+    description: "Localhost RPC URL for Arbitrum Anvil instance"
+  base_local_url:
+    description: "Localhost RPC URL for Base Anvil instance"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        cache: false
+
+    - name: Start Anvil Fork Ethereum
+      shell: bash
+      run: |
+        anvil \
+        --block-time 0.05 \
+        --hardfork prague \
+        --host 0.0.0.0 \
+        --fork-url "${{ inputs.ethereum_rpc_url }}" \
+        --port 8545 \
+        --chain-id 1 \
+        --no-rate-limit &
+        echo "ethereum_local_url=http://localhost:8545" >> $GITHUB_OUTPUT
+
+    - name: Start Anvil Fork Arbitrum
+      shell: bash
+      run: |
+        anvil \
+        --block-time 0.05 \
+        --hardfork prague \
+        --host 0.0.0.0 \
+        --fork-url "${{ inputs.arbitrum_rpc_url }}" \
+        --port 8547 \
+        --chain-id 42161 \
+        --no-rate-limit &
+        echo "arbitrum_local_url=http://localhost:8547" >> $GITHUB_OUTPUT
+
+    - name: Start Anvil Fork Base
+      shell: bash
+      run: |
+        anvil \
+        --block-time 0.05 \
+        --hardfork prague \
+        --host 0.0.0.0 \
+        --fork-url "${{ inputs.base_rpc_url }}" \
+        --port 8546 \
+        --chain-id 8453 \
+        --no-rate-limit &
+        sleep 5
+        echo "base_local_url=http://localhost:8546" >> $GITHUB_OUTPUT
+
+    - name: Fund Wallet
+      shell: bash
+      run: |
+        WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
+        echo "Funding wallet: $WALLET_ADDRESS"
+        WEI_AMOUNT=$(cast to-wei "${{ inputs.fund_amount_eth }}" ether)
+        cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547
+
+    - name: Verify Wallet Balance
+      shell: bash
+      run: |
+        WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
+        BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
+        BALANCE_ETH=$(cast from-wei $BALANCE ether)
+        echo "Wallet balance: $BALANCE_ETH ETH"
+        if [ "$(echo "$BALANCE_ETH >= ${{ inputs.fund_amount_eth }}" | bc)" -ne 1 ]; then
+          echo "Balance verification failed: Wallet has less ETH than expected"
+          exit 1
+        fi
+
+    - name: Generate GitHub App Token
+      id: generate_token
+      uses: tibdex/github-app-token@v1
+      with:
+        app_id: ${{ inputs.mono_app_id }}
+        private_key: ${{ inputs.mono_app_private_key }}
+
+    - name: Checkout mono repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ steps.generate_token.outputs.token }}
+        repository: "CompassLabs/mono"
+        path: "mono"
+
+    - name: Install uv
+      shell: bash
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Start API
+      shell: bash
+      working-directory: mono/api
+      env:
+        ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
+        ARBITRUM_MAINNET_RPC_URL: http://localhost:8547
+        BASE_MAINNET_RPC_URL: http://localhost:8546
+      run: |
+        make install && make run &
+        until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
+        echo "API is running"
