@@ -126,6 +126,13 @@ runs:
         ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
         ARBITRUM_MAINNET_RPC_URL: http://localhost:8547
         BASE_MAINNET_RPC_URL: http://localhost:8546
+        PENDLE_API_URL: https://api-v2.pendle.finance
+        MORPHO_GRAPHQL_API_URL: https://blue-api.morpho.org/graphql
+        THE_GRAPH_URL_AAVE_ARBITRUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
+        THE_GRAPH_URL_AAVE_ETHEREUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
+        THE_GRAPH_URL_AAVE_BASE: https://gateway.thegraph.com/api/subgraphs/id/notvalid
+        THE_GRAPH_API_KEY: notvalid
+        ENV: "development"
       run: |
         make install && make run &
         until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
