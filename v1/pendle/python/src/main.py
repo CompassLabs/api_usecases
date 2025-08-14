@@ -60,7 +60,7 @@ usdc_allowance = compass_api_sdk.universal.generic_allowance(
 
 if int(usdc_allowance.amount) < 100:
     # Set new allowance if current USDC allowance for Pendle Router is insufficient
-    set_allowance_tx = compass_api_sdk.universal.generic_generic_allowance_set(
+    set_allowance_tx = compass_api_sdk.universal.generic_allowance_set(
         chain="arbitrum",
         sender=WALLET_ADDRESS,
         token="USDC",
