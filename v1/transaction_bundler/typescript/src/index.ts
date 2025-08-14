@@ -109,10 +109,11 @@ const bunderTx = await walletClient.sendTransaction(
 
 const txHash = await walletClient.sendTransaction(bunderTx as any);
 
-console.log(
-  "tx",
-  await publicClient.waitForTransactionReceipt({
-    hash: txHash,
-  })
-);
+const receipt = await publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
 // SNIPPET END 5
+
+if (receipt.status !== "success") {
+  throw Error();
+}
