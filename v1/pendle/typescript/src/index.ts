@@ -9,12 +9,12 @@ import { ContractEnum as Contract } from "@compass-labs/api-sdk/models/operation
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
-const RPC_URL = process.env.RPC_URL as string;
+const ARBITRUM_RPC_URL = process.env.ARBITRUM_RPC_URL as string;
 const account = privateKeyToAccount(PRIVATE_KEY);
 const WALLET_ADDRESS = account.address;
 // SNIPPET END 21
 
-console.log("RPC_URL", RPC_URL);
+console.log("ARBITRUM_RPC_URL", ARBITRUM_RPC_URL);
 console.log("process.env.SERVER_URL", process.env.SERVER_URL);
 
 // SNIPPET START 20
@@ -27,12 +27,12 @@ const compassApiSDK = new CompassApiSDK({
 const walletClient = createWalletClient({
   account,
   chain: arbitrum,
-  transport: http(RPC_URL),
+  transport: http(ARBITRUM_RPC_URL),
 });
 
 const publicClient = createPublicClient({
   chain: arbitrum,
-  transport: http(RPC_URL),
+  transport: http(ARBITRUM_RPC_URL),
 });
 // SNIPPET END 20
 
