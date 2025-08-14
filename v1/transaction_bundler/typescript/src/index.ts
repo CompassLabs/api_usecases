@@ -12,6 +12,9 @@ dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
 
+console.log("ETHEREUM_RPC_URL", ETHEREUM_RPC_URL);
+console.log("process.env.SERVER_URL", process.env.SERVER_URL);
+
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
@@ -53,7 +56,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   tokenIn: "ETH",
   tokenOut: "WETH",
   amount: 1,
-  maxSlippagePercent: 2,
+  maxSlippagePercent: 1,
 });
 
 const swapTxHash = await walletClient.sendTransaction({
