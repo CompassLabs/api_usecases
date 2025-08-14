@@ -21,12 +21,6 @@ compass_api_sdk = CompassAPI(
 w3 = Web3(Web3.HTTPProvider(ARBITRUM_RPC_URL))
 # SNIPPET END 20
 
-print("eth", compass_api_sdk.token.token_balance(
-    chain="arbitrum",
-    token="ETH",
-    user=WALLET_ADDRESS,
-))
-
 # SNIPPET START 1
 markets_response = compass_api_sdk.pendle.pendle_markets(
     chain="arbitrum",
@@ -52,7 +46,7 @@ swap_tx = compass_api_sdk.swap.swap_odos(
     amount=0.1,
     max_slippage_percent=5,
 )
-signed_tx = w3.eth.account.sign_transaction(swap_tx, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(swap_tx.transaction, PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
@@ -74,7 +68,7 @@ if usdc_allowance.amount < 100:
         amount=100,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 5
@@ -90,7 +84,7 @@ buy_pt_tx = compass_api_sdk.pendle.pendle_pt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction.transaction, PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 6
