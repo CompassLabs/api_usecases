@@ -58,7 +58,7 @@ usdc_allowance = compass_api_sdk.universal.generic_allowance(
     contract="PendleRouter",
 )
 
-if usdc_allowance.amount < 100:
+if int(usdc_allowance.amount) < 100:
     # Set new allowance if current USDC allowance for Pendle Router is insufficient
     set_allowance_tx = compass_api_sdk.universal.generic_generic_allowance_set(
         chain="arbitrum",
@@ -68,7 +68,7 @@ if usdc_allowance.amount < 100:
         amount=100,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 5
@@ -84,7 +84,7 @@ buy_pt_tx = compass_api_sdk.pendle.pendle_pt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 6
@@ -115,7 +115,7 @@ if pt_allowance.amount < market.user_position.pt_balance:
         amount=market.user_position.pt_balance,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 8
@@ -131,7 +131,7 @@ sell_pt_tx = compass_api_sdk.pendle.pendle_pt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(sell_pt_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(sell_pt_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 9
@@ -162,7 +162,7 @@ if underlying_asset_allowance.amount < market.user_position.underlying_token_bal
         amount=market.user_position.underlying_token_balance,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 11
@@ -178,7 +178,7 @@ buy_yt_tx = compass_api_sdk.pendle.pendle_yt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(buy_yt_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(buy_yt_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 12
@@ -190,7 +190,7 @@ redeem_yield_tx = compass_api_sdk.pendle.pendle_redeem_yield(
     market_address=market_address,
 )
 
-signed_tx = w3.eth.account.sign_transaction(redeem_yield_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(redeem_yield_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 13
@@ -221,7 +221,7 @@ if yt_allowance.amount < market.user_position.yt_balance:
         amount=market.user_position.yt_balance,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 15
@@ -237,7 +237,7 @@ sell_yt_tx = compass_api_sdk.pendle.pendle_yt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(sell_yt_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(sell_yt_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 16
@@ -275,7 +275,7 @@ if usdt_allowance.amount < usdt_balance.amount:
         amount=market.user_position.underlying_token_balance,
     )
 
-    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction, PRIVATE_KEY)
+    signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
     w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 18
@@ -291,7 +291,7 @@ add_liquidity_tx = compass_api_sdk.pendle.pendle_liquidity(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(add_liquidity_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(add_liquidity_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 19
