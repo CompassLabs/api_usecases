@@ -36,6 +36,14 @@ const publicClient = createPublicClient({
 });
 // SNIPPET END 2
 
+const EthBalance = await compassApiSDK.token.tokenBalance({
+  chain: "arbitrum",
+  token: "ETH",
+  user: account.address,
+});
+
+console.log("EthBalance", EthBalance);
+
 // SNIPPET START 3
 const auth =
   await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
