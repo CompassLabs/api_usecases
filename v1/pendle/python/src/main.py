@@ -12,13 +12,16 @@ ARBITRUM_RPC_URL = os.getenv("ARBITRUM_RPC_URL")
 WALLET_ADDRESS = Account.from_key(PRIVATE_KEY).address
 # SNIPPET END 21
 
+print("ARBITRUM_RPC_URL", ARBITRUM_RPC_URL)
+print("WALLET_ADDRESS", WALLET_ADDRESS)
+
 # SNIPPET START 20
 compass_api_sdk = CompassAPI(api_key_auth=os.getenv("COMPASS_API_KEY"))
 
 w3 = Web3(Web3.HTTPProvider(ARBITRUM_RPC_URL))
 # SNIPPET END 20
 
-print("eth", eth_balance = compass_api_sdk.token.token_balance(
+print("eth", compass_api_sdk.token.token_balance(
     chain="arbitrum",
     token="ETH",
     user=WALLET_ADDRESS,
