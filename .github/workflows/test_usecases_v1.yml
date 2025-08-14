@@ -95,40 +95,40 @@ jobs:
         working-directory: v1/pendle/typescript
         run: npm run start
 
-    run-pendle-python:
-      runs-on: ubuntu-latest
-      env:
-        COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-        ARBITRUM_RPC_URL: http://localhost:8547
-        SERVER_URL: http://localhost:8000
+  run-pendle-python:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ARBITRUM_RPC_URL: http://localhost:8547
+      SERVER_URL: http://localhost:8000
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-        - name: Install uv
-          run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-        - name: Start up full local API and anvil
-          uses: ./.github/actions/local_anvil_and_api
-          id: local_anvil_and_api
-          with:
-            ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-            arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-            base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-            private_key: ${{ secrets.PRIVATE_KEY }}
-            mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-            mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-            fund_amount_eth: "10"
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
 
-        - name: Install dependencies
-          working-directory: v1/pendle/python
-          run: uv sync
+      - name: Install dependencies
+        working-directory: v1/pendle/python
+        run: uv sync
 
-        - name: Run example
-          working-directory: v1/pendle/python
-          run: ./.venv/bin/python src/main.py
+      - name: Run example
+        working-directory: v1/pendle/python
+        run: ./.venv/bin/python src/main.py
 
   failure-alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
