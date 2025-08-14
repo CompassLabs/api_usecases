@@ -46,7 +46,7 @@ swap_tx = compass_api_sdk.swap.swap_odos(
     amount=0.1,
     max_slippage_percent=5,
 )
-signed_tx = w3.eth.account.sign_transaction(swap_tx.transaction, PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(swap_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
