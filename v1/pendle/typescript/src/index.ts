@@ -324,7 +324,7 @@ const UsdtAllowance = await compassApiSDK.universal.genericAllowance({
 });
 
 if (UsdtAllowance.amount < UsdtBalance.amount) {
-  // Set new allowance if current underlying asset allowance for Pendle Router is insufficient
+  // Set new allowance if current USDT allowance for Pendle Router is insufficient
   const setAllowanceForUsdtTx =
     await compassApiSDK.universal.genericAllowanceSet({
       chain: "arbitrum",
