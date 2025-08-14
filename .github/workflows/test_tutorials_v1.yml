@@ -47,7 +47,7 @@ jobs:
 
 
       - name: Start up full local API and anvil
-        uses: ./.github/actions/local_anvil_and_api
+        uses: .github/actions/local_anvil_and_api
         with:
           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}

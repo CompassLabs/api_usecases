@@ -41,6 +41,7 @@ runs:
         cache: false
 
     - name: Start Anvil Fork Ethereum
+      shell: bash
       run: |
         anvil \
         --block-time 0.05 \
@@ -53,6 +54,7 @@ runs:
         echo "ethereum_local_url=http://localhost:8545" >> $GITHUB_OUTPUT
 
     - name: Start Anvil Fork Arbitrum
+      shell: bash
       run: |
         anvil \
         --block-time 0.05 \
@@ -65,6 +67,7 @@ runs:
         echo "arbitrum_local_url=http://localhost:8547" >> $GITHUB_OUTPUT
 
     - name: Start Anvil Fork Base
+      shell: bash
       run: |
         anvil \
         --block-time 0.05 \
@@ -78,6 +81,7 @@ runs:
         echo "base_local_url=http://localhost:8546" >> $GITHUB_OUTPUT
 
     - name: Fund Wallet
+      shell: bash
       run: |
         WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
         echo "Funding wallet: $WALLET_ADDRESS"
@@ -85,6 +89,7 @@ runs:
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547
 
     - name: Verify Wallet Balance
+      shell: bash
       run: |
         WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
         BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
@@ -111,9 +116,11 @@ runs:
         path: "mono"
 
     - name: Install uv
+      shell: bash
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
     - name: Start API
+      shell: bash
       working-directory: mono/api
       env:
         ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
