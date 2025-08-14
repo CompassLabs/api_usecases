@@ -32,24 +32,6 @@ signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 signed_authorization = signed_auth.model_dump(by_alias=True)
 # SNIPPET END 2
 
-# const swapTX = await compassApiSDK.swap.swapOdos({
-#   chain: "ethereum",
-#   sender: account.address,
-#   tokenIn: "ETH",
-#   tokenOut: "WETH",
-#   amount: 1,
-#   maxSlippagePercent: 1,
-# });
-
-# const swapTxHash = await walletClient.sendTransaction({
-#   ...(swapTX.transaction as any),
-#   value: BigInt(swapTX.transaction.value), // Convert to BigInt
-# });
-
-# await publicClient.waitForTransactionReceipt({
-#   hash: swapTxHash,
-# });
-
 swap_tx = compass_api_sdk.swap.swap_odos(
     chain="ethereum",
     sender=account.address,
@@ -91,8 +73,8 @@ res = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
 # SNIPPET END 3
 
 # SNIPPET START 4
-unsigned_transaction = res.model_dump(by_alias=True)
-signed_transaction = w3.eth.account.sign_transaction(unsigned_transaction, PRIVATE_KEY)
+bundler_transaction = res.transaction.model_dump(by_alias=True)
+signed_transaction = w3.eth.account.sign_transaction(bundler_transaction, PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 4
