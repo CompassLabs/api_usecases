@@ -16,7 +16,10 @@ print("ARBITRUM_RPC_URL", ARBITRUM_RPC_URL)
 print("WALLET_ADDRESS", WALLET_ADDRESS)
 
 # SNIPPET START 20
-compass_api_sdk = CompassAPI(api_key_auth=os.getenv("COMPASS_API_KEY"))
+compass_api_sdk = CompassAPI(
+    api_key_auth=os.getenv("COMPASS_API_KEY"), 
+    server_url=os.getenv("ARBITRUM_RPC_URL") or None # For internal testing purposes. You do not need to set this.
+)
 
 w3 = Web3(Web3.HTTPProvider(ARBITRUM_RPC_URL))
 # SNIPPET END 20
