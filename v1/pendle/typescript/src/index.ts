@@ -16,8 +16,7 @@ const WALLET_ADDRESS = account.address;
 
 console.log("RPC_URL", RPC_URL);
 console.log("process.env.SERVER_URL", process.env.SERVER_URL);
-9007199254740991;
-2000000000000000000;
+
 // SNIPPET START 20
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -36,6 +35,14 @@ const publicClient = createPublicClient({
   transport: http(RPC_URL),
 });
 // SNIPPET END 20
+
+const ETHBalance = await compassApiSDK.token.tokenBalance({
+  chain: "arbitrum",
+  token: "ETH",
+  user: WALLET_ADDRESS,
+});
+
+console.log("ETHBalance", ETHBalance);
 
 // SNIPPET START 1
 const { markets } = await compassApiSDK.pendle.pendleMarkets({
