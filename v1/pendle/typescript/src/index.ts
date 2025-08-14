@@ -387,17 +387,17 @@ const UsdtAllowance = await compassApiSDK.universal.genericAllowance({
 
 if (UsdtAllowance.amount < UsdtBalance.amount) {
   // Set new allowance if current underlying asset allowance for Pendle Router is insufficient
-  const setAllowanceForUnderlyingAssetTx =
+  const setAllowanceForUsdtTx =
     await compassApiSDK.universal.genericAllowanceSet({
       chain: "arbitrum",
       sender: WALLET_ADDRESS,
       token: "USDT",
       contract: Contract.PendleRouter,
-      amount: userPosition.underlyingTokenBalance,
+      amount: UsdtBalance.amount,
     });
 
   const txHash = await walletClient.sendTransaction(
-    setAllowanceForUnderlyingAssetTx.transaction as any
+    setAllowanceForUsdtTx.transaction as any
   );
 
   await publicClient.waitForTransactionReceipt({
