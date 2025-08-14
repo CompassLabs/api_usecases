@@ -37,7 +37,7 @@ const publicClient = createPublicClient({
 // SNIPPET END 2
 
 const EthBalance = await compassApiSDK.token.tokenBalance({
-  chain: "arbitrum",
+  chain: "ethereum",
   token: "ETH",
   user: account.address,
 });
