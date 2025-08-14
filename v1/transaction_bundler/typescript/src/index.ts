@@ -12,9 +12,6 @@ dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
 
-console.log("ETHEREUM_RPC_URL", ETHEREUM_RPC_URL);
-console.log("process.env.SERVER_URL", process.env.SERVER_URL);
-
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
@@ -35,14 +32,6 @@ const publicClient = createPublicClient({
   transport: http(ETHEREUM_RPC_URL),
 });
 // SNIPPET END 2
-
-const EthBalance = await compassApiSDK.token.tokenBalance({
-  chain: "ethereum",
-  token: "ETH",
-  user: account.address,
-});
-
-console.log("EthBalance", EthBalance);
 
 // SNIPPET START 3
 const auth =
@@ -120,7 +109,10 @@ const bunderTx = await walletClient.sendTransaction(
 
 const txHash = await walletClient.sendTransaction(bunderTx as any);
 
-await publicClient.waitForTransactionReceipt({
-  hash: txHash,
-});
+console.log(
+  "tx",
+  await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  })
+);
 // SNIPPET END 5

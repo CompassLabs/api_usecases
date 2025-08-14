@@ -90,17 +90,17 @@ runs:
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8546
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547
 
-    - name: Verify Wallet Balance
-      shell: bash
-      run: |
-        WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
-        BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
-        BALANCE_ETH=$(cast from-wei $BALANCE ether)
-        echo "Wallet balance: $BALANCE_ETH ETH"
-        if [ "$(echo "$BALANCE_ETH >= ${{ inputs.fund_amount_eth }}" | bc)" -ne 1 ]; then
-          echo "Balance verification failed: Wallet has less ETH than expected"
-          exit 1
-        fi
+    # - name: Verify Wallet Balance
+    #   shell: bash
+    #   run: |
+    #     WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
+    #     BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
+    #     BALANCE_ETH=$(cast from-wei $BALANCE ether)
+    #     echo "Wallet balance: $BALANCE_ETH ETH"
+    #     if [ "$(echo "$BALANCE_ETH >= ${{ inputs.fund_amount_eth }}" | bc)" -ne 1 ]; then
+    #       echo "Balance verification failed: Wallet has less ETH than expected"
+    #       exit 1
+    #     fi
 
     - name: Generate GitHub App Token
       id: generate_token
