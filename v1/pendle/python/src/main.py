@@ -84,7 +84,7 @@ buy_pt_tx = compass_api_sdk.pendle.pendle_pt(
     max_slippage_percent=5,
 )
 
-signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction.transaction.model_dump(by_alias=True), PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(buy_pt_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 6

@@ -14,46 +14,6 @@ permissions:
   contents: write # This is required for actions/checkout
 
 jobs:
-  run-basic-examples:
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-      ZERODEV_RPC: ${{ secrets.ZERODEV_RPC }}
-      WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          cache: false
-
-      - name: Anvil Fork Base
-        run: |
-          anvil \
-          --block-time 0.05 \
-          --hardfork prague \
-          --host 0.0.0.0 \
-          --fork-url ${{ secrets.FORK_BASE_RPC_URL }} \
-          --port 8546 \
-          --chain-id 8453 \
-          --no-rate-limit &
-          sleep 5
-
-      - name: Install dependencies
-        working-directory: v1/basic_examples/deposit_on_aave/python_example
-        run: uv sync
-
-      - name: Run example
-        working-directory: v1/basic_examples/deposit_on_aave/python_example
-        run: ./.venv/bin/python main.py
-
   run-pendle-typescript:
     runs-on: ubuntu-latest
     env:
