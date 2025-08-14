@@ -1,0 +1,18 @@
+[project]
+name = "aave-looping-example" # This is your project's name, NOT an interpreter name
+version = "0.1.0"
+description = "Example of Aave looping in Python"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "web3~=7.12.0",
+    "python-dotenv~=1.1.0",
+    "compass-api-sdk~=*",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
