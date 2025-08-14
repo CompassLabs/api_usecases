@@ -8,49 +8,59 @@ from eth_account import Account
 dotenv.load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
-RPC_URL = os.getenv("RPC_URL")
-COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
+ETHEREUM_RPC_URL = os.getenv("ETHEREUM_RPC_URL")
 
-sdk = CompassAPI(api_key_auth=COMPASS_API_KEY)
+w3 = Web3(Web3.HTTPProvider(ETHEREUM_RPC_URL))
 
-private_key = PRIVATE_KEY
-if not private_key.startswith("0x"):
-    private_key = f"0x{private_key}"
+compass_api_sdk = CompassAPI(
+    api_key_auth=os.getenv("COMPASS_API_KEY"), 
+    server_url=os.getenv("SERVER_URL") or None # For internal testing purposes. You do not need to set this.
+)
 
-w3 = Web3(Web3.HTTPProvider(RPC_URL))
-account = Account.from_key(private_key)
-
+account = Account.from_key(PRIVATE_KEY)
 # SNIPPET END 1
 
 
 # SNIPPET START 2
-auth = sdk.transaction_bundler.bundler_authorization(
-    chain="ethereum:mainnet",
+auth = compass_api_sdk.transaction_bundler.transaction_bundler_authorization(
+    chain="ethereum",
     sender=account.address
 )
 
-signed_auth = Account.sign_authorization(auth.model_dump(by_alias=True), private_key)
-
+signed_auth = Account.sign_authorization(auth.model_dump(by_alias=True), PRIVATE_KEY)
 # SNIPPET END 2
 
+swap_tx = compass_api_sdk.swap.swap_odos(
+    chain="ethereum",
+    sender=account.address,
+    token_in="ETH",
+    token_out="USDC",
+    amount=1,
+    max_slippage_percent=1
+)
+signed_tx = w3.eth.account.sign_transaction(swap_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
+tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+w3.eth.wait_for_transaction_receipt(tx_hash)
+
 # SNIPPET START 3
-looping_tx = sdk.transaction_bundler.bundler_aave_loop(
-    chain="ethereum:mainnet",
+looping_tx = compass_api_sdk.transaction_bundler.transaction_bundler_aave_loop(
+    chain="ethereum",
     sender=account.address,
     signed_authorization=signed_auth.model_dump(),
     collateral_token="USDC",
     borrow_token="WETH",
-    initial_collateral_amount=10,
+    initial_collateral_amount=100,
     multiplier=1.5,
     max_slippage_percent=2.5,
     loan_to_value=70
 )
-
 # SNIPPET END 3
 
 # SNIPPET START 4
-signed_tx = w3.eth.account.sign_transaction(looping_tx.model_dump(by_alias=True), private_key)
-tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-print(f"Transaction hash: {tx_hash.hex()}")
-
+signed_transaction = w3.eth.account.sign_transaction(looping_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
+tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 4
+
+if receipt.status != 1:
+    raise Exception()
