@@ -118,11 +118,11 @@ jobs:
           fund_amount_eth: "10"
 
       - name: Install dependencies
-        working-directory: v1/basic_examples/python_example
+        working-directory: v1/basic_examples/python_example/
         run: uv sync
 
       - name: Run example
-        working-directory: v1/basic_examples/python_example
+        working-directory: v1/basic_examples/python_example/
         run: ./.venv/bin/python main.py #src/main.py
 
   run-transaction-bundler-typescript:
