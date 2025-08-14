@@ -5,8 +5,8 @@ on:
     # Runs at 00:00 UTC every day
     - cron: "0 0 * * *"
   pull_request:
-     branches:
-       - main
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -59,15 +59,8 @@ jobs:
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-      ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
+      ARBITRUM_RPC_URL: http://localhost:8547
       SERVER_URL: http://localhost:8000
-      PENDLE_API_URL: https://api-v2.pendle.finance
-      MORPHO_GRAPHQL_API_URL: https://blue-api.morpho.org/graphql
-      THE_GRAPH_URL_AAVE_ARBITRUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-      THE_GRAPH_URL_AAVE_ETHEREUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-      THE_GRAPH_URL_AAVE_BASE: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-      THE_GRAPH_API_KEY: notvalid
-      ENV: "development"
 
     steps:
       - name: Checkout repository
@@ -107,7 +100,6 @@ jobs:
         env:
           RPC_URL: ${{ steps.local_anvil_and_api.outputs.arbitrum_local_url }}
         run: npm run start
-
 
   failure-alert:
     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
