@@ -86,6 +86,8 @@ runs:
         WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
         echo "Funding wallet: $WALLET_ADDRESS"
         WEI_AMOUNT=$(cast to-wei "${{ inputs.fund_amount_eth }}" ether)
+        cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8545
+        cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8546
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547
 
     - name: Verify Wallet Balance
