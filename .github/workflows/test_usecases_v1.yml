@@ -100,8 +100,8 @@ jobs:
 
       - name: Run application
         working-directory: v1/pendle/typescript
-        env:
-          RPC_URL: ${{ steps.local_anvil_and_api.outputs.arbitrum_local_url }}
+        # env:
+        #   RPC_URL: ${{ steps.local_anvil_and_api.outputs.arbitrum_local_url }}
         run: npm run start
 
       - name: PWD

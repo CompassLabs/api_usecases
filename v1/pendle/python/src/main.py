@@ -18,6 +18,12 @@ compass_api_sdk = CompassAPI(api_key_auth=os.getenv("COMPASS_API_KEY"))
 w3 = Web3(Web3.HTTPProvider(ARBITRUM_RPC_URL))
 # SNIPPET END 20
 
+print("eth", eth_balance = compass_api_sdk.token.token_balance(
+    chain="arbitrum",
+    token="ETH",
+    user=WALLET_ADDRESS,
+))
+
 # SNIPPET START 1
 markets_response = compass_api_sdk.pendle.pendle_markets(
     chain="arbitrum",
