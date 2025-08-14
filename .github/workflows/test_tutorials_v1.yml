@@ -43,11 +43,9 @@ jobs:
         working-directory: v1/pendle/typescript
         run: pwd
 
-
-
-
       - name: Start up full local API and anvil
         uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
         with:
           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
@@ -56,9 +54,6 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
-
-
-
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
@@ -71,7 +66,7 @@ jobs:
       - name: Run application
         working-directory: v1/pendle/typescript
         env:
-          RPC_URL: ${{ steps.anvil.outputs.arbitrum_local_url }}
+          RPC_URL: ${{ steps.local_anvil_and_api.outputs.arbitrum_local_url }}
         run: npm run start
 
   failure_alert:
