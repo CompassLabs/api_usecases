@@ -66,7 +66,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   sender: WALLET_ADDRESS,
   tokenIn: "ETH",
   tokenOut: "USDC",
-  amount: 1,
+  amount: 0.1,
   maxSlippagePercent: 10,
 });
 
@@ -100,7 +100,7 @@ const UsdcAllowance = await compassApiSDK.universal.genericAllowance({
   contract: Contract.PendleRouter,
 });
 
-if (BigInt(UsdcAllowance.amount) < 1000) {
+if (BigInt(UsdcAllowance.amount) < 100) {
   // Set new allowance if current USDC allowance for Pendle Router is insufficient
   const setAllowanceForUsdcTx =
     await compassApiSDK.universal.genericAllowanceSet({
@@ -108,7 +108,7 @@ if (BigInt(UsdcAllowance.amount) < 1000) {
       sender: WALLET_ADDRESS,
       token: "USDC",
       contract: Contract.PendleRouter,
-      amount: 1000,
+      amount: 100,
     });
 
   const txHash = await walletClient.sendTransaction(
@@ -130,7 +130,7 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   marketAddress,
   action: "BUY",
   token: "USDC",
-  amountIn: 1000,
+  amountIn: 100,
   maxSlippagePercent: 10,
 });
 
