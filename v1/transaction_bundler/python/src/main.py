@@ -45,7 +45,7 @@ tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
 # SNIPPET START 3
-res = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
+bundler_tx = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
     chain="ethereum",
     sender=account.address,
     signed_authorization=signed_authorization,
@@ -73,8 +73,7 @@ res = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
 # SNIPPET END 3
 
 # SNIPPET START 4
-bundler_transaction = res.transaction.model_dump(by_alias=True)
-signed_transaction = w3.eth.account.sign_transaction(bundler_transaction, PRIVATE_KEY)
+signed_transaction = w3.eth.account.sign_transaction(bundler_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 4
