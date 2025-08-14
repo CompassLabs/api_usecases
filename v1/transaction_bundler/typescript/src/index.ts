@@ -56,9 +56,10 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   maxSlippagePercent: 2,
 });
 
-const swapTxHash = await walletClient.sendTransaction(
-  swapTX.transaction as any
-);
+const swapTxHash = await walletClient.sendTransaction({
+  ...(swapTX.transaction as any),
+  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
