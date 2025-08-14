@@ -251,7 +251,6 @@ market = compass_api_sdk.pendle.pendle_market(
 # SNIPPET END 17
 
 # SNIPPET START 18
-
 usdt_balance = compass_api_sdk.token.token_balance(
     chain="arbitrum",
     token="USDT",
@@ -270,9 +269,9 @@ if usdt_allowance.amount < usdt_balance.amount:
     set_allowance_tx = compass_api_sdk.universal.generic_allowance_set(
         chain="arbitrum",
         sender=WALLET_ADDRESS,
-        token=underlying_asset_address,
+        token="USDT",
         contract="PendleRouter",
-        amount=market.user_position.underlying_token_balance,
+        amount=usdt_balance.amount,
     )
 
     signed_tx = w3.eth.account.sign_transaction(set_allowance_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
