@@ -22,23 +22,20 @@ account = Account.from_key(PRIVATE_KEY)
 
 # SNIPPET START 2
 auth = compass_api_sdk.transaction_bundler.transaction_bundler_authorization(
-    chain=models.Chain.ETHEREUM_MAINNET,
+    chain="ethereum",
     sender=account.address
 )
 
 auth_dict = auth.model_dump(mode='json', by_alias=True)
 
 signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
-
-chain = models.Chain.ETHEREUM_MAINNET
-sender = account.address
 signed_authorization = signed_auth.model_dump(by_alias=True)
 # SNIPPET END 2
 
 # SNIPPET START 3
 res = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
-    chain=chain,
-    sender=sender,
+    chain="ethereum",
+    sender=account.address,
     signed_authorization=signed_authorization,
     actions=[
         models.UserOperation(
