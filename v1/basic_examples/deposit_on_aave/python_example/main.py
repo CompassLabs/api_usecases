@@ -14,10 +14,11 @@ PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 assert PRIVATE_KEY
 SPECIFIC_MORPHO_VAULT = "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738" #Seamless USDC vault
 BASE_RPC_URL = os.getenv("BASE_RPC_URL","https://base-rpc.publicnode.com")
+SERVER_URL = os.getenv("SERVER_URL") 
 WALLET_ADDRESS = Account.from_key(PRIVATE_KEY).address
 
 w3 = Web3(HTTPProvider(BASE_RPC_URL))
-compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
+compass = CompassAPI(api_key_auth=COMPASS_API_KEY, server_url=SERVER_URL) # TODO(ccosnett) make this optional... etc.. like in typescript
 
 # SNIPPET END 1
 
