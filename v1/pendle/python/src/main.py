@@ -54,7 +54,7 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 usdc_allowance = compass_api_sdk.universal.generic_allowance(
     chain="arbitrum",
     user=WALLET_ADDRESS,
-    token=underlying_asset_address,
+    token="USDC",
     contract="PendleRouter",
 )
 
