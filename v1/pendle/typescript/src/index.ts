@@ -300,22 +300,14 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET END 16
 
 // SNIPPET START 17
-({ userPosition } = await compassApiSDK.pendle.pendleMarket({
-  chain: "arbitrum",
-  userAddress: WALLET_ADDRESS,
-  marketAddress,
-}));
-// SNIPPET END 17
-
-if (!userPosition) throw Error();
-
-// SNIPPET START 18
 const UsdtBalance = await compassApiSDK.token.tokenBalance({
   chain: "arbitrum",
   token: "USDT",
   user: WALLET_ADDRESS,
 });
+// SNIPPET END 17
 
+// SNIPPET START 18
 const UsdtAllowance = await compassApiSDK.universal.genericAllowance({
   chain: "arbitrum",
   user: WALLET_ADDRESS,

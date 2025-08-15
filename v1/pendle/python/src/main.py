@@ -243,20 +243,14 @@ w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 16
 
 # SNIPPET START 17
-market = compass_api_sdk.pendle.pendle_market(
-    chain="arbitrum",
-    user_address=WALLET_ADDRESS,
-    market_address=market_address,
-)
-# SNIPPET END 17
-
-# SNIPPET START 18
 usdt_balance = compass_api_sdk.token.token_balance(
     chain="arbitrum",
     token="USDT",
     user=WALLET_ADDRESS,
 )
+# SNIPPET END 17
 
+# SNIPPET START 18
 usdt_allowance = compass_api_sdk.universal.generic_allowance(
     chain="arbitrum",
     user=WALLET_ADDRESS,
