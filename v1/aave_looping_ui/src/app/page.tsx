@@ -1,6 +1,6 @@
 import { WalletConnect } from "@/components/WalletConnect";
 import { EmbeddedWallet } from "@/components/EmbeddedWallet";
-import { BundledTransaction } from "@/components/BundledTransaction";
+import { AaveLooping } from "@/components/BundledTransaction";
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
             Compass Labs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Dynamic SDK Integration - Wallet Connection & Embedded Wallets
+            Dynamic SDK Integration with Aave Leverage Looping
           </p>
         </header>
 
@@ -24,15 +24,15 @@ export default function Home() {
           {/* Embedded Wallet */}
           <EmbeddedWallet />
 
-          {/* Bundled Transaction */}
-          <BundledTransaction />
+          {/* Aave Looping */}
+          <AaveLooping />
           
           {/* Info Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Features
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   🔗 Wallet Connection
@@ -53,6 +53,17 @@ export default function Home() {
                   <li>• MPC-based security</li>
                   <li>• No seed phrase management</li>
                   <li>• Cross-device access</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  📈 Aave Looping
+                </h3>
+                <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+                  <li>• Leverage up to 5x</li>
+                  <li>• Customizable LTV ratios</li>
+                  <li>• Multiple token pairs</li>
+                  <li>• Risk validation</li>
                 </ul>
               </div>
             </div>
