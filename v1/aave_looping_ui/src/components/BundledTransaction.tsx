@@ -4,10 +4,7 @@ import { useState } from 'react';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core';
-import { createWalletClient, getAddress } from 'viem';
-import { base } from 'viem/chains';
-import { http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+import { getAddress } from 'viem';
 
 export const AaveLooping = () => {
   const { user, primaryWallet } = useDynamicContext();
@@ -140,15 +137,8 @@ export const AaveLooping = () => {
         from: getAddress(loopingTx.transaction.from as `0x${string}`),
       };
       console.log('txRequest', txRequest);
-      const account = privateKeyToAccount(process.env.NEXT_PUBLIC_PRIVATE_KEY as `0x${string}`);
 
-      const viemWalletClient = createWalletClient({
-        account,
-        chain: base,
-        transport: http(),
-      });
-    //   const hash = await walletClient.sendTransaction(txRequest as any);
-      const hash = await viemWalletClient.sendTransaction(txRequest as any);
+      const hash = await walletClient.sendTransaction(txRequest as any);
       setTxHash(hash);
     } catch (e: any) {
       console.error(e);
