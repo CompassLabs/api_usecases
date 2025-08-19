@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core'
 import { CompassApiSDK } from '@compass-labs/api-sdk'
+import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core'
+import { getAddress } from 'viem'
 import LoadingSpinner from './LoadingSpinner'
 
 interface VaultActionsProps {
@@ -21,13 +24,14 @@ interface AuthorizationResponse {
 }
 
 export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSuccess }: VaultActionsProps) {
+  const { user, primaryWallet } = useDynamicContext()
   const [isDepositOpen, setIsDepositOpen] = useState(false)
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [amount, setAmount] = useState('')
   const [actionType, setActionType] = useState<'deposit' | 'withdraw' | null>(null)
-  const [authData, setAuthData] = useState<AuthorizationResponse | null>(null)
-  const [signedAuth, setSignedAuth] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
 
   const getCompassSDK = () => {
     const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
@@ -38,16 +42,20 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
   }
 
   const getAuthorization = async () => {
+    if (!user || !primaryWallet?.address) {
+      throw new Error('Please connect a wallet first.')
+    }
+
     try {
       const compassApiSDK = getCompassSDK()
+      const sender = primaryWallet.address as `0x${string}`
       
       const authResponse = await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
         chain: "base",
-        sender: "0x0000000000000000000000000000000000000000",
+        sender,
       })
       
       console.log('Authorization response:', authResponse)
-      setAuthData(authResponse as unknown as AuthorizationResponse)
       return authResponse
     } catch (error) {
       console.error('Failed to get authorization:', error)
@@ -56,19 +64,52 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
   }
 
   const signAuthorization = async (authData: AuthorizationResponse) => {
-    // TODO: this needs to be implemented by provence
+    if (!primaryWallet) {
+      throw new Error('No wallet connected')
+    }
+    console.log('primaryWallet:', primaryWallet)
+    console.log('primaryWallet.address:', primaryWallet.address)
+    
+    const connector: any = (primaryWallet as any)?.connector
+    if (!connector || !isDynamicWaasConnector(connector)) {
+      throw new Error('Authorization signing requires an embedded wallet')
+    }
+
+    console.log('authData:', authData)
+    console.log('connector:', connector)
+    console.log('connector type:', connector.constructor?.name)
+
+    try {
+      // Get wallet client to ensure connection is established
+      const walletClient = await (primaryWallet as any).getWalletClient()
+      console.log('walletClient:', walletClient)
+      console.log('walletClient.account:', walletClient?.account)
+      
+      // Sign the authorization using Dynamic connector
+      const signedAuth = await (connector as any).signAuthorization(authData)
+      console.log('signedAuth:', signedAuth)
+      return signedAuth
+    } catch (error) {
+      console.error('Error during authorization signing:', error)
+      throw new Error(`Authorization signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   const submitBundledTransaction = async (signedAuth: any, type: 'deposit' | 'withdraw') => {
+    if (!primaryWallet?.address) {
+      throw new Error('No wallet connected')
+    }
+
     try {
       const compassApiSDK = getCompassSDK()
       const amountValue = parseFloat(amount)
+      const sender = primaryWallet.address as `0x${string}`
 
       const actionType = type === 'deposit' ? 'VAULT_DEPOSIT' : 'VAULT_WITHDRAW'
 
       const bundledTx = await compassApiSDK.transactionBundler.transactionBundlerExecute({
         chain: "base",
-        sender: "0x0000000000000000000000000000000000000000",
+        sender,
         actions: [
           {
             body: {
@@ -86,7 +127,14 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
             }
           }
         ],
-        signedAuthorization: signedAuth
+        signedAuthorization: {
+          nonce: signedAuth.nonce,
+          address: signedAuth.address,
+          chainId: signedAuth.chainId,
+          r: signedAuth.r,
+          s: signedAuth.s,
+          yParity: signedAuth.yParity as number,
+        }
       })
 
       console.log('Bundled transaction result:', bundledTx)
@@ -98,8 +146,16 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
   }
 
   const handleAction = async (type: 'deposit' | 'withdraw') => {
+    setError(null)
+    setTxHash(null)
+    
+    if (!user || !primaryWallet?.address) {
+      setError('Please connect a wallet first.')
+      return
+    }
+
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount')
+      setError('Please enter a valid amount')
       return
     }
 
@@ -107,6 +163,15 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
     setActionType(type)
 
     try {
+      // Check wallet connection first
+      console.log('Step 0: Verifying wallet connection...')
+      const walletClient: any = await (primaryWallet as any).getWalletClient()
+      console.log('Wallet client ready:', !!walletClient, 'Account:', walletClient?.account)
+      
+      if (!walletClient || !walletClient.account) {
+        throw new Error('Wallet connection not fully established. Please disconnect and reconnect your wallet.')
+      }
+
       console.log('Step 1: Getting authorization...')
       const auth = await getAuthorization()
       
@@ -116,8 +181,23 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
       console.log('Step 3: Submitting bundled transaction...')
       const result = await submitBundledTransaction(signed, type)
       
+      const txRequest = {
+        ...result.transaction,
+        chainId: Number(result.transaction.chainId),
+        value: BigInt(result.transaction.value || '0x0'),
+        nonce: result.transaction.nonce ? BigInt(result.transaction.nonce) : undefined,
+        gas: result.transaction.gas ? BigInt(result.transaction.gas) : undefined,
+        maxFeePerGas: result.transaction.maxFeePerGas ? BigInt(result.transaction.maxFeePerGas) : undefined,
+        maxPriorityFeePerGas: result.transaction.maxPriorityFeePerGas ? BigInt(result.transaction.maxPriorityFeePerGas) : undefined,
+        to: getAddress(result.transaction.to as `0x${string}`),
+        from: getAddress(result.transaction.from as `0x${string}`),
+      }
+      
+      console.log('Step 4: Sending transaction...', txRequest)
+      const hash = await walletClient.sendTransaction(txRequest as any)
+      setTxHash(hash)
+      
       console.log(`${type} transaction result:`, result)
-      alert(`${type === 'deposit' ? 'Deposit' : 'Withdrawal'} transaction submitted successfully!`)
       
       setAmount('')
       setIsDepositOpen(false)
@@ -138,12 +218,14 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
           errorMessage = `Transaction was cancelled by user`
         } else if (error.message.includes('authorization')) {
           errorMessage = `Authorization failed. Please try again.`
+        } else if (error.message.includes('not fully established')) {
+          errorMessage = error.message
         } else {
           errorMessage = error.message
         }
       }
       
-      alert(errorMessage)
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
       setActionType(null)
@@ -164,26 +246,32 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
     setIsWithdrawOpen(false)
     setAmount('')
     setActionType(null)
-    setAuthData(null)
-    setSignedAuth(null)
+    setError(null)
+    setTxHash(null)
   }
 
   return (
     <>
-      <div className="flex space-x-2">
-        <button
-          onClick={() => openModal('deposit')}
-          className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-        >
-          Deposit
-        </button>
-        <button
-          onClick={() => openModal('withdraw')}
-          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-        >
-          Withdraw
-        </button>
-      </div>
+      {!user ? (
+        <p className="text-gray-600 text-sm">
+          Please connect a wallet to use vault actions.
+        </p>
+      ) : (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => openModal('deposit')}
+            className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+          >
+            Deposit
+          </button>
+          <button
+            onClick={() => openModal('withdraw')}
+            className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+          >
+            Withdraw
+          </button>
+        </div>
+      )}
 
       {isDepositOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -221,6 +309,22 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
               <p>Token: {vaultToken}</p>
               <p className="mt-1 text-gray-600">This will use the transaction bundler for gas optimization.</p>
             </div>
+
+            {txHash && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700 break-all">
+                  <span className="font-medium">Transaction Hash:</span> {txHash}
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-md">
+                <p className="text-sm text-red-700">
+                  {error}
+                </p>
+              </div>
+            )}
 
             <div className="flex space-x-3">
               <button
@@ -279,6 +383,22 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
               <p>Token: {vaultToken}</p>
               <p className="mt-1 text-gray-600">This will use the transaction bundler for gas optimization.</p>
             </div>
+
+            {txHash && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700 break-all">
+                  <span className="font-medium">Transaction Hash:</span> {txHash}
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-md">
+                <p className="text-sm text-red-700">
+                  {error}
+                </p>
+              </div>
+            )}
 
             <div className="flex space-x-3">
               <button

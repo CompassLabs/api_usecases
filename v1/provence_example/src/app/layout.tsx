@@ -1,27 +1,39 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import ErrorBoundary from '@/components/ErrorBoundary'
-
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
+import { EthereumWalletConnectors } from '@dynamic-labs/ethereum';
 
 export const metadata: Metadata = {
-  title: 'Vault Rebalance Demo',
-  description: 'A vault rebalance demonstration application built with Next.js',
-}
+  title: "Compass Labs - Dynamic SDK Example",
+  description: "A Next.js application demonstrating Dynamic SDK integration for wallet connection and embedded wallets",
+  keywords: ["Compass Labs", "Dynamic SDK", "Wallet Connection", "Embedded Wallets", "Next.js", "TypeScript"],
+  authors: [{ name: "Compass Labs" }],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ErrorBoundary>
+      <body
+        className={`antialiased bg-white dark:bg-gray-900 transition-colors duration-200`}
+      >
+        <DynamicContextProvider
+          settings={{
+            environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "REPLACE_WITH_YOUR_ENVIRONMENT_ID",
+            walletConnectors: [EthereumWalletConnectors],
+          }}
+        >
           {children}
-        </ErrorBoundary>
+        </DynamicContextProvider>
       </body>
     </html>
-  )
-} 
+  );
+}

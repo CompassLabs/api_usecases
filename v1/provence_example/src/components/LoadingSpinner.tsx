@@ -1,16 +1,15 @@
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
-  className?: string
 }
 
-export default function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ size = 'md' }: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8'
+    sm: 'h-4 w-4',
+    md: 'h-6 w-6', 
+    lg: 'h-8 w-8'
   }
 
   return (
-    <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 ${sizeClasses[size]} ${className}`} />
+    <div className={`animate-spin rounded-full border-b-2 border-blue-600 ${sizeClasses[size]}`}></div>
   )
-} 
+}
