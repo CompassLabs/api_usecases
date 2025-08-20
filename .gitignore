@@ -55,3 +55,6 @@ next-env.d.ts
 .vscode
 
 .next/
+
+
+**/dist/
