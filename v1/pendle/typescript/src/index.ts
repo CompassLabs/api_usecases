@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { arbitrum } from "viem/chains";
 import { http, createWalletClient, createPublicClient } from "viem";
 import { ContractEnum as Contract } from "@compass-labs/api-sdk/models/operations";
-
+    
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
@@ -58,9 +58,13 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   maxSlippagePercent: 2,
 });
 
+const transaction = swapTX.transaction as any;
 const swapTxHash = await walletClient.sendTransaction({
-  ...(swapTX.transaction as any),
-  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+  ...transaction,
+  value: BigInt(transaction.value),
+  gas: BigInt(transaction.gas),
+  maxFeePerGas: BigInt(transaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
 
 await publicClient.waitForTransactionReceipt({
@@ -86,9 +90,14 @@ if (BigInt(UsdcAllowance.amount) < 100) {
       amount: 100,
     });
 
-  const txHash = await walletClient.sendTransaction(
-    setAllowanceForUsdcTx.transaction as any
-  );
+  const allowanceTx = setAllowanceForUsdcTx.transaction as any;
+  const txHash = await walletClient.sendTransaction({
+    ...allowanceTx,
+    value: BigInt(allowanceTx.value || 0),
+    gas: BigInt(allowanceTx.gas),
+    maxFeePerGas: BigInt(allowanceTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(allowanceTx.maxPriorityFeePerGas),
+  });
 
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -107,7 +116,14 @@ const buyPtTx = await compassApiSDK.pendle.pendlePt({
   maxSlippagePercent: 4,
 });
 
-let txHash = await walletClient.sendTransaction(buyPtTx.transaction as any);
+const buyTx = buyPtTx.transaction as any;
+let txHash = await walletClient.sendTransaction({
+  ...buyTx,
+  value: BigInt(buyTx.value || 0),
+  gas: BigInt(buyTx.gas),
+  maxFeePerGas: BigInt(buyTx.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(buyTx.maxPriorityFeePerGas),
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
@@ -144,9 +160,14 @@ if (pTAllowance.amount < userPosition.ptBalance) {
     }
   );
 
-  const txHash = await walletClient.sendTransaction(
-    setAllowanceForPtTx.transaction as any
-  );
+  const ptAllowanceTx = setAllowanceForPtTx.transaction as any;
+  const txHash = await walletClient.sendTransaction({
+    ...ptAllowanceTx,
+    value: BigInt(ptAllowanceTx.value || 0),
+    gas: BigInt(ptAllowanceTx.gas),
+    maxFeePerGas: BigInt(ptAllowanceTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(ptAllowanceTx.maxPriorityFeePerGas),
+  });
 
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -165,7 +186,14 @@ const sellPtTx = await compassApiSDK.pendle.pendlePt({
   maxSlippagePercent: 4,
 });
 
-txHash = await walletClient.sendTransaction(sellPtTx.transaction as any);
+const sellTx = sellPtTx.transaction as any;
+txHash = await walletClient.sendTransaction({
+  ...sellTx,
+  value: BigInt(sellTx.value || 0),
+  gas: BigInt(sellTx.gas),
+  maxFeePerGas: BigInt(sellTx.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(sellTx.maxPriorityFeePerGas),
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
@@ -203,9 +231,14 @@ if (underlyingAssetAllowance.amount < userPosition.underlyingTokenBalance) {
       amount: userPosition.underlyingTokenBalance,
     });
 
-  const txHash = await walletClient.sendTransaction(
-    setAllowanceForUnderlyingAssetTx.transaction as any
-  );
+  const underlyingAllowanceTx = setAllowanceForUnderlyingAssetTx.transaction as any;
+  const txHash = await walletClient.sendTransaction({
+    ...underlyingAllowanceTx,
+    value: BigInt(underlyingAllowanceTx.value || 0),
+    gas: BigInt(underlyingAllowanceTx.gas),
+    maxFeePerGas: BigInt(underlyingAllowanceTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(underlyingAllowanceTx.maxPriorityFeePerGas),
+  });
 
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -224,7 +257,14 @@ const buyYtTx = await compassApiSDK.pendle.pendleYt({
   maxSlippagePercent: 4,
 });
 
-txHash = await walletClient.sendTransaction(buyYtTx.transaction as any);
+const buyYtTransaction = buyYtTx.transaction as any;
+txHash = await walletClient.sendTransaction({
+  ...buyYtTransaction,
+  value: BigInt(buyYtTransaction.value || 0),
+  gas: BigInt(buyYtTransaction.gas),
+  maxFeePerGas: BigInt(buyYtTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(buyYtTransaction.maxPriorityFeePerGas),
+});
 // SNIPPET END 12
 
 // SNIPPET START 13
@@ -234,7 +274,14 @@ const redeemYieldTx = await compassApiSDK.pendle.pendleRedeemYield({
   marketAddress,
 });
 
-txHash = await walletClient.sendTransaction(redeemYieldTx.transaction as any);
+const redeemTx = redeemYieldTx.transaction as any;
+txHash = await walletClient.sendTransaction({
+  ...redeemTx,
+  value: BigInt(redeemTx.value || 0),
+  gas: BigInt(redeemTx.gas),
+  maxFeePerGas: BigInt(redeemTx.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(redeemTx.maxPriorityFeePerGas),
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
@@ -271,9 +318,14 @@ if (yTAllowance.amount < userPosition.ytBalance) {
     }
   );
 
-  const txHash = await walletClient.sendTransaction(
-    setAllowanceForPtTx.transaction as any
-  );
+  const ytAllowanceTx = setAllowanceForPtTx.transaction as any;
+  const txHash = await walletClient.sendTransaction({
+    ...ytAllowanceTx,
+    value: BigInt(ytAllowanceTx.value || 0),
+    gas: BigInt(ytAllowanceTx.gas),
+    maxFeePerGas: BigInt(ytAllowanceTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(ytAllowanceTx.maxPriorityFeePerGas),
+  });
 
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -292,7 +344,14 @@ const sellYtTx = await compassApiSDK.pendle.pendleYt({
   maxSlippagePercent: 4,
 });
 
-txHash = await walletClient.sendTransaction(sellYtTx.transaction as any);
+const sellYtTransaction = sellYtTx.transaction as any;
+txHash = await walletClient.sendTransaction({
+  ...sellYtTransaction,
+  value: BigInt(sellYtTransaction.value || 0),
+  gas: BigInt(sellYtTransaction.gas),
+  maxFeePerGas: BigInt(sellYtTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(sellYtTransaction.maxPriorityFeePerGas),
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
@@ -326,9 +385,14 @@ if (UsdtAllowance.amount < UsdtBalance.amount) {
       amount: UsdtBalance.amount,
     });
 
-  const txHash = await walletClient.sendTransaction(
-    setAllowanceForUsdtTx.transaction as any
-  );
+  const usdtAllowanceTx = setAllowanceForUsdtTx.transaction as any;
+  const txHash = await walletClient.sendTransaction({
+    ...usdtAllowanceTx,
+    value: BigInt(usdtAllowanceTx.value || 0),
+    gas: BigInt(usdtAllowanceTx.gas),
+    maxFeePerGas: BigInt(usdtAllowanceTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(usdtAllowanceTx.maxPriorityFeePerGas),
+  });
 
   await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -347,9 +411,14 @@ const supplyLiquidityTx = await compassApiSDK.pendle.pendleLiquidity({
   maxSlippagePercent: 4,
 });
 
-txHash = await walletClient.sendTransaction(
-  supplyLiquidityTx.transaction as any
-);
+const supplyTx = supplyLiquidityTx.transaction as any;
+txHash = await walletClient.sendTransaction({
+  ...supplyTx,
+  value: BigInt(supplyTx.value || 0),
+  gas: BigInt(supplyTx.gas),
+  maxFeePerGas: BigInt(supplyTx.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(supplyTx.maxPriorityFeePerGas),
+});
 
 await publicClient.waitForTransactionReceipt({
   hash: txHash,
