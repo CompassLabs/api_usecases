@@ -5,7 +5,7 @@ import { mainnet } from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
-import { SendTransactionRequest } from "viem";
+
 
 dotenv.config();
 
@@ -56,9 +56,13 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   maxSlippagePercent: 1,
 });
 
+const transaction = swapTX.transaction as any;
 const swapTxHash = await walletClient.sendTransaction({
-  ...(swapTX.transaction as any),
-  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+  ...transaction,
+  value: BigInt(transaction.value),
+  gas: BigInt(transaction.gas),
+  maxFeePerGas: BigInt(transaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
 
 await publicClient.waitForTransactionReceipt({
@@ -102,7 +106,14 @@ const bundlerTx =
 // SNIPPET END 4
 
 // SNIPPET START 5
-const txHash = await walletClient.sendTransaction(bundlerTx.transaction as any);
+const bundlerTransaction = bundlerTx.transaction as any;
+const txHash = await walletClient.sendTransaction({
+  ...bundlerTransaction,
+  value: BigInt(bundlerTransaction.value || 0),
+  gas: BigInt(bundlerTransaction.gas),
+  maxFeePerGas: BigInt(bundlerTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(bundlerTransaction.maxPriorityFeePerGas),
+});
 
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,

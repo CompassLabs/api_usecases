@@ -56,9 +56,13 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   maxSlippagePercent: 1,
 });
 
+const transaction = swapTX.transaction as any;
 const swapTxHash = await walletClient.sendTransaction({
-  ...(swapTX.transaction as any),
-  value: BigInt(swapTX.transaction.value), // Convert to BigInt
+  ...transaction,
+  value: BigInt(transaction.value),
+  gas: BigInt(transaction.gas),
+  maxFeePerGas: BigInt(transaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
 
 await publicClient.waitForTransactionReceipt({
@@ -89,11 +93,14 @@ const loopingTx =
 // SNIPPET END 4
 
 // SNIPPET START 5
-const bunderTx = await walletClient.sendTransaction(
-  loopingTx.transaction as any
-);
-
-const txHash = await walletClient.sendTransaction(bunderTx as any);
+const loopingTransaction = loopingTx.transaction as any;
+const txHash = await walletClient.sendTransaction({
+  ...loopingTransaction,
+  value: BigInt(loopingTransaction.value || 0),
+  gas: BigInt(loopingTransaction.gas),
+  maxFeePerGas: BigInt(loopingTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(loopingTransaction.maxPriorityFeePerGas),
+});
 
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
