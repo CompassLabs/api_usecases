@@ -78,7 +78,7 @@ export default function Home() {
                 <div className="flex items-center space-x-4">
                   {primaryWallet && (
                     <span className="text-sm text-gray-600">
-                      {`${primaryWallet.address?.slice(0, 6)}...${primaryWallet.address?.slice(-4)}`}
+                      {`${primaryWallet.address}`}
                     </span>
                   )}
                   <button

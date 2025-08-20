@@ -15,6 +15,13 @@ export default function UserPositions() {
   const [isRebalancing, setIsRebalancing] = useState(false)
   const [rebalanceError, setRebalanceError] = useState<string | null>(null)
   const [transactionStatus, setTransactionStatus] = useState<string | null>(null)
+  
+  // Withdraw functionality state
+  const [withdrawModal, setWithdrawModal] = useState<{ isOpen: boolean; vaultId: string | null }>({ isOpen: false, vaultId: null })
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [isWithdrawing, setIsWithdrawing] = useState(false)
+  const [withdrawError, setWithdrawError] = useState<string | null>(null)
+  const [withdrawTxHash, setWithdrawTxHash] = useState<string | null>(null)
 
   if (!hasWallet) {
     return (
@@ -325,6 +332,187 @@ export default function UserPositions() {
     return totalValue > 0 ? (vaultValue / totalValue) * 100 : 0
   }
 
+  // Withdraw functionality methods
+  const getCompassSDK = () => {
+    const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
+    if (!apiKey) {
+      throw new Error('COMPASS_API_KEY not found in environment variables')
+    }
+    return new CompassApiSDK({ apiKeyAuth: apiKey })
+  }
+
+  const getAuthorization = async () => {
+    if (!user || !primaryWallet?.address) {
+      throw new Error('Please connect a wallet first.')
+    }
+
+    try {
+      const compassApiSDK = getCompassSDK()
+      const sender = primaryWallet.address as `0x${string}`
+      
+      const authResponse = await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
+        chain: "base",
+        sender,
+      })
+      
+      return authResponse
+    } catch (error) {
+      console.error('Failed to get authorization:', error)
+      throw error
+    }
+  }
+
+  const signAuthorization = async (authData: any) => {
+    if (!primaryWallet) {
+      throw new Error('No wallet connected')
+    }
+    
+    const connector: any = (primaryWallet as any)?.connector
+    if (!connector || !isDynamicWaasConnector(connector)) {
+      throw new Error('Authorization signing requires an embedded wallet')
+    }
+
+    try {
+      const walletClient = await (primaryWallet as any).getWalletClient()
+      if (!walletClient || !walletClient.account) {
+        throw new Error('Wallet connection not fully established. Please disconnect and reconnect your wallet.')
+      }
+      
+      const signedAuth = await (connector as any).signAuthorization(authData)
+      return signedAuth
+    } catch (error) {
+      console.error('Error during authorization signing:', error)
+      throw new Error(`Authorization signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  const handleWithdraw = async (vaultId: string) => {
+    setWithdrawError(null)
+    setWithdrawTxHash(null)
+    
+    if (!user || !primaryWallet?.address) {
+      setWithdrawError('Please connect a wallet first.')
+      return
+    }
+
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+      setWithdrawError('Please enter a valid amount')
+      return
+    }
+
+    const vaultPosition = positions?.vaultPositions?.find(p => p.id === vaultId)
+    if (!vaultPosition) {
+      setWithdrawError('Vault position not found')
+      return
+    }
+
+    setIsWithdrawing(true)
+
+    try {
+      console.log('Step 1: Getting authorization...')
+      const auth = await getAuthorization()
+      
+      console.log('Step 2: Signing authorization...')
+      const signed = await signAuthorization(auth)
+      
+      console.log('Step 3: Submitting bundled transaction...')
+      const compassApiSDK = getCompassSDK()
+      const amountValue = parseFloat(withdrawAmount)
+      const sender = primaryWallet.address as `0x${string}`
+
+      const bundledTx = await compassApiSDK.transactionBundler.transactionBundlerExecute({
+        chain: "base",
+        sender,
+        actions: [
+          {
+            body: {
+              contract: vaultPosition.vault.address,
+              amount: amountValue.toString(),
+              actionType: "SET_ALLOWANCE",
+              token: vaultPosition.vault.asset.address
+            }
+          },
+          {
+            body: {
+              vaultAddress: vaultPosition.vault.address,
+              amount: amountValue.toString(),
+              actionType: "VAULT_WITHDRAW"
+            }
+          }
+        ],
+        signedAuthorization: {
+          nonce: signed.nonce,
+          address: signed.address,
+          chainId: signed.chainId,
+          r: signed.r,
+          s: signed.s,
+          yParity: signed.yParity as number,
+        }
+      })
+
+      const walletClient: any = await (primaryWallet as any).getWalletClient()
+      
+      const txRequest = {
+        ...bundledTx.transaction,
+        chainId: Number(bundledTx.transaction.chainId),
+        value: BigInt(bundledTx.transaction.value || '0x0'),
+        nonce: bundledTx.transaction.nonce ? BigInt(bundledTx.transaction.nonce) : undefined,
+        gas: bundledTx.transaction.gas ? BigInt(bundledTx.transaction.gas) : undefined,
+        maxFeePerGas: bundledTx.transaction.maxFeePerGas ? BigInt(bundledTx.transaction.maxFeePerGas) : undefined,
+        maxPriorityFeePerGas: bundledTx.transaction.maxPriorityFeePerGas ? BigInt(bundledTx.transaction.maxPriorityFeePerGas) : undefined,
+        to: getAddress(bundledTx.transaction.to as `0x${string}`),
+        from: getAddress(bundledTx.transaction.from as `0x${string}`),
+      }
+      
+      console.log('Step 4: Sending transaction...', txRequest)
+      const hash = await walletClient.sendTransaction(txRequest as any)
+      setWithdrawTxHash(hash)
+      
+      setWithdrawAmount('')
+      setWithdrawModal({ isOpen: false, vaultId: null })
+      refreshPositions()
+      
+    } catch (error) {
+      console.error('Withdraw failed:', error)
+      
+      let errorMessage = 'Withdrawal failed. Please try again.'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('insufficient')) {
+          errorMessage = 'Insufficient balance for withdrawal'
+        } else if (error.message.includes('gas')) {
+          errorMessage = 'Transaction failed due to gas issues. Please try again.'
+        } else if (error.message.includes('user rejected')) {
+          errorMessage = 'Transaction was cancelled by user'
+        } else if (error.message.includes('authorization')) {
+          errorMessage = 'Authorization failed. Please try again.'
+        } else if (error.message.includes('not fully established')) {
+          errorMessage = error.message
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      setWithdrawError(errorMessage)
+    } finally {
+      setIsWithdrawing(false)
+    }
+  }
+
+  const openWithdrawModal = (vaultId: string) => {
+    setWithdrawModal({ isOpen: true, vaultId })
+    setWithdrawError(null)
+    setWithdrawTxHash(null)
+    setWithdrawAmount('')
+  }
+
+  const closeWithdrawModal = () => {
+    setWithdrawModal({ isOpen: false, vaultId: null })
+    setWithdrawAmount('')
+    setWithdrawError(null)
+    setWithdrawTxHash(null)
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
@@ -420,6 +608,17 @@ export default function UserPositions() {
                       />
                     </div>
                   </div>
+                  
+                  {/* Withdraw Button */}
+                  <div className="flex justify-end mt-3">
+                    <button
+                      onClick={() => openWithdrawModal(position.id)}
+                      disabled={isRebalancing || isWithdrawing}
+                      className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Withdraw
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -457,6 +656,95 @@ export default function UserPositions() {
                   {getTotalPercentage().toFixed(1)}%
                 </span>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Modal */}
+      {withdrawModal.isOpen && withdrawModal.vaultId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-black">
+                Withdraw from {positions?.vaultPositions?.find(p => p.id === withdrawModal.vaultId)?.vault.name || 'Vault'}
+              </h3>
+              <button
+                onClick={closeWithdrawModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-black mb-2">
+                Amount to Withdraw
+              </label>
+              <input
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                disabled={isWithdrawing}
+              />
+            </div>
+
+            {withdrawModal.vaultId && (
+              <div className="mb-4 text-xs text-black">
+                {(() => {
+                  const vaultPosition = positions?.vaultPositions?.find(p => p.id === withdrawModal.vaultId)
+                  if (!vaultPosition) return null
+                  const availableAmount = parseFloat(vaultPosition.state.assets) / Math.pow(10, vaultPosition.vault.asset.decimals)
+                  return (
+                    <>
+                      <p>Vault: {vaultPosition.vault.address.slice(0, 6)}...{vaultPosition.vault.address.slice(-4)}</p>
+                      <p>Token: {vaultPosition.vault.asset.symbol}</p>
+                      <p>Available: {availableAmount.toFixed(4)} {vaultPosition.vault.asset.symbol}</p>
+                      <p className="mt-1 text-gray-600">This will use the transaction bundler for gas optimization.</p>
+                    </>
+                  )
+                })()}
+              </div>
+            )}
+
+            {withdrawTxHash && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700 break-all">
+                  <span className="font-medium">Transaction Hash:</span> {withdrawTxHash}
+                </p>
+              </div>
+            )}
+
+            {withdrawError && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-md">
+                <p className="text-sm text-red-700">
+                  {withdrawError}
+                </p>
+              </div>
+            )}
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => withdrawModal.vaultId && handleWithdraw(withdrawModal.vaultId)}
+                disabled={isWithdrawing || !withdrawAmount}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {isWithdrawing && <LoadingSpinner size="sm" />}
+                <span>{isWithdrawing ? 'Processing...' : 'Submit Withdrawal'}</span>
+              </button>
+              <button
+                onClick={closeWithdrawModal}
+                disabled={isWithdrawing}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
