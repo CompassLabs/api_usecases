@@ -197,7 +197,7 @@ function EarnForm({
         </button>
         <div className="flex flex-col items-center">
           <div className="text-5xl font-bold font-mono tracking-tighter">
-            {amount.toFixed(3)}
+            ${(amount * Number(token.price)).toFixed(2)}
           </div>
           <div className="flex items-center gap-1.5 mt-px">
             <img
