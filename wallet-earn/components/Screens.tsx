@@ -43,7 +43,7 @@ export type TokenData = TokenBalanceResponse & TokenPriceResponse;
 
 export type VaultData = VaultGetVaultResponse & { vaultAddress: string };
 
-export default function Screens({ address }: { address: `0x${string}` }) {
+export default function Screens() {
   const [screen, setScreen] = React.useState<Screen>(Screen.Wallet);
   const [token, setToken] = React.useState<Token>(Token.ETH);
   const [tokenData, setTokenData] = React.useState<TokenData[]>();
@@ -94,10 +94,8 @@ export default function Screens({ address }: { address: `0x${string}` }) {
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{
-              x: "-70%",
+              x: "-100%",
               opacity: 0,
-              // scale: 0.9,
-              filter: "brightness(0.8)",
             }}
             transition={{
               type: "tween",

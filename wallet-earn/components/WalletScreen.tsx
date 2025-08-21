@@ -30,7 +30,7 @@ export default function WalletScreen({
         {tokenData?.map((t) => (
           <li
             key={t.tokenAddress}
-            className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-4 py-2 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
+            className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-5 py-2 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
             onClick={() => {
               setScreen(Screen.Token);
               setToken(t.tokenSymbol as Token);
@@ -41,14 +41,14 @@ export default function WalletScreen({
                 src={`/${t.tokenSymbol}.${
                   t.tokenSymbol !== "cbBTC" ? "svg" : "webp"
                 }`}
-                className="w-10 h-10 rounded-full"
+                className="w-9 h-9 rounded-full"
               />
             </div>
             <div className="ml-4">
-              <div className="font-medium">{t.tokenSymbol}</div>
+              <div className="font-semibold font-sans">{t.tokenSymbol}</div>
             </div>
             <div className="ml-auto flex flex-col items-end">
-              <div className="font-medium">
+              <div className="font-semibold font-sans">
                 {vaultData ? (
                   `$${(addTokenTotal(t, vaultData) * Number(t.price)).toFixed(
                     2
@@ -57,7 +57,7 @@ export default function WalletScreen({
                   <Skeleton className="w-10 h-3 ml-1" />
                 )}
               </div>
-              <div className="text-sm text-neutral-400">
+              <div className="text-[13px] text-neutral-400">
                 {vaultData ? (
                   addTokenTotal(t, vaultData).toFixed(3)
                 ) : (

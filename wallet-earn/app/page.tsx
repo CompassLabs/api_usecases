@@ -19,7 +19,7 @@ export default async function Home() {
           <span className="text-xs">●●●●</span>
           {account.address.slice(-4)}
         </div>
-        <Screens address={account.address} />
+        <Screens />
       </div>
     </div>
   );
