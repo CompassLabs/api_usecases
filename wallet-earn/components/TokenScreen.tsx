@@ -71,8 +71,8 @@ export default function TokenScreen({
         }}
       >
         <div className="px-1">
-          <h2 className="text-2xl font-sans font-medium">Earn</h2>
-          <p className="text-neutral-400 text-sm">
+          <h2 className="text-2xl font-sans font-semibold">Earn</h2>
+          <p className="text-neutral-500 text-sm">
             You can earn yield on your idle crypto by staking it!
           </p>
         </div>
