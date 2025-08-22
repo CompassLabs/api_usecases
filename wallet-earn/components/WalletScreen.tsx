@@ -103,17 +103,6 @@ export default function WalletScreen({
             </li>
           ))}
       </ul>
-        <div className="flex justify-center -mt-1.5">
-          <a
-            href="https://github.com/CompassLabs/api_usecases/tree/main/wallet-earn"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neutral-300 hover:text-neutral-200 underline"
-          >
-            Source code here
-          </a>
-        </div>
     </div>
-
   );
 }
