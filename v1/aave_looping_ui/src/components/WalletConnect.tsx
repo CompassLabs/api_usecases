@@ -2,13 +2,25 @@
 
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { DynamicConnectButton } from "@dynamic-labs/sdk-react-core";
+import { useState } from "react";
 
 export const WalletConnect = () => {
-  const { user, handleUnlinkWallet, primaryWallet } = useDynamicContext();
+  const { user, handleLogOut, removeWallet, primaryWallet } = useDynamicContext();
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  const handleDisconnect = () => {
-    if (primaryWallet?.id) {
-      handleUnlinkWallet(primaryWallet.id);
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    try {
+      // If user wants to completely log out (recommended for full disconnect)
+      await handleLogOut();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback to removing just the wallet if logout fails
+      if (primaryWallet?.id) {
+        removeWallet(primaryWallet.id);
+      }
+    } finally {
+      setIsDisconnecting(false);
     }
   };
 
@@ -71,9 +83,20 @@ export const WalletConnect = () => {
           <div className="flex gap-3 pt-4">
             <button
               onClick={handleDisconnect}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              disabled={isDisconnecting}
+              className={`${
+                isDisconnecting 
+                  ? 'bg-red-400 cursor-not-allowed' 
+                  : 'bg-red-600 hover:bg-red-700'
+              } text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center gap-2`}
             >
-              Disconnect Wallet
+              {isDisconnecting && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {isDisconnecting ? 'Disconnecting...' : 'Disconnect Wallet'}
             </button>
           </div>
         </div>
