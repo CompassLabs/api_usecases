@@ -103,6 +103,17 @@ export default function WalletScreen({
             </li>
           ))}
       </ul>
+        <div className="flex justify-center -mt-1.5">
+          <a
+            href="https://github.com/TODO"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-300 hover:text-neutral-200 underline"
+          >
+            Source code here
+          </a>
+        </div>
     </div>
+
   );
 }
