@@ -184,12 +184,14 @@ export const BundledTransaction = () => {
     };
     console.log('txRequest', txRequest);
 
-    // const hash = await walletClient.sendTransaction(txRequest as any);
+    // NOTE: Using dynamic's wallet client here fails to use a valid authorisation
+    // example transaction: https://basescan.org/tx/0x4a129df5b8027066d09a0fc3321e4902b529ce9bb4a0af0781037f78d22e6329
+    const hash = await walletClient.sendTransaction(txRequest as any);
 
-    //   console.log(unsignedTx);
-    // primaryWallet.switchNetwork(8453);
-      const hash = await walletClient.sendTransaction(txRequest as any);
-    //   const hash2 = await viemWalletClient.sendTransaction(txRequest as any);
+    // NOTE: Using viem's wallet client uses the correct authorisation
+    // example tx: https://basescan.org/tx/0xa07115eab728aa9e1fef812331c979f7f8a4b3dd9965b1b451bed7d10655cd28
+    // using this instead of dynamic's wallet client works
+    // const hash2 = await viemWalletClient.sendTransaction(txRequest as any);
       setTxHash(hash);
     } catch (e: any) {
       console.error(e);
