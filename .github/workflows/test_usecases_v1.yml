@@ -90,7 +90,7 @@ jobs:
         working-directory: v1/pendle/python
         run: ./.venv/bin/python src/main.py
         
-  run-basic-examples-deposit-on-morpho-python:
+  run-basic-examples-deposit-on-morpho-python: #
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
