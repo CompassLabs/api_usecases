@@ -19,7 +19,9 @@ assert COMPASS_API_KEY
 CHAIN = models.Chain.BASE
 ETH = models.TokenEnum.ETH
 USDC = models.TokenEnum.USDC
-SPECIFIC_MORPHO_VAULT = os.getenv("SPECIFIC_MORPHO_VAULT")
+SPECIFIC_MORPHO_VAULT = (
+    os.getenv("SPECIFIC_MORPHO_VAULT") or "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738"
+)  # Seamless USDC Vault on base: https://app.morpho.org/base/vault/0x616a4E1db48e22028f6bbf20444Cd3b8e3273738/seamless-usdc-vault
 
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
 
