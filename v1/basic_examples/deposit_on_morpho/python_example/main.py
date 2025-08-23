@@ -40,15 +40,18 @@ def send_tx(response):
     tx = response.model_dump(by_alias=True)
     signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
+    start = time.time()
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    end = time.time()
+    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
     # convert receipt to a serializable dict
-    return tx_hash, dict(receipt)
+    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
 
 
 # SNIPPET END 2
 
 
-# assuming your wallet has ETH but not USDC. We sell 0.01 USD of ETH for USDC.
+# assuming your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
 
 one_USD_in_ETH = 1 / float(compass.token.token_price(chain=CHAIN, token=ETH).price)
 
@@ -64,19 +67,23 @@ swap_tx = compass.swap.swap_odos(
 
 devtools.debug(send_tx(swap_tx))
 
-time.sleep(4)
+time.sleep(1)
 
 allowance_tx = compass.universal.generic_allowance_set(
     chain=CHAIN,
     sender=WALLET_ADDRESS,
     contract=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
     amount=0.01,
-    token=USDC
+    token=USDC,
 )
 
 devtools.debug(send_tx(allowance_tx))
 
-devtools.debug(compass.universal.generic_allowance(chain=CHAIN, token=USDC, user=WALLET_ADDRESS, contract=SPECIFIC_MORPHO_VAULT))
+devtools.debug(
+    compass.universal.generic_allowance(
+        chain=CHAIN, token=USDC, user=WALLET_ADDRESS, contract=SPECIFIC_MORPHO_VAULT
+    ).amount
+)
 
 
 deposit_tx = compass.morpho.morpho_deposit(
