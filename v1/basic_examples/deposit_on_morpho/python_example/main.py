@@ -1,4 +1,6 @@
 # SNIPPET START 1
+import time
+
 from compass_api_sdk import CompassAPI, models
 import os
 import dotenv
@@ -62,7 +64,7 @@ swap_tx = compass.swap.swap_odos(
 
 devtools.debug(send_tx(swap_tx))
 
-
+time.sleep(4)
 
 allowance_tx = compass.universal.generic_allowance_set(
     chain=CHAIN,
@@ -74,6 +76,8 @@ allowance_tx = compass.universal.generic_allowance_set(
 
 devtools.debug(send_tx(allowance_tx))
 
+devtools.debug(compass.universal.generic_allowance(chain=CHAIN, token=USDC, user=WALLET_ADDRESS, contract=SPECIFIC_MORPHO_VAULT))
+
 
 deposit_tx = compass.morpho.morpho_deposit(
     chain=CHAIN,
@@ -81,5 +85,4 @@ deposit_tx = compass.morpho.morpho_deposit(
     vault_address=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
     amount=0.01,
 )
-
-devtools.debug(send_tx(swap_tx))
+devtools.debug(send_tx(deposit_tx))
