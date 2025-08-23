@@ -17,6 +17,7 @@ assert COMPASS_API_KEY
 CHAIN = models.Chain.BASE
 ETH = models.TokenEnum.ETH
 USDC = models.TokenEnum.USDC
+SPECIFIC_MORPHO_VAULT = os.getenv("SPECIFIC_MORPHO_VAULT")
 
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
 
@@ -30,6 +31,7 @@ account = Account.from_key(PRIVATE_KEY)
 WALLET_ADDRESS = account.address
 # SNIPPET END 1
 
+
 # SNIPPET START 2
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
@@ -39,6 +41,8 @@ def send_tx(response):
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     # convert receipt to a serializable dict
     return tx_hash, dict(receipt)
+
+
 # SNIPPET END 2
 
 
@@ -60,4 +64,22 @@ devtools.debug(send_tx(swap_tx))
 
 
 
+allowance_tx = compass.universal.generic_allowance_set(
+    chain=CHAIN,
+    sender=WALLET_ADDRESS,
+    contract=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
+    amount=0.01,
+    token=USDC
+)
 
+devtools.debug(send_tx(allowance_tx))
+
+
+deposit_tx = compass.morpho.morpho_deposit(
+    chain=CHAIN,
+    sender=WALLET_ADDRESS,
+    vault_address=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
+    amount=0.01,
+)
+
+devtools.debug(send_tx(swap_tx))
