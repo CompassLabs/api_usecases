@@ -9,6 +9,7 @@ import {
   VaultGetVaultResponse,
 } from "@compass-labs/api-sdk/models/components";
 import { AnimatePresence, motion } from "motion/react";
+import { Spinner } from "@geist-ui/core";
 
 export enum Screen {
   Wallet,
@@ -33,14 +34,11 @@ export const vaultsByToken: { [key: string]: string[] } = {
     "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
     "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738",
   ],
-  // cbBTC: ["0x543257eF2161176D7C8cD90BA65C2d4CaEF5a796"],
   cbBTC: [],
-  // wstETH: ["0x3E3Cbfd1046C9D1863F83879cc5541B0B789Ec03"],
   wstETH: [],
 };
 
 export type TokenData = TokenBalanceResponse & TokenPriceResponse;
-
 export type VaultData = VaultGetVaultResponse & { vaultAddress: string };
 
 export default function Screens() {
@@ -48,44 +46,64 @@ export default function Screens() {
   const [token, setToken] = React.useState<Token>(Token.ETH);
   const [tokenData, setTokenData] = React.useState<TokenData[]>();
   const [vaultData, setVaultData] = React.useState<VaultData[]>();
-
+  const [loading, setLoading] = React.useState(true);
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
   const handleRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const getTokenData = async () => {
-    setTokenData(undefined);
-    const tokenDataPromises = Object.keys(Token).map((token) =>
-      fetch(`/api/token?token=${token}`).then((res) => res.json())
-    );
-    const tokenData: TokenData[] = await Promise.all(tokenDataPromises);
-    setTokenData(tokenData);
-  };
-
-  const getVaultData = async () => {
-    setVaultData(undefined);
-    const vaultDataPromises = Object.keys(vaultsByToken).flatMap((tokenKey) =>
-      vaultsByToken[tokenKey].map((vaultAddress) =>
-        fetch(`/api/vault/${vaultAddress}`)
-          .then((res) => res.json())
-          .then((data) => ({ ...data, vaultAddress }))
-      )
-    );
-    const vaultData: VaultData[] = await Promise.all(vaultDataPromises);
-    setVaultData(vaultData);
-  };
-
   React.useEffect(() => {
-    getTokenData();
-  }, [refreshTrigger]);
+    let isMounted = true;
 
-  React.useEffect(() => {
-    getVaultData();
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const tokenDataPromises = Object.keys(Token).map((token) =>
+          fetch(`/api/token?token=${token}`).then((res) => res.json())
+        );
+
+        const vaultDataPromises = Object.keys(vaultsByToken).flatMap(
+          (tokenKey) =>
+            vaultsByToken[tokenKey].map((vaultAddress) =>
+              fetch(`/api/vault/${vaultAddress}`)
+                .then((res) => res.json())
+                .then((data) => ({ ...data, vaultAddress }))
+            )
+        );
+
+        const [tokenResults, vaultResults] = await Promise.all([
+          Promise.all(tokenDataPromises),
+          Promise.all(vaultDataPromises),
+        ]);
+
+        if (isMounted) {
+          setTokenData(tokenResults);
+          setVaultData(vaultResults);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchAllData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [refreshTrigger]);
 
   const renderScreen = () => {
+    if (loading) {
+      return (
+        <div className="h-full flex items-center justify-center bg-neutral-50">
+          <Spinner size="large" className="opacity-60" />
+        </div>
+      );
+    }
+
     switch (screen) {
       case Screen.Wallet:
         return (
@@ -120,21 +138,13 @@ export default function Screens() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%", opacity: 0.5 }}
-            transition={{
-              type: "tween",
-              duration: 0.2,
-              stiffness: 300,
-              damping: 30,
-            }}
+            transition={{ type: "tween", duration: 0.2, stiffness: 300, damping: 30 }}
             className="h-full bg-neutral-50"
           >
             <TokenScreen
               setScreen={setScreen}
               tokenData={
-                (() =>
-                  tokenData?.find(
-                    (tB) => tB.tokenSymbol === token
-                  ))() as TokenData
+                tokenData?.find((tB) => tB.tokenSymbol === token) as TokenData
               }
               vaultData={vaultData?.filter(
                 (vD) => vD.underlyingToken.symbol === token
