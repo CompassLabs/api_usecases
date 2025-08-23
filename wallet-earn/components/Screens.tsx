@@ -99,7 +99,7 @@ export default function Screens() {
     if (loading) {
       return (
         <div className="h-full flex items-center justify-center bg-neutral-50">
-          <Spinner size="large" className="opacity-60" />
+          <Spinner scale={2} className="opacity-60" />
         </div>
       );
     }
