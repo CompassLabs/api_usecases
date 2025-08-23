@@ -72,7 +72,7 @@ time.sleep(1)
 allowance_tx = compass.universal.generic_allowance_set(
     chain=CHAIN,
     sender=WALLET_ADDRESS,
-    contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
+    contract='AaveV3Pool',
     amount=0.01,
     token=USDC,
 )
@@ -84,7 +84,7 @@ devtools.debug(
         chain=CHAIN,
         token=USDC,
         user=WALLET_ADDRESS,
-        contract=models.SetAllowanceRequestContractEnum.AAVE_V3_POOL,
+        contract='AaveV3Pool',
     ).amount
 )
 
