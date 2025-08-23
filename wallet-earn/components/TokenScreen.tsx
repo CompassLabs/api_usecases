@@ -83,7 +83,7 @@ export default function TokenScreen({
           )}
         >
           {(tokenData &&
-            vaultData?.map((vD) => (
+            vaultData?.slice(1).map((vD) => (
               <EarnItem
                 vaultData={vD}
                 token={tokenData}
