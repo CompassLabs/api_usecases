@@ -19,18 +19,19 @@ assert COMPASS_API_KEY
 CHAIN = models.Chain.BASE
 ETH = models.TokenEnum.ETH
 USDC = models.TokenEnum.USDC
-SPECIFIC_MORPHO_VAULT = os.getenv("SPECIFIC_MORPHO_VAULT")
+SPECIFIC_MORPHO_VAULT = (
+    os.getenv("SPECIFIC_MORPHO_VAULT") or "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738"
+)  # Seamless USDC Vault on base: https://app.morpho.org/base/vault/0x616a4E1db48e22028f6bbf20444Cd3b8e3273738/seamless-usdc-vault
+account = Account.from_key(PRIVATE_KEY)
+WALLET_ADDRESS = account.address
 
+# initialize clients
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
-
 compass = CompassAPI(
     api_key_auth=COMPASS_API_KEY,
     server_url=os.getenv("SERVER_URL")
     or None,  # For internal testing purposes. You do not need to set this.
 )
-
-account = Account.from_key(PRIVATE_KEY)
-WALLET_ADDRESS = account.address
 # SNIPPET END 1
 
 
@@ -65,34 +66,41 @@ swap_tx = compass.swap.swap_odos(
     max_slippage_percent=1,
 )
 
-devtools.debug(send_tx(swap_tx))
+print(send_tx(swap_tx))
 
 time.sleep(1)
 
+# SNIPPET START 3
+# SET ALLOWANCE
+# Get unsigned Allowance Transaction from the Compass API
 allowance_tx = compass.universal.generic_allowance_set(
     chain=CHAIN,
     sender=WALLET_ADDRESS,
-    contract="AaveV3Pool",
+    contract=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
     amount=0.01,
     token=USDC,
 )
+# SNIPPET END 3
 
-devtools.debug(send_tx(allowance_tx))
-
-devtools.debug(
-    compass.universal.generic_allowance(
-        chain=CHAIN,
-        token=USDC,
-        user=WALLET_ADDRESS,
-        contract="AaveV3Pool",
-    ).amount
-)
+# SNIPPET START 4
+print(send_tx(allowance_tx))
+# SNIPPET END 4
 
 
-deposit_tx = compass.aave_v3.aave_supply(
+
+# SNIPPET START 5
+# DEPOSIT ON MORPHO
+# Get unsigned transaction
+deposit_tx = compass.morpho.morpho_deposit(
     chain=CHAIN,
     sender=WALLET_ADDRESS,
-    token=USDC,  # seamless USDC Vault.
+    vault_address=SPECIFIC_MORPHO_VAULT,  # seamless USDC Vault.
     amount=0.01,
 )
-devtools.debug(send_tx(deposit_tx))
+# SNIPPET END 5
+
+
+# SNIPPET START 6
+
+print(send_tx(deposit_tx))
+# SNIPPET END 6

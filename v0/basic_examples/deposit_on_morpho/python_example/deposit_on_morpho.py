@@ -59,6 +59,8 @@ res = compass.morpho.deposit(
     sender=WALLET_ADDRESS,
 )
 print(res.model_dump())
+# SNIPPET END 5
+
 
 # SNIPPET START 6
 # Sign and broadcast deposit transaction
