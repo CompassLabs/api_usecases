@@ -169,7 +169,9 @@ function EarnForm({
           method: "POST",
           body: JSON.stringify({
             vaultAddress: vaultData.vaultAddress,
-            amount: amount === 0 ? "ALL" : withdrawAmount,
+            amount: withdrawAmount,
+            isAll: amount === 0 ? true : false,
+            token: token.tokenSymbol,
           }),
         });
       }
