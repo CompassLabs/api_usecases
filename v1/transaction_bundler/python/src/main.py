@@ -13,8 +13,9 @@ ETHEREUM_RPC_URL = os.getenv("ETHEREUM_RPC_URL")
 w3 = Web3(Web3.HTTPProvider(ETHEREUM_RPC_URL))
 
 compass_api_sdk = CompassAPI(
-    api_key_auth=os.getenv("COMPASS_API_KEY"), 
-    server_url=os.getenv("SERVER_URL") or None # For internal testing purposes. You do not need to set this.
+    api_key_auth=os.getenv("COMPASS_API_KEY"),
+    server_url=os.getenv("SERVER_URL")
+    or None,  # For internal testing purposes. You do not need to set this.
 )
 
 account = Account.from_key(PRIVATE_KEY)
@@ -22,11 +23,10 @@ account = Account.from_key(PRIVATE_KEY)
 
 # SNIPPET START 2
 auth = compass_api_sdk.transaction_bundler.transaction_bundler_authorization(
-    chain="ethereum",
-    sender=account.address
+    chain="ethereum", sender=account.address
 )
 
-auth_dict = auth.model_dump(mode='json', by_alias=True)
+auth_dict = auth.model_dump(mode="json", by_alias=True)
 
 signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 signed_authorization = signed_auth.model_dump(by_alias=True)
@@ -38,9 +38,11 @@ swap_tx = compass_api_sdk.swap.swap_odos(
     token_in="ETH",
     token_out="WETH",
     amount=1,
-    max_slippage_percent=1
+    max_slippage_percent=1,
 )
-signed_tx = w3.eth.account.sign_transaction(swap_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
+signed_tx = w3.eth.account.sign_transaction(
+    swap_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY
+)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
@@ -73,7 +75,9 @@ bundler_tx = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
 # SNIPPET END 3
 
 # SNIPPET START 4
-signed_transaction = w3.eth.account.sign_transaction(bundler_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY)
+signed_transaction = w3.eth.account.sign_transaction(
+    bundler_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY
+)
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 # SNIPPET END 4

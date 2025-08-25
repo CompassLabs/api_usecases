@@ -13,7 +13,7 @@ RPC_URL = os.getenv("RPC_URL")
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 
 with CompassAPI(
-        api_key_auth=os.getenv("COMPASS_API_KEY"),
+    api_key_auth=os.getenv("COMPASS_API_KEY"),
 ) as compass_api:
     # First get the authorization
     account = Account.from_key(PRIVATE_KEY)
@@ -22,11 +22,10 @@ with CompassAPI(
 
     # SNIPPET START 2
     auth = compass_api.transaction_bundler.bundler_authorization(
-        chain=models.Chain.ETHEREUM_MAINNET,
-        sender=account.address
+        chain=models.Chain.ETHEREUM_MAINNET, sender=account.address
     )
 
-    auth_dict = auth.model_dump(mode='json', by_alias=True)
+    auth_dict = auth.model_dump(mode="json", by_alias=True)
 
     # Sign the authorization
     signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
@@ -71,7 +70,9 @@ with CompassAPI(
 
     # SNIPPET START 4
     unsigned_transaction = res.model_dump(by_alias=True)
-    signed_transaction = w3.eth.account.sign_transaction(unsigned_transaction, PRIVATE_KEY)
+    signed_transaction = w3.eth.account.sign_transaction(
+        unsigned_transaction, PRIVATE_KEY
+    )
     txn_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
     print(txn_hash.hex())
     # SNIPPET END 4
