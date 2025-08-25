@@ -123,7 +123,7 @@ jobs:
 
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python_example
-        run: ./.venv/bin/python main.py #src/main.py        
+        run: ./.venv/bin/python deposit_on_morpho.py #src/main.py
         
   run-basic-examples-deposit-on-aave-python:
     runs-on: ubuntu-latest
