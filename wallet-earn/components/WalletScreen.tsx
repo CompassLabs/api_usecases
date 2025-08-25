@@ -21,7 +21,7 @@ export default function WalletScreen({
           {tokenData && vaultData ? (
             `$${addTotalBalance(tokenData, vaultData).toFixed(2)}`
           ) : (
-            <Skeleton className="w-32 h-10" />
+            <Skeleton className="w-32 h-10 rounded-xl" />
           )}
         </div>
         <div className="text-neutral-400 -mt-0.5">Total value</div>
@@ -70,8 +70,13 @@ function TokenCard({
           className="w-9 h-9 rounded-full"
         />
       </div>
-      <div className="ml-4">
-        <div className="font-semibold font-sans">{tokenSymbol}</div>
+      <div className="ml-4 flex items-center gap-2">
+        <div className="font-semibold font-sans">{tokenSymbol}</div>{" "}
+        {vaultsByToken[`${tokenSymbol}`].length > 0 && (
+          <div className="border border-sky-600/30 bg-sky-400/5 px-1.5 rounded-full text-[11px] text-sky-600/80 font-medium">
+            Earn
+          </div>
+        )}
       </div>
       <div className="ml-auto flex flex-col items-end">
         <div className="font-semibold font-sans">
@@ -92,11 +97,6 @@ function TokenCard({
           {tokenSymbol}
         </div>
       </div>
-      {true && (
-        <div className="ml-4 border border-emerald-600/50 bg-emerald-400/5 px-1.5 rounded-full text-[12px] text-emerald-600/80 font-medium">
-          Earn
-        </div>
-      )}
     </li>
   );
 }

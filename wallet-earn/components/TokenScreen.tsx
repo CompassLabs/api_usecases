@@ -1,9 +1,9 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Inbox } from "lucide-react";
 import { Screen, TokenData, VaultData } from "./Screens";
-import { Spinner } from "@geist-ui/core";
+import { Loading } from "@geist-ui/core";
 import React from "react";
 import { addTokenTotal, cn } from "@/utils/utils";
-
+import { motion } from "motion/react";
 import EarnItem from "./EarnItem";
 import Skeleton from "./primitives/Skeleton";
 
@@ -27,15 +27,27 @@ export default function TokenScreen({
         isOpen && "scale-[0.97] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
       )}
     >
-      <div className="flex flex-col items-center justify-end flex-2 relative">
-        <div className="absolute inset-x-0 h-14 bottom-0 translate-y-full bg-gradient-to-b from-neutral-50 via-neutral-50 via-30% to-transparent" />
+      <motion.button
+        className="absolute z-10 top-4 left-0 p-2 rounded-full hover:bg-neutral-100 duration-200 cursor-pointer"
+        onClick={() => {
+          console.log("isOpen", isOpen);
+          !isOpen && setScreen(Screen.Wallet);
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { delay: 0.2 } }}
+        exit={{ opacity: 0, transition: { duration: 0.01 } }}
+        // transition={{ delay: 0.2 }}
+      >
+        <ChevronLeft size={28} />
+      </motion.button>
+      <div className="flex-[0.9] flex flex-col items-center justify-center mt-4 relative">
         <h1 className="text-5xl font-bold mb-2 font-sans tracking-tighter">
           {tokenData && vaultData ? (
             `$${(
               addTokenTotal(tokenData, vaultData) * Number(tokenData.price)
             ).toFixed(2)}`
           ) : (
-            <Skeleton className="w-32 h-10" />
+            <Skeleton className="w-32 h-10 rounded-xl" />
           )}
         </h1>
         <div className="p-px shadow-inner shadow-neutral-300 rounded-full mb-2">
@@ -55,48 +67,41 @@ export default function TokenScreen({
           {tokenData?.tokenSymbol}
         </div>
       </div>
-      <button
-        className="absolute top-3 left-0 p-2 rounded-full hover:bg-neutral-100 duration-200 cursor-pointer"
-        onClick={() => {
-          console.log("isOpen", isOpen);
-          !isOpen && setScreen(Screen.Wallet);
-        }}
-      >
-        <ChevronLeft size={28} />
-      </button>
-      <div
-        className="overflow-y-auto overflow-x-hidden flex-3 pt-14"
-        style={{
-          scrollbarWidth: "none",
-        }}
-      >
+      <div className="flex-1 flex flex-col">
         <div className="px-1">
           <h2 className="text-2xl font-sans font-semibold">Earn</h2>
           <p className="text-neutral-500 text-sm">
             You can earn yield on your idle crypto by staking it!
           </p>
         </div>
-        <ul
-          className={cn(
-            "flex flex-col gap-2 -mx-3 pt-3 pb-3 px-3 ",
-            !vaultData && "h-full"
-          )}
-        >
-          {(tokenData &&
-            vaultData?.map((vD) => (
-              <EarnItem
-                vaultData={vD}
-                token={tokenData}
-                key={vD.symbol}
-                setIsOpen={setIsOpen}
-                handleRefresh={handleRefresh}
-              />
-            ))) || (
-            <div className="w-full flex justify-center items-center my-auto">
-              <Spinner className="opacity-50" />
-            </div>
-          )}
-        </ul>
+        {tokenData && vaultData && vaultData.length > 0 ? (
+          <ul className="flex flex-col gap-2 -mx-3 pt-3 pb-3 px-3">
+            {tokenData &&
+              vaultData?.map((vD) => (
+                <EarnItem
+                  vaultData={vD}
+                  token={tokenData}
+                  key={vD.symbol}
+                  setIsOpen={setIsOpen}
+                  handleRefresh={handleRefresh}
+                />
+              ))}
+          </ul>
+        ) : (
+          <div className="w-full flex flex-col justify-center items-center my-auto">
+            {vaultData?.length === 0 ? (
+              <>
+                <Inbox className="stroke-[0.4] text-zinc-400/70" size={64} />
+                <div className="text-[13px] text-zinc-400 text-center">
+                  There are currently no {tokenData?.tokenSymbol}
+                  <br /> earning oppurtunities.
+                </div>
+              </>
+            ) : (
+              <Loading className="opacity-60" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -32,59 +32,48 @@ export default function EarnItem({
   return (
     <>
       <li
-        className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-4 py-2 shadow shadow-neutral-100 hover:scale-[1.01]. duration-300 cursor-pointer. hover:shadow-neutral-200."
+        className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-4 py-2 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
+        onClick={() => {
+          setOpen(true);
+          setIsOpen(true);
+        }}
         key={vaultData.symbol}
       >
-        <div className="flex flex-col w-full">
-          <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5">
-            Historical Earnings
-          </h3>
-          <ul className="flex justify-between">
-            {Object.entries(vaultData.apy).map(
-              ([key, value]) =>
-                key !== "current" && (
-                  <li className="flex flex-col items-center" key={key}>
-                    <div className="font-bold flex items-center gap-1 font-sans">
-                      <TrendingUp className="text-green-600" size={14} />
-                      {Number(value).toFixed(2)}%
-                    </div>
-                    <div className="text-neutral-500 text-[13px] -mt-0.5">
-                      {key.replace("apy", "").replace("Day", " day")}
-                    </div>
-                  </li>
-                )
-            )}
-          </ul>
-          <div className="flex">
-            <div className="mt-8 flex flex-col flex-1 items-center">
-              <h3 className="text-center font-medium text-sm mb-2 flex items-center gap-1.5">
-                Staked Position
+        <div className="flex justify-between w-full px-6">
+          <div className="flex flex-col">
+            <h3 className="self-center text-sm font-medium flex items-center gap-1.5 text-zinc-500">
+              APY
+            </h3>
+            <div className="flex flex-col items-center">
+              <div className="relative font-bold flex items-center gap-1 font-sans text-lg">
+                <TrendingUp
+                  className="absolute -translate-x-full -left-1 text-green-600"
+                  size={14}
+                />
+                {Number(vaultData.apy.apy7Day).toFixed(2)}%
+              </div>
+              <div className="text-neutral-500 text-[13px] -mt-0.5">7 day</div>
+            </div>
+          </div>
+          <div className="flex.">
+            <div className="flex flex-col flex-1 items-center">
+              <h3 className="text-center font-medium text-sm flex items-center gap-1.5 text-zinc-500">
+                Position
               </h3>
-              <div className="text-xl font-bold font-sans">
+              <div className="text-lg font-bold font-sans">
                 $
                 {(
                   Number(vaultData.userPosition?.amountInUnderlyingToken) *
                   Number(token.price)
                 ).toFixed(2)}
               </div>
-              <div className="text-sm text-neutral-500">
+              <div className="text-[13px] text-neutral-500 -mt-0.5">
                 {Number(
                   vaultData.userPosition?.amountInUnderlyingToken
                 ).toFixed(3)}{" "}
                 {vaultData.underlyingToken.symbol}
               </div>
             </div>
-          </div>
-          <div className="ml-auto. mt-4 w-full">
-            <button
-              className="bg-[#7D00FF]/90. bg-gradient-to-b from-neutral-700 via-neutral-900 to-neutral-800 outline-[1.5px] outline-[#7D00FF]. outline-neutral-950 w-full text-white px-3 py-1 rounded-md font-medium text-sm cursor-pointer hover:scale-[1.01] duration-300 shadow hover:shadow-md"
-              onClick={() => {
-                setOpen(true);
-                setIsOpen(true);
-              }}
-            >
-              Stake
-            </button>
           </div>
         </div>
       </li>
@@ -103,7 +92,7 @@ export default function EarnItem({
       />
       <div
         className={cn(
-          "absolute -inset-x-4 bg-white -bottom-4 rounded-t-[42px] border border-neutral-100 translate-y-full duration-300 shadow-xl shadow-neutral-600 px-3",
+          "absolute z-10 -inset-x-4 bg-white -bottom-4 rounded-t-[42px] border border-neutral-100 translate-y-full duration-300 shadow-xl shadow-neutral-600 px-3",
           open &&
             !isClosing &&
             "translate-y-0 duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
@@ -189,42 +178,71 @@ function EarnForm({
 
   return (
     <div className="flex flex-col justify-center items-center gap-12 h-full pt-12 pb-8">
-      <div className="flex w-full justify-around items-center">
-        <button
-          className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-          onClick={() => setAmount(0)}
-          disabled={isLoading}
-        >
-          None
-        </button>
-        <div className="flex flex-col items-center">
-          <div className="text-5xl font-bold font-mono tracking-tighter">
-            ${(amount * Number(token.price)).toFixed(2)}
-          </div>
-          <div className="flex items-center gap-1.5 mt-px">
-            <img
-              className="w-5 h-5"
-              src={`${token.tokenSymbol}.${
-                token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
-              }`}
-            />
-            <div className="text-neutral-500 font-medium">
-              {token.tokenSymbol}
+      <div className="flex flex-col w-full">
+        <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
+          Historical Earnings
+        </h3>
+        <ul className="flex justify-around w-full">
+          {Object.entries(vaultData.apy).map(
+            ([key, value]) =>
+              key !== "current" && (
+                <li className="flex flex-col items-center" key={key}>
+                  <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+                    <TrendingUp
+                      className="absolute -translate-x-full -left-1 text-green-600"
+                      size={14}
+                    />
+                    {Number(value).toFixed(2)}%
+                  </div>
+                  <div className="text-neutral-500 text-[13px] -mt-0.5">
+                    {key.replace("apy", "").replace("Day", " day")}
+                  </div>
+                </li>
+              )
+          )}
+        </ul>
+      </div>
+      <div className="flex flex-col w-full">
+        <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
+          Staked Position
+        </h3>
+        <div className="flex w-full justify-around items-center">
+          <button
+            className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
+            onClick={() => setAmount(0)}
+            disabled={isLoading}
+          >
+            None
+          </button>
+          <div className="flex flex-col items-center">
+            <div className="text-5xl font-bold font-mono tracking-tighter">
+              ${(amount * Number(token.price)).toFixed(2)}
+            </div>
+            <div className="flex items-center gap-1.5 mt-px">
+              <img
+                className="w-5 h-5"
+                src={`${token.tokenSymbol}.${
+                  token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
+                }`}
+              />
+              <div className="text-neutral-500 font-medium">
+                {token.tokenSymbol}
+              </div>
             </div>
           </div>
+          <button
+            className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
+            onClick={() =>
+              setAmount(
+                Number(token.amount) +
+                  Number(vaultData.userPosition?.amountInUnderlyingToken)
+              )
+            }
+            disabled={isLoading}
+          >
+            All
+          </button>
         </div>
-        <button
-          className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-          onClick={() =>
-            setAmount(
-              Number(token.amount) +
-                Number(vaultData.userPosition?.amountInUnderlyingToken)
-            )
-          }
-          disabled={isLoading}
-        >
-          All
-        </button>
       </div>
       <div className="w-full px-8">
         <Slider
@@ -245,7 +263,7 @@ function EarnForm({
       <div className="w-full">
         <button
           className={cn(
-            "flex flex-row items-center justify-center bg-neutral-900/90 shadow-[0_0_0_1px_black,inset_0_0_1px_1px_hsla(0,0%,100%,0.14)] text-white font-semibold tracking-tighter. w-full rounded-xl py-1.5 cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed duration-200",
+            "flex flex-row items-center justify-center bg-neutral-900/90 shadow-[0_0_0_1px_black,inset_0_0_1px_1px_hsla(0,0%,100%,0.14)] text-white font-semibold tracking-tighter. w-full rounded-xl py-1.5 cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed duration-200 bg-gradient-to-b from-neutral-700 via-neutral-900 to-neutral-800",
             isLoading && "cursor-wait"
           )}
           disabled={
