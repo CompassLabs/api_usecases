@@ -1,6 +1,6 @@
 # SNIPPET START 1
 from compass_api_sdk import CompassAPI
-import os   
+import os
 import dotenv
 from web3 import Web3
 from eth_account import Account
@@ -25,8 +25,7 @@ account = Account.from_key(private_key)
 
 # SNIPPET START 2
 auth = sdk.transaction_bundler.bundler_authorization(
-    chain="ethereum:mainnet",
-    sender=account.address
+    chain="ethereum:mainnet", sender=account.address
 )
 
 signed_auth = Account.sign_authorization(auth.model_dump(by_alias=True), private_key)
@@ -43,13 +42,15 @@ looping_tx = sdk.transaction_bundler.bundler_aave_loop(
     initial_collateral_amount=10,
     multiplier=1.5,
     max_slippage_percent=2.5,
-    loan_to_value=70
+    loan_to_value=70,
 )
 
 # SNIPPET END 3
 
 # SNIPPET START 4
-signed_tx = w3.eth.account.sign_transaction(looping_tx.model_dump(by_alias=True), private_key)
+signed_tx = w3.eth.account.sign_transaction(
+    looping_tx.model_dump(by_alias=True), private_key
+)
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 print(f"Transaction hash: {tx_hash.hex()}")
 
