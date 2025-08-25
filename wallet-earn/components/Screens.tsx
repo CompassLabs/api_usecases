@@ -58,7 +58,7 @@ export default function Screens() {
   const getTokenData = async () => {
     setTokenData(undefined);
     const tokenDataPromises = Object.keys(Token).map((token) =>
-      fetch(`/api/token?token=${token}`).then((res) => res.json())
+      fetch(`/api/token/${token}`).then((res) => res.json())
     );
     const tokenData: TokenData[] = await Promise.all(tokenDataPromises);
     setTokenData(tokenData);

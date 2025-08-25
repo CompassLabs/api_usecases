@@ -1,16 +1,13 @@
 import { CHAIN } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
+import { TokenEnum } from "@compass-labs/api-sdk/models/components";
 import { privateKeyToAccount } from "viem/accounts";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const token = searchParams.get("token");
-
-  if (!token) {
-    return new Response(JSON.stringify({ error: "Missing query parameters" }), {
-      status: 400,
-    });
-  }
+export async function GET(
+  _: Request,
+  { params }: { params: Promise<{ token: TokenEnum | `0x${string}` }> }
+) {
+  const { token } = await params;
 
   const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
 
