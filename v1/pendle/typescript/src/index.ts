@@ -39,7 +39,7 @@ const { markets } = await compassApiSDK.pendle.pendleMarkets({
 // SNIPPET END 1
 
 // SNIPPET START 2
-const selectedMarket = markets[0];
+const selectedMarket = markets[1];
 // SNIPPET END 2
 
 // SNIPPET START 3
