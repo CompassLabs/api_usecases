@@ -57,19 +57,8 @@ def send_tx(response):
 
 # SNIPPET END 2
 
-# SNIPPET START 2
-auth = compass.transaction_bundler.transaction_bundler_authorization(
-    chain=CHAIN, sender=WALLET_ADDRESS
-)
 
-auth_dict = auth.model_dump(mode="json", by_alias=True)
-
-signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
-signed_authorization = signed_auth.model_dump(by_alias=True)
-# SNIPPET END 2
-
-
-# assuming your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
+# setup assuming  your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
 one_USD_in_ETH = 1 / float(compass.token.token_price(chain=CHAIN, token=ETH).price)
 
 # using ODOS to perform the swap
@@ -84,14 +73,30 @@ swap_tx = compass.swap.swap_odos(
 
 devtools.debug(send_tx(swap_tx))
 
+# SNIPPET START 3
+# Get and Sign Authorization
+auth = compass.transaction_bundler.transaction_bundler_authorization(
+    chain=CHAIN, sender=WALLET_ADDRESS
+)
+
+auth_dict = auth.model_dump(mode="json", by_alias=True)
+
+signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
+signed_authorization = signed_auth.model_dump(by_alias=True)
+# SNIPPET END 3
+
+
 time.sleep(1)
 
 
-# SNIPPET START 3
+# SNIPPET START 4
 
 DEPOSIT_AMOUNT = 0.01  # amount that your user will deposit in a morpho vault
 FEE_PERCENTAGE = 0.01  # the percentage fee you will charge to the user.
 FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE  # the fee you will charge to the user.
+
+
+# Create bundle of transactions
 bundler_tx = compass.transaction_bundler.transaction_bundler_execute(
     chain=CHAIN,
     sender=WALLET_ADDRESS,
@@ -105,6 +110,7 @@ bundler_tx = compass.transaction_bundler.transaction_bundler_execute(
                 amount=DEPOSIT_AMOUNT,
             )
         ),
+        # the fee transaction
         models.UserOperation(
             body=models.TokenTransferParams(
                 to="0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
@@ -122,11 +128,12 @@ bundler_tx = compass.transaction_bundler.transaction_bundler_execute(
         ),
     ],
 )
-# SNIPPET END 3
-
-# SNIPPET START 4
-devtools.debug(send_tx(bundler_tx))
 # SNIPPET END 4
+
+# SNIPPET START 5
+# Sign and broadcast the bundler transaction
+devtools.debug(send_tx(bundler_tx))
+# SNIPPET END 5
 
 # if receipt.status != 1:
 #     raise Exception()
