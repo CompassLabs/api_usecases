@@ -130,6 +130,7 @@ export default function Screens() {
           >
             <TokenScreen
               setScreen={setScreen}
+              tokenSymbol={token}
               tokenData={
                 (() =>
                   tokenData?.find(

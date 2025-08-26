@@ -1,5 +1,5 @@
 import { ChevronLeft, Inbox } from "lucide-react";
-import { Screen, TokenData, VaultData } from "./Screens";
+import { Screen, Token, TokenData, VaultData } from "./Screens";
 import { Loading } from "@geist-ui/core";
 import React from "react";
 import { addTokenTotal, cn } from "@/utils/utils";
@@ -9,11 +9,13 @@ import Skeleton from "./primitives/Skeleton";
 
 export default function TokenScreen({
   setScreen,
+  tokenSymbol,
   tokenData,
   vaultData,
   handleRefresh,
 }: {
   setScreen: (screen: Screen) => void;
+  tokenSymbol: Token;
   tokenData?: TokenData;
   vaultData?: VaultData[];
   handleRefresh: () => void;
@@ -41,20 +43,23 @@ export default function TokenScreen({
         <ChevronLeft size={28} />
       </motion.button>
       <div className="flex-[0.9] flex flex-col items-center justify-center mt-4 relative">
-        <h1 className="text-5xl font-bold mb-2 font-sans tracking-tighter">
+        <h1 className="relative text-5xl font-bold mb-2 font-sans tracking-tighter">
           {tokenData && vaultData ? (
-            `$${(
-              addTokenTotal(tokenData, vaultData) * Number(tokenData.price)
-            ).toFixed(2)}`
+            <>
+              <span className="absolute top-1/2 -translate-y-1/2 -translate-x-full -left-0.5 text-3xl">
+                $
+              </span>
+              {(
+                addTokenTotal(tokenData, vaultData) * Number(tokenData.price)
+              ).toFixed(2)}
+            </>
           ) : (
             <Skeleton className="w-32 h-10 rounded-xl" />
           )}
         </h1>
         <div className="p-px shadow-inner shadow-neutral-300 rounded-full mb-2">
           <img
-            src={`/${tokenData?.tokenSymbol}.${
-              tokenData?.tokenSymbol !== "cbBTC" ? "svg" : "webp"
-            }`}
+            src={`/${tokenSymbol}.${tokenSymbol !== "cbBTC" ? "svg" : "webp"}`}
             className="w-14 h-14 rounded-full outline outline-offset-[-1px] outline-neutral-900/20"
           />
         </div>
@@ -64,7 +69,7 @@ export default function TokenScreen({
           ) : (
             <Skeleton className="w-10 mr-1 h-3" />
           )}{" "}
-          {tokenData?.tokenSymbol}
+          {tokenSymbol}
         </div>
       </div>
       <div className="flex-1 flex flex-col">

@@ -17,9 +17,14 @@ export default function WalletScreen({
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col justify-center items-center h-full">
-        <div className="text-5xl font-bold font-sans">
+        <div className="relative text-5xl font-bold font-sans">
           {tokenData && vaultData ? (
-            `$${addTotalBalance(tokenData, vaultData).toFixed(2)}`
+            <>
+              <span className="absolute top-1/2 -translate-y-1/2 -translate-x-full -left-0.5 text-4xl">
+                $
+              </span>
+              {addTotalBalance(tokenData, vaultData).toFixed(2)}
+            </>
           ) : (
             <Skeleton className="w-32 h-10 rounded-xl" />
           )}
@@ -59,9 +64,8 @@ function TokenCard({
     <li
       className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-5 py-2 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
       onClick={() => {
-        if (!token) return;
         setScreen(Screen.Token);
-        setToken(token.tokenSymbol as Token);
+        setToken(tokenSymbol as Token);
       }}
     >
       <div className="p-px border border-neutral-200 rounded-full">
