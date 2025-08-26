@@ -26,20 +26,21 @@ SPECIFIC_MORPHO_VAULT = (
 account = Account.from_key(PRIVATE_KEY)
 WALLET_ADDRESS = account.address
 
+# SNIPPET END 1
 
-# clients
+
+# SNIPPET START 2
+# Initialize SDK and Web3 clients
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
 compass = CompassAPI(
     api_key_auth=COMPASS_API_KEY,
     server_url=os.getenv("SERVER_URL")
     or None,  # For internal testing purposes. You do not need to set this.
 )
+# SNIPPET END 2
 
 
-# SNIPPET END 1
-
-
-# SNIPPET START 2
+# SNIPPET START 3
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
     tx = response.model_dump(by_alias=True)
@@ -55,7 +56,7 @@ def send_tx(response):
     return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
 
 
-# SNIPPET END 2
+# SNIPPET END 3
 
 
 # setup assuming  your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
@@ -73,7 +74,7 @@ swap_tx = compass.swap.swap_odos(
 
 devtools.debug(send_tx(swap_tx))
 
-# SNIPPET START 3
+# SNIPPET START 4
 # Get and Sign Authorization
 auth = compass.transaction_bundler.transaction_bundler_authorization(
     chain=CHAIN, sender=WALLET_ADDRESS
@@ -83,13 +84,13 @@ auth_dict = auth.model_dump(mode="json", by_alias=True)
 
 signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 signed_authorization = signed_auth.model_dump(by_alias=True)
-# SNIPPET END 3
+# SNIPPET END 4
 
 
 time.sleep(1)
 
 
-# SNIPPET START 4
+# SNIPPET START 5
 
 DEPOSIT_AMOUNT = 0.01  # amount that your user will deposit in a morpho vault
 FEE_PERCENTAGE = 0.01  # the percentage fee you will charge to the user.
@@ -128,12 +129,12 @@ bundler_tx = compass.transaction_bundler.transaction_bundler_execute(
         ),
     ],
 )
-# SNIPPET END 4
+# SNIPPET END 5
 
-# SNIPPET START 5
+# SNIPPET START 6
 # Sign and broadcast the bundler transaction
 devtools.debug(send_tx(bundler_tx))
-# SNIPPET END 5
+# SNIPPET END 6
 
 # if receipt.status != 1:
 #     raise Exception()
