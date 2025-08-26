@@ -17,7 +17,6 @@ compass = CompassAPI(api_key_auth=COMPASS_API_KEY)
 # SNIPPET END 1
 
 
-
 # SNIPPET START 2
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
@@ -27,6 +26,8 @@ def send_tx(response):
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     # convert receipt to a serializable dict
     return tx_hash, dict(receipt)
+
+
 # SNIPPET END 2
 
 
@@ -66,4 +67,3 @@ print(res.model_dump())
 # Sign and broadcast deposit transaction
 print(send_tx(res))
 # SNIPPET END 6
-
