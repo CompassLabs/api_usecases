@@ -29,7 +29,7 @@ markets_response = compass_api_sdk.pendle.pendle_markets(
 # SNIPPET END 1
 
 # SNIPPET START 2
-selected_market = markets_response.markets[0]
+selected_market = markets_response.markets[1]
 # SNIPPET END 2
 
 # SNIPPET START 3
