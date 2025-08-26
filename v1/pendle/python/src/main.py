@@ -45,7 +45,7 @@ swap_tx = compass_api_sdk.swap.swap_odos(
     token_in="ETH",
     token_out="USDC",
     amount=0.1,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 signed_tx = w3.eth.account.sign_transaction(
     swap_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY
@@ -68,7 +68,7 @@ if int(usdc_allowance.amount) < 100:
         sender=WALLET_ADDRESS,
         token="USDC",
         contract="PendleRouter",
-        amount=100,
+        amount=20,
     )
 
     signed_tx = w3.eth.account.sign_transaction(
@@ -86,7 +86,7 @@ buy_pt_tx = compass_api_sdk.pendle.pendle_pt(
     action="BUY",
     token="USDC",
     amount_in=100,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 
 signed_tx = w3.eth.account.sign_transaction(
@@ -137,7 +137,7 @@ sell_pt_tx = compass_api_sdk.pendle.pendle_pt(
     action="SELL",
     token=underlying_asset_address,
     amount_in=market.user_position.pt_balance,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 
 signed_tx = w3.eth.account.sign_transaction(
@@ -188,7 +188,7 @@ buy_yt_tx = compass_api_sdk.pendle.pendle_yt(
     action="BUY",
     token=underlying_asset_address,
     amount_in=market.user_position.underlying_token_balance,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 
 signed_tx = w3.eth.account.sign_transaction(
@@ -253,7 +253,7 @@ sell_yt_tx = compass_api_sdk.pendle.pendle_yt(
     action="SELL",
     token="USDT",
     amount_in=market.user_position.yt_balance,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 
 signed_tx = w3.eth.account.sign_transaction(
@@ -304,7 +304,7 @@ add_liquidity_tx = compass_api_sdk.pendle.pendle_liquidity(
     action="SUPPLY",
     token="USDT",
     amount_in=usdt_balance.amount,
-    max_slippage_percent=10,
+    max_slippage_percent=2,
 )
 
 signed_tx = w3.eth.account.sign_transaction(
