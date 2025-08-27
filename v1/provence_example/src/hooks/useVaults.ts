@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CompassApiSDK } from '@compass-labs/api-sdk'
+import { getCompassSDK } from '@/utils/compass'
 
 interface Vault {
   id: string
@@ -22,14 +22,7 @@ export function useVaults() {
         setIsLoading(true)
         setError(null)
         
-        const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
-        if (!apiKey) {
-          throw new Error('COMPASS_API_KEY not found in environment variables')
-        }
-
-        const compassApiSDK = new CompassApiSDK({
-          apiKeyAuth: apiKey,
-        })
+        const compassApiSDK = getCompassSDK()
 
         const morphoResult = await compassApiSDK.morpho.morphoVaults({})
         
@@ -66,14 +59,7 @@ export function useVaults() {
     setError(null)
     
     try {
-      const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
-      if (!apiKey) {
-        throw new Error('COMPASS_API_KEY not found in environment variables')
-      }
-
-      const compassApiSDK = new CompassApiSDK({
-        apiKeyAuth: apiKey,
-      })
+      const compassApiSDK = getCompassSDK()
 
       const morphoResult = await compassApiSDK.morpho.morphoVaults({})
       

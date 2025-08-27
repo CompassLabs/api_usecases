@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core'
-import { CompassApiSDK } from '@compass-labs/api-sdk'
+import { useMetaMask } from '@/contexts/MetaMaskContext'
+import { getCompassSDK } from '@/utils/compass'
 
 interface VaultPosition {
   id: string
@@ -73,13 +73,13 @@ interface UserPositions {
 }
 
 export function useUserPositions() {
-  const { user, primaryWallet } = useDynamicContext()
+  const { wallet } = useMetaMask()
   const [positions, setPositions] = useState<UserPositions | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchPositions = async () => {
-    if (!user || !primaryWallet?.address) {
+    if (!wallet?.address) {
       setPositions(null)
       setError(null)
       return
@@ -89,16 +89,9 @@ export function useUserPositions() {
       setIsLoading(true)
       setError(null)
       
-      const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
-      if (!apiKey) {
-        throw new Error('COMPASS_API_KEY not found in environment variables')
-      }
+      const compassApiSDK = getCompassSDK()
 
-      const compassApiSDK = new CompassApiSDK({
-        apiKeyAuth: apiKey,
-      })
-
-      const userAddress = primaryWallet.address as string
+      const userAddress = wallet.address as string
       const result = await compassApiSDK.morpho.morphoUserPosition({
         chain: 'base' as any,
         userAddress: userAddress
@@ -115,7 +108,7 @@ export function useUserPositions() {
 
   useEffect(() => {
     fetchPositions()
-  }, [user, primaryWallet?.address])
+  }, [wallet?.address])
 
   const refreshPositions = () => {
     fetchPositions()
@@ -126,6 +119,6 @@ export function useUserPositions() {
     isLoading,
     error,
     refreshPositions,
-    hasWallet: !!(user && primaryWallet?.address)
+    hasWallet: !!wallet?.address
   }
 }
