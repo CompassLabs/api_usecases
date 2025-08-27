@@ -1,16 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core'
-import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core'
-import { CompassApiSDK } from '@compass-labs/api-sdk'
+import { useMetaMask, getMetaMaskProvider } from '@/contexts/MetaMaskContext'
 import { getAddress } from 'viem'
 import { useUserPositions } from '../hooks/useUserPositions'
 import LoadingSpinner from './LoadingSpinner'
+import { getCompassSDK } from '@/utils/compass'
 
 export default function UserPositions() {
   const { positions, isLoading, error, refreshPositions, hasWallet } = useUserPositions()
-  const { user, primaryWallet } = useDynamicContext()
+  const { wallet } = useMetaMask()
   const [rebalancePercentages, setRebalancePercentages] = useState<Record<string, string>>({})
   const [isRebalancing, setIsRebalancing] = useState(false)
   const [rebalanceError, setRebalanceError] = useState<string | null>(null)
@@ -115,8 +114,13 @@ export default function UserPositions() {
   }
 
   const handleRebalance = async () => {
-    if (!positions?.vaultPositions || !user || !primaryWallet?.address) {
-      setRebalanceError('Please connect your wallet first')
+    if (!positions?.vaultPositions || !wallet?.address) {
+      setRebalanceError('Please connect your MetaMask wallet first')
+      return
+    }
+
+    if (wallet.chainId !== 8453) {
+      setRebalanceError('Please switch to Base network to rebalance')
       return
     }
 
@@ -138,8 +142,8 @@ export default function UserPositions() {
         throw new Error('COMPASS_API_KEY not found in environment variables')
       }
 
-      const compassApiSDK = new CompassApiSDK({ apiKeyAuth: apiKey })
-      const walletAddress = primaryWallet.address as `0x${string}`
+      const compassApiSDK = getCompassSDK()
+      const walletAddress = getAddress(wallet.address)
       
       console.log('Rebalancing with percentages:', rebalancePercentages)
       
@@ -206,81 +210,52 @@ export default function UserPositions() {
         return
       }
 
-      setTransactionStatus('Getting authorization...')
+      setTransactionStatus('Preparing bundled transaction...')
       
-      // Get authorization for transaction bundling
-      const auth = await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-        chain: 'base',
+      // Get the batched user operations for rebalancing
+      const batchedOps = await compassApiSDK.smartAccount.smartAccountBatchedUserOperations({
+        chain: 'base' as any,
         sender: walletAddress,
-      })
-
-      setTransactionStatus('Signing authorization...')
-      
-      // Verify wallet connection first
-      const walletClient: any = await (primaryWallet as any).getWalletClient()
-      console.log('Wallet client ready:', !!walletClient, 'Account:', walletClient?.account)
-      
-      if (!walletClient || !walletClient.account) {
-        throw new Error('Wallet connection not fully established. Please disconnect and reconnect your wallet.')
-      }
-      
-      // Sign authorization using Dynamic connector
-      const connector: any = (primaryWallet as any)?.connector
-      if (!connector || !isDynamicWaasConnector(connector)) {
-        throw new Error('Authorization signing requires an embedded wallet')
-      }
-
-      console.log('primaryWallet:', primaryWallet)
-      console.log('connector:', connector)
-      console.log('connector type:', connector.constructor?.name)
-      console.log('auth data:', auth)
-
-      let signedAuth
-      try {
-        signedAuth = await (connector as any).signAuthorization(auth)
-        console.log('signedAuth:', signedAuth)
-        
-        if (!signedAuth) {
-          throw new Error('Authorization signing returned empty result')
-        }
-      } catch (authError) {
-        console.error('Authorization signing error:', authError)
-        throw new Error(`Authorization signing failed: ${authError instanceof Error ? authError.message : 'Unknown error'}`)
-      }
-      
-      setTransactionStatus('Executing bundled transaction...')
-      
-      // Execute bundled transaction
-      const bundledTx = await compassApiSDK.transactionBundler.transactionBundlerExecute({
-        chain: 'base',
-        sender: walletAddress,
-        actions: vault_actions,
-        signedAuthorization: {
-          nonce: signedAuth.nonce,
-          address: signedAuth.address,
-          chainId: signedAuth.chainId,
-          r: signedAuth.r,
-          s: signedAuth.s,
-          yParity: signedAuth.yParity as number,
-        }
+        operations: vault_actions,
       })
 
       setTransactionStatus('Sending transaction...')
       
+      // Format calls for EIP-5792
+      const calls = batchedOps.operations.map((call: any) => ({
+        to: call.to,
+        data: call.data,
+        value: `0x${call.value.toString(16)}`,
+      }));
+
       const txRequest = {
-        ...bundledTx.transaction,
-        chainId: Number(bundledTx.transaction.chainId),
-        value: BigInt(bundledTx.transaction.value || '0x0'),
-        nonce: bundledTx.transaction.nonce ? BigInt(bundledTx.transaction.nonce) : undefined,
-        gas: bundledTx.transaction.gas ? BigInt(bundledTx.transaction.gas) : undefined,
-        maxFeePerGas: bundledTx.transaction.maxFeePerGas ? BigInt(bundledTx.transaction.maxFeePerGas) : undefined,
-        maxPriorityFeePerGas: bundledTx.transaction.maxPriorityFeePerGas ? BigInt(bundledTx.transaction.maxPriorityFeePerGas) : undefined,
-        to: getAddress(bundledTx.transaction.to as `0x${string}`),
-        from: getAddress(bundledTx.transaction.from as `0x${string}`),
+        method: 'wallet_sendCalls',
+        params: [{
+          version: '2.0.0',
+          chainId: "0x2105", // Base chain ID
+          atomicRequired: true,
+          calls: calls,
+          from: walletAddress,
+        }],
+      };
+
+      console.log('Sending rebalance transaction request:', txRequest);
+      
+      // Use the robust provider helper with retry logic
+      let result;
+      try {
+        const provider = await getMetaMaskProvider();
+        result = await provider.request(txRequest);
+      } catch (providerError: any) {
+        if (providerError.message?.includes('No active wallet')) {
+          throw new Error('MetaMask is locked or not connected. Please unlock MetaMask and try again.');
+        }
+        throw providerError;
       }
       
-      const txHash = await walletClient.sendTransaction(txRequest as any)
-      
+      console.log('Rebalance transaction result:', result);
+
+      const txHash = result?.id || 'Transaction submitted';
       setTransactionStatus(`Transaction submitted! Hash: ${txHash}. Waiting for confirmation...`)
       
       console.log('Rebalance transaction hash:', txHash)
@@ -302,14 +277,8 @@ export default function UserPositions() {
           errorMessage = 'Insufficient balance for rebalancing'
         } else if (error.message.includes('gas')) {
           errorMessage = 'Transaction failed due to gas issues. Please try again.'
-        } else if (error.message.includes('user rejected')) {
+        } else if (error.message.includes('User rejected') || error.message.includes('user rejected')) {
           errorMessage = 'Transaction was cancelled by user'
-        } else if (error.message.includes('authorization')) {
-          errorMessage = 'Authorization failed. Please try again.'
-        } else if (error.message.includes('not fully established')) {
-          errorMessage = error.message
-        } else if (error.message.includes('signer.account')) {
-          errorMessage = 'Wallet connection issue. Please disconnect and reconnect your wallet.'
         } else {
           errorMessage = error.message
         }
@@ -332,66 +301,19 @@ export default function UserPositions() {
     return totalValue > 0 ? (vaultValue / totalValue) * 100 : 0
   }
 
-  // Withdraw functionality methods
-  const getCompassSDK = () => {
-    const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
-    if (!apiKey) {
-      throw new Error('COMPASS_API_KEY not found in environment variables')
-    }
-    return new CompassApiSDK({ apiKeyAuth: apiKey })
-  }
-
-  const getAuthorization = async () => {
-    if (!user || !primaryWallet?.address) {
-      throw new Error('Please connect a wallet first.')
-    }
-
-    try {
-      const compassApiSDK = getCompassSDK()
-      const sender = primaryWallet.address as `0x${string}`
-      
-      const authResponse = await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-        chain: "base",
-        sender,
-      })
-      
-      return authResponse
-    } catch (error) {
-      console.error('Failed to get authorization:', error)
-      throw error
-    }
-  }
-
-  const signAuthorization = async (authData: any) => {
-    if (!primaryWallet) {
-      throw new Error('No wallet connected')
-    }
-    
-    const connector: any = (primaryWallet as any)?.connector
-    if (!connector || !isDynamicWaasConnector(connector)) {
-      throw new Error('Authorization signing requires an embedded wallet')
-    }
-
-    try {
-      const walletClient = await (primaryWallet as any).getWalletClient()
-      if (!walletClient || !walletClient.account) {
-        throw new Error('Wallet connection not fully established. Please disconnect and reconnect your wallet.')
-      }
-      
-      const signedAuth = await (connector as any).signAuthorization(authData)
-      return signedAuth
-    } catch (error) {
-      console.error('Error during authorization signing:', error)
-      throw new Error(`Authorization signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
+  // Simplified withdraw using standard MetaMask transactions
 
   const handleWithdraw = async (vaultId: string) => {
     setWithdrawError(null)
     setWithdrawTxHash(null)
     
-    if (!user || !primaryWallet?.address) {
-      setWithdrawError('Please connect a wallet first.')
+    if (!wallet?.address) {
+      setWithdrawError('Please connect your MetaMask wallet first.')
+      return
+    }
+
+    if (wallet.chainId !== 8453) {
+      setWithdrawError('Please switch to Base network to withdraw.')
       return
     }
 
@@ -409,21 +331,15 @@ export default function UserPositions() {
     setIsWithdrawing(true)
 
     try {
-      console.log('Step 1: Getting authorization...')
-      const auth = await getAuthorization()
-      
-      console.log('Step 2: Signing authorization...')
-      const signed = await signAuthorization(auth)
-      
-      console.log('Step 3: Submitting bundled transaction...')
+      console.log('Preparing withdraw transaction...')
       const compassApiSDK = getCompassSDK()
       const amountValue = parseFloat(withdrawAmount)
-      const sender = primaryWallet.address as `0x${string}`
+      const sender = getAddress(wallet.address)
 
-      const bundledTx = await compassApiSDK.transactionBundler.transactionBundlerExecute({
-        chain: "base",
+      const batchedOps = await compassApiSDK.smartAccount.smartAccountBatchedUserOperations({
+        chain: "base" as any,
         sender,
-        actions: [
+        operations: [
           {
             body: {
               contract: vaultPosition.vault.address,
@@ -440,32 +356,41 @@ export default function UserPositions() {
             }
           }
         ],
-        signedAuthorization: {
-          nonce: signed.nonce,
-          address: signed.address,
-          chainId: signed.chainId,
-          r: signed.r,
-          s: signed.s,
-          yParity: signed.yParity as number,
-        }
       })
 
-      const walletClient: any = await (primaryWallet as any).getWalletClient()
+      console.log('Sending withdraw transaction...')
       
+      // Format calls for EIP-5792
+      const calls = batchedOps.operations.map((call: any) => ({
+        to: call.to,
+        data: call.data,
+        value: `0x${call.value.toString(16)}`,
+      }));
+
       const txRequest = {
-        ...bundledTx.transaction,
-        chainId: Number(bundledTx.transaction.chainId),
-        value: BigInt(bundledTx.transaction.value || '0x0'),
-        nonce: bundledTx.transaction.nonce ? BigInt(bundledTx.transaction.nonce) : undefined,
-        gas: bundledTx.transaction.gas ? BigInt(bundledTx.transaction.gas) : undefined,
-        maxFeePerGas: bundledTx.transaction.maxFeePerGas ? BigInt(bundledTx.transaction.maxFeePerGas) : undefined,
-        maxPriorityFeePerGas: bundledTx.transaction.maxPriorityFeePerGas ? BigInt(bundledTx.transaction.maxPriorityFeePerGas) : undefined,
-        to: getAddress(bundledTx.transaction.to as `0x${string}`),
-        from: getAddress(bundledTx.transaction.from as `0x${string}`),
+        method: 'wallet_sendCalls',
+        params: [{
+          version: '2.0.0',
+          chainId: "0x2105", // Base chain ID
+          atomicRequired: true,
+          calls: calls,
+          from: sender,
+        }],
+      };
+
+      // Use the robust provider helper with retry logic
+      let result;
+      try {
+        const provider = await getMetaMaskProvider();
+        result = await provider.request(txRequest);
+      } catch (providerError: any) {
+        if (providerError.message?.includes('No active wallet')) {
+          throw new Error('MetaMask is locked or not connected. Please unlock MetaMask and try again.');
+        }
+        throw providerError;
       }
       
-      console.log('Step 4: Sending transaction...', txRequest)
-      const hash = await walletClient.sendTransaction(txRequest as any)
+      const hash = result?.id || 'Transaction submitted';
       setWithdrawTxHash(hash)
       
       setWithdrawAmount('')
@@ -482,12 +407,8 @@ export default function UserPositions() {
           errorMessage = 'Insufficient balance for withdrawal'
         } else if (error.message.includes('gas')) {
           errorMessage = 'Transaction failed due to gas issues. Please try again.'
-        } else if (error.message.includes('user rejected')) {
+        } else if (error.message.includes('User rejected') || error.message.includes('user rejected')) {
           errorMessage = 'Transaction was cancelled by user'
-        } else if (error.message.includes('authorization')) {
-          errorMessage = 'Authorization failed. Please try again.'
-        } else if (error.message.includes('not fully established')) {
-          errorMessage = error.message
         } else {
           errorMessage = error.message
         }

@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
-import { EthereumWalletConnectors } from '@dynamic-labs/ethereum';
+import { MetaMaskProvider } from "@/contexts/MetaMaskContext";
 
 export const metadata: Metadata = {
-  title: "Compass Labs - Dynamic SDK Example",
-  description: "A Next.js application demonstrating Dynamic SDK integration for wallet connection and embedded wallets",
-  keywords: ["Compass Labs", "Dynamic SDK", "Wallet Connection", "Embedded Wallets", "Next.js", "TypeScript"],
+  title: "Compass Labs - MetaMask Vault Dashboard",
+  description: "A Next.js application demonstrating MetaMask integration with Compass Labs API for vault management",
+  keywords: ["Compass Labs", "MetaMask", "Vault", "DeFi", "Morpho", "Next.js", "TypeScript"],
   authors: [{ name: "Compass Labs" }],
 };
 
@@ -25,14 +24,9 @@ export default function RootLayout({
       <body
         className={`antialiased bg-white dark:bg-gray-900 transition-colors duration-200`}
       >
-        <DynamicContextProvider
-          settings={{
-            environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "REPLACE_WITH_YOUR_ENVIRONMENT_ID",
-            walletConnectors: [EthereumWalletConnectors],
-          }}
-        >
+        <MetaMaskProvider>
           {children}
-        </DynamicContextProvider>
+        </MetaMaskProvider>
       </body>
     </html>
   );

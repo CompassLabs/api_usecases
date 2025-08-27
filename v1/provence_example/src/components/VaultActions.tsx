@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core'
-import { CompassApiSDK } from '@compass-labs/api-sdk'
-import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core'
+import { useMetaMask, getMetaMaskProvider } from '@/contexts/MetaMaskContext'
 import { getAddress } from 'viem'
 import LoadingSpinner from './LoadingSpinner'
+import { getCompassSDK } from '@/utils/compass'
 
 interface VaultActionsProps {
   vaultAddress: string
@@ -14,99 +13,49 @@ interface VaultActionsProps {
   onSuccess?: () => void
 }
 
-interface AuthorizationResponse {
-  nonce: number
-  address: string
-  chain_id: number
-  r: string
-  s: string
-  y_parity: number
-}
+
 
 export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSuccess }: VaultActionsProps) {
-  const { user, primaryWallet } = useDynamicContext()
+  const { wallet } = useMetaMask()
   const [isDepositOpen, setIsDepositOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [amount, setAmount] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
 
-  const getCompassSDK = () => {
-    const apiKey = process.env.NEXT_PUBLIC_COMPASS_API_KEY
-    if (!apiKey) {
-      throw new Error('COMPASS_API_KEY not found in environment variables')
-    }
-    return new CompassApiSDK({ apiKeyAuth: apiKey })
-  }
+  // Simplified deposit using standard MetaMask transactions
 
-  const getAuthorization = async () => {
-    if (!user || !primaryWallet?.address) {
-      throw new Error('Please connect a wallet first.')
-    }
-
-    try {
-      const compassApiSDK = getCompassSDK()
-      const sender = primaryWallet.address as `0x${string}`
-      
-      const authResponse = await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-        chain: "base",
-        sender,
-      })
-      
-      console.log('Authorization response:', authResponse)
-      return authResponse
-    } catch (error) {
-      console.error('Failed to get authorization:', error)
-      throw error
-    }
-  }
-
-  const signAuthorization = async (authData: AuthorizationResponse) => {
-    if (!primaryWallet) {
-      throw new Error('No wallet connected')
-    }
-    console.log('primaryWallet:', primaryWallet)
-    console.log('primaryWallet.address:', primaryWallet.address)
+  const handleDeposit = async () => {
+    setError(null)
+    setTxHash(null)
     
-    const connector: any = (primaryWallet as any)?.connector
-    if (!connector || !isDynamicWaasConnector(connector)) {
-      throw new Error('Authorization signing requires an embedded wallet')
+    if (!wallet?.address) {
+      setError('Please connect your MetaMask wallet first.')
+      return
     }
 
-    console.log('authData:', authData)
-    console.log('connector:', connector)
-    console.log('connector type:', connector.constructor?.name)
+    if (wallet.chainId !== 8453) {
+      setError('Please switch to Base network to deposit.')
+      return
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter a valid amount')
+      return
+    }
+
+    setIsLoading(true)
 
     try {
-      // Get wallet client to ensure connection is established
-      const walletClient = await (primaryWallet as any).getWalletClient()
-      console.log('walletClient:', walletClient)
-      console.log('walletClient.account:', walletClient?.account)
-      
-      // Sign the authorization using Dynamic connector
-      const signedAuth = await (connector as any).signAuthorization(authData)
-      console.log('signedAuth:', signedAuth)
-      return signedAuth
-    } catch (error) {
-      console.error('Error during authorization signing:', error)
-      throw new Error(`Authorization signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-
-  const submitBundledTransaction = async (signedAuth: any) => {
-    if (!primaryWallet?.address) {
-      throw new Error('No wallet connected')
-    }
-
-    try {
+      console.log('Preparing deposit transaction...')
       const compassApiSDK = getCompassSDK()
       const amountValue = parseFloat(amount)
-      const sender = primaryWallet.address as `0x${string}`
+      const sender = getAddress(wallet.address)
 
-      const bundledTx = await compassApiSDK.transactionBundler.transactionBundlerExecute({
-        chain: "base",
+      const batchedOps = await compassApiSDK.smartAccount.smartAccountBatchedUserOperations({
+        chain: "base" as any,
         sender,
-        actions: [
+        operations: [
           {
             body: {
               contract: vaultAddress,
@@ -123,73 +72,41 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
             }
           }
         ],
-        signedAuthorization: {
-          nonce: signedAuth.nonce,
-          address: signedAuth.address,
-          chainId: signedAuth.chainId,
-          r: signedAuth.r,
-          s: signedAuth.s,
-          yParity: signedAuth.yParity as number,
-        }
       })
 
-      console.log('Bundled transaction result:', bundledTx)
-      return bundledTx
-    } catch (error) {
-      console.error('Failed to submit bundled transaction:', error)
-      throw error
-    }
-  }
-
-  const handleDeposit = async () => {
-    setError(null)
-    setTxHash(null)
-    
-    if (!user || !primaryWallet?.address) {
-      setError('Please connect a wallet first.')
-      return
-    }
-
-    if (!amount || parseFloat(amount) <= 0) {
-      setError('Please enter a valid amount')
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      // Check wallet connection first
-      console.log('Step 0: Verifying wallet connection...')
-      const walletClient: any = await (primaryWallet as any).getWalletClient()
-      console.log('Wallet client ready:', !!walletClient, 'Account:', walletClient?.account)
+      console.log('Sending deposit transaction...')
       
-      if (!walletClient || !walletClient.account) {
-        throw new Error('Wallet connection not fully established. Please disconnect and reconnect your wallet.')
-      }
+      // Format calls for EIP-5792
+      const calls = batchedOps.operations.map((call: any) => ({
+        to: call.to,
+        data: call.data,
+        value: `0x${call.value.toString(16)}`,
+      }));
 
-      console.log('Step 1: Getting authorization...')
-      const auth = await getAuthorization()
-      
-      console.log('Step 2: Signing authorization...')
-      const signed = await signAuthorization(auth as unknown as AuthorizationResponse)
-      
-      console.log('Step 3: Submitting bundled transaction...')
-      const result = await submitBundledTransaction(signed)
-      
       const txRequest = {
-        ...result.transaction,
-        chainId: Number(result.transaction.chainId),
-        value: BigInt(result.transaction.value || '0x0'),
-        nonce: result.transaction.nonce ? BigInt(result.transaction.nonce) : undefined,
-        gas: result.transaction.gas ? BigInt(result.transaction.gas) : undefined,
-        maxFeePerGas: result.transaction.maxFeePerGas ? BigInt(result.transaction.maxFeePerGas) : undefined,
-        maxPriorityFeePerGas: result.transaction.maxPriorityFeePerGas ? BigInt(result.transaction.maxPriorityFeePerGas) : undefined,
-        to: getAddress(result.transaction.to as `0x${string}`),
-        from: getAddress(result.transaction.from as `0x${string}`),
+        method: 'wallet_sendCalls',
+        params: [{
+          version: '2.0.0',
+          chainId: "0x2105", // Base chain ID
+          atomicRequired: true,
+          calls: calls,
+          from: sender,
+        }],
+      };
+
+      // Use the robust provider helper with retry logic
+      let result;
+      try {
+        const provider = await getMetaMaskProvider();
+        result = await provider.request(txRequest);
+      } catch (providerError: any) {
+        if (providerError.message?.includes('No active wallet')) {
+          throw new Error('MetaMask is locked or not connected. Please unlock MetaMask and try again.');
+        }
+        throw providerError;
       }
       
-      console.log('Step 4: Sending transaction...', txRequest)
-      const hash = await walletClient.sendTransaction(txRequest as any)
+      const hash = result?.id || 'Transaction submitted';
       setTxHash(hash)
       
       console.log('Deposit transaction result:', result)
@@ -208,12 +125,8 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
           errorMessage = 'Insufficient balance for deposit'
         } else if (error.message.includes('gas')) {
           errorMessage = 'Transaction failed due to gas issues. Please try again.'
-        } else if (error.message.includes('user rejected')) {
+        } else if (error.message.includes('User rejected') || error.message.includes('user rejected')) {
           errorMessage = 'Transaction was cancelled by user'
-        } else if (error.message.includes('authorization')) {
-          errorMessage = 'Authorization failed. Please try again.'
-        } else if (error.message.includes('not fully established')) {
-          errorMessage = error.message
         } else {
           errorMessage = error.message
         }
@@ -241,9 +154,13 @@ export default function VaultActions({ vaultAddress, vaultName, vaultToken, onSu
 
   return (
     <>
-      {!user ? (
+      {!wallet ? (
         <p className="text-gray-600 text-sm">
-          Please connect a wallet to use vault actions.
+          Please connect your MetaMask wallet to use vault actions.
+        </p>
+      ) : wallet.chainId !== 8453 ? (
+        <p className="text-orange-600 text-sm">
+          Please switch to Base network to use vault actions.
         </p>
       ) : (
         <button
