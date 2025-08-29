@@ -40,25 +40,6 @@ compass = CompassAPI(
 # SNIPPET END 2
 
 
-# SNIPPET START 3
-# Helper function to sign and broadcast unsigned transaction:
-def send_tx(response):
-    tx = response.model_dump(by_alias=True)
-    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
-    start = time.time()
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    end = time.time()
-    if receipt.status != 1:
-        raise Exception()
-    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
-    # convert receipt to a serializable dict
-    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
-
-
-# SNIPPET END 3
-
-
 # setup assuming  your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
 one_USD_in_ETH = 1 / float(compass.token.token_price(chain=CHAIN, token=ETH).price)
 
@@ -74,7 +55,7 @@ swap_tx = compass.swap.swap_odos(
 
 devtools.debug(send_tx(swap_tx))
 
-# SNIPPET START 4
+# SNIPPET START 3
 # Get and Sign Authorization
 auth = compass.transaction_bundler.transaction_bundler_authorization(
     chain=CHAIN, sender=WALLET_ADDRESS
@@ -84,13 +65,13 @@ auth_dict = auth.model_dump(mode="json", by_alias=True)
 
 signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
 signed_authorization = signed_auth.model_dump(by_alias=True)
-# SNIPPET END 4
+# SNIPPET END 3
 
 
 time.sleep(1)
 
 
-# SNIPPET START 5
+# SNIPPET START 4
 
 DEPOSIT_AMOUNT = 0.01  # amount that your user will deposit in a morpho vault
 FEE_PERCENTAGE = 0.01  # the percentage fee you will charge to the user.
@@ -129,12 +110,30 @@ bundler_tx = compass.transaction_bundler.transaction_bundler_execute(
         ),
     ],
 )
-# SNIPPET END 5
+# SNIPPET END 4
 
-# SNIPPET START 6
+# SNIPPET START 5
+
+
+# Helper function to sign and broadcast unsigned transaction:
+# Can be re-used for any unsigned transaction our API returns.
+def send_tx(response):
+    tx = response.model_dump(by_alias=True)
+    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
+    start = time.time()
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    end = time.time()
+    if receipt.status != 1:
+        raise Exception()
+    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
+    # convert receipt to a serializable dict
+    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+
+
 # Sign and broadcast the bundler transaction
 devtools.debug(send_tx(bundler_tx))
-# SNIPPET END 6
+# SNIPPET END 5
 
 # if receipt.status != 1:
 #     raise Exception()
