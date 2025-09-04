@@ -1,20 +1,20 @@
 'use client';
 
-import { useMetaMask } from "@/contexts/MetaMaskContext";
+import { useWalletConnect } from "@/contexts/WalletConnectContext";
 
 export const WalletConnect = () => {
-  const { wallet, isConnecting, error, connectWallet, disconnectWallet, switchToBaseChain } = useMetaMask();
+  const { wallet, isConnecting, error, connectWallet, disconnectWallet, switchToBaseChain } = useWalletConnect();
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        MetaMask Connection
+        Wallet Connection
       </h2>
       
       {!wallet ? (
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            Connect your MetaMask wallet to get started
+            Connect your wallet to get started
           </p>
           <button
             onClick={connectWallet}
@@ -31,7 +31,7 @@ export const WalletConnect = () => {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             )}
-            {isConnecting ? 'Connecting...' : 'Connect MetaMask'}
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
           </button>
           
           {error && (
@@ -46,7 +46,7 @@ export const WalletConnect = () => {
         <div className="space-y-4">
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
             <p className="text-green-800 dark:text-green-200 font-medium">
-              ✅ MetaMask Connected Successfully!
+              ✅ Wallet Connected Successfully!
             </p>
           </div>
           
@@ -84,7 +84,7 @@ export const WalletConnect = () => {
                 Wallet Type
               </label>
               <p className="text-gray-900 dark:text-white font-mono text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded">
-                MetaMask
+                WalletConnect
               </p>
             </div>
           </div>

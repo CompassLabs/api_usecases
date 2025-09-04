@@ -1,5 +1,5 @@
 import { WalletConnect } from "@/components/WalletConnect";
-import { MetaMaskInfo } from "@/components/EmbeddedWallet";
+import { WalletInfo } from "@/components/EmbeddedWallet";
 import { AaveLooping } from "@/components/AaveLoop";
 
 export default function Home() {
@@ -12,17 +12,17 @@ export default function Home() {
             Compass Labs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            MetaMask Integration with Aave Leverage Looping
+            WalletConnect Integration with Aave Leverage Looping
           </p>
         </header>
 
         {/* Main Content */}
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* MetaMask Connection */}
+          {/* Wallet Connection */}
           <WalletConnect />
           
-          {/* MetaMask Wallet Info */}
-          <MetaMaskInfo />
+          {/* Wallet Info */}
+          <WalletInfo />
 
           {/* Aave Looping */}
           <AaveLooping />
@@ -35,10 +35,10 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  🦊 MetaMask Integration
+                  🔗 WalletConnect Integration
                 </h3>
                 <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
-                  <li>• Direct MetaMask connection</li>
+                  <li>• Multi-wallet support</li>
                   <li>• Base network support</li>
                   <li>• EIP-5792 transaction batching</li>
                   <li>• Secure wallet interaction</li>
@@ -72,10 +72,10 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="text-center mt-16 text-gray-600 dark:text-gray-400">
-          <p>Built with Next.js, TypeScript, and MetaMask</p>
+          <p>Built with Next.js, TypeScript, and WalletConnect</p>
           <p className="mt-2">
-            <a href="https://docs.metamask.io/" className="text-blue-600 dark:text-blue-400 hover:underline">
-              MetaMask Documentation
+            <a href="https://docs.reown.com/" className="text-blue-600 dark:text-blue-400 hover:underline">
+              WalletConnect Documentation
             </a>
           </p>
         </footer>

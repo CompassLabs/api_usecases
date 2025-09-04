@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { MetaMaskProvider } from "@/contexts/MetaMaskContext";
+import { WalletConnectProvider } from "@/contexts/WalletConnectContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Compass Labs - MetaMask Aave Looping",
-  description: "A Next.js application demonstrating MetaMask integration with Compass Labs API for Aave leverage looping",
-  keywords: ["Compass Labs", "MetaMask", "Aave", "Leverage Looping", "DeFi", "Next.js", "TypeScript"],
+  title: "Compass Labs - WalletConnect Aave Looping",
+  description: "A Next.js application demonstrating WalletConnect integration with Compass Labs API for Aave leverage looping",
+  keywords: ["Compass Labs", "WalletConnect", "Aave", "Leverage Looping", "DeFi", "Next.js", "TypeScript"],
   authors: [{ name: "Compass Labs" }],
 };
 
@@ -35,9 +35,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 transition-colors duration-200`}
       >
-        <MetaMaskProvider>
+        <WalletConnectProvider>
           {children}
-        </MetaMaskProvider>
+        </WalletConnectProvider>
       </body>
     </html>
   );

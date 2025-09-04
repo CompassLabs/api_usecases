@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useMetaMask, getMetaMaskProvider } from '@/contexts/MetaMaskContext';
+import { useWalletConnect } from '@/contexts/WalletConnectContext';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { getAddress } from 'viem';
+import { useWalletClient } from 'wagmi';
 
 export const AaveLooping = () => {
-  const { wallet } = useMetaMask();
+  const { wallet } = useWalletConnect();
+  const { data: walletClient } = useWalletClient();
   const [isSending, setIsSending] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export const AaveLooping = () => {
     setTxHash(null);
     
     if (!wallet?.address) {
-      setError('Please connect your MetaMask wallet first.');
+      setError('Please connect your wallet first.');
       return;
     }
 
@@ -104,14 +106,27 @@ export const AaveLooping = () => {
 
       console.log('Sending transaction request:', txRequest);
       
-      // Use the robust provider helper with retry logic
+      // Use WalletConnect via wagmi
       let result;
       try {
-        const provider = await getMetaMaskProvider();
-        result = await provider.request(txRequest);
+        if (!walletClient) {
+          throw new Error('Wallet not connected. Please connect your wallet and try again.');
+        }
+        
+        // For WalletConnect, we use walletClient.request method
+        result = await walletClient.request({
+          method: 'wallet_sendCalls',
+          params: [{
+            version: '2.0.0',
+            chainId: "0x2105",
+            atomicRequired: true,
+            calls: calls,
+            from: loopingTx.from,
+          }]
+        });
       } catch (providerError: any) {
-        if (providerError.message?.includes('No active wallet')) {
-          throw new Error('MetaMask is locked or not connected. Please unlock MetaMask and try again.');
+        if (providerError.message?.includes('No active wallet') || providerError.message?.includes('not connected')) {
+          throw new Error('Wallet is locked or not connected. Please check your wallet and try again.');
         }
         throw providerError;
       }
@@ -147,7 +162,7 @@ export const AaveLooping = () => {
 
       {!wallet ? (
         <p className="text-gray-600 dark:text-gray-300">
-          Please connect your MetaMask wallet first to use Aave looping.
+          Please connect your wallet first to use Aave looping.
         </p>
       ) : wallet.chainId !== 8453 ? (
         <div className="text-center">

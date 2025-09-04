@@ -1,20 +1,20 @@
 'use client';
 
-import { useMetaMask } from "@/contexts/MetaMaskContext";
+import { useWalletConnect } from "@/contexts/WalletConnectContext";
 
-export const MetaMaskInfo = () => {
-  const { wallet } = useMetaMask();
+export const WalletInfo = () => {
+  const { wallet } = useWalletConnect();
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        MetaMask Wallet Info
+        Wallet Info
       </h2>
       
       <div className="space-y-4">
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <p className="text-blue-800 dark:text-blue-200 text-sm">
-            <strong>About MetaMask:</strong> MetaMask is a browser extension and mobile app that allows you to manage your Ethereum assets and interact with decentralized applications. Your private keys are stored securely in your browser or device.
+            <strong>About WalletConnect:</strong> WalletConnect allows you to connect your preferred wallet to decentralized applications securely. Your private keys never leave your wallet app.
           </p>
         </div>
         
@@ -53,7 +53,7 @@ export const MetaMaskInfo = () => {
         ) : (
           <div className="text-center py-4">
             <p className="text-gray-600 dark:text-gray-300">
-              Connect your MetaMask wallet above to see wallet information
+              Connect your wallet above to see wallet information
             </p>
           </div>
         )}
