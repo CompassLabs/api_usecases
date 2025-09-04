@@ -117,7 +117,7 @@ export const AaveLooping = () => {
       }
       
       console.log('Transaction result:', result);
-      setTxHash(result?.id || 'Transaction submitted');
+    //   setTxHash(result?.id || 'Transaction submitted');
     } catch (e: any) {
       console.error('Aave looping transaction failed:', e);
       
