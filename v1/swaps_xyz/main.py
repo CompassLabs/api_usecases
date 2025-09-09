@@ -21,7 +21,7 @@ with CompassAPI(
             sender=SENDER_WALLET,
             token=models.TokenEnum.USDC
     )
-    print(f"{aave_supply_tx=}")
+    print(f"aave_supply_tx={aave_supply_tx.model_dump_json()}")
 
 
 
@@ -30,7 +30,7 @@ url = "https://api-v2.swaps.xyz/api/getAction"
 headers = {"x-api-key": PLAYGROUND_KEY}
 
 params = {
-    "actionType": "swap-action",
+    "actionType": "evm-calldata-tx",
     "sender": SENDER_WALLET,
     "srcChainId": 1,
     "srcToken": USDC_ETHEREUM,
@@ -38,11 +38,13 @@ params = {
     "dstToken": WETH_ETHEREUM,
     "slippage": 100,
     "amount": 1,
-    "swapDirection": "exact-amount-in"
+    "swapDirection": "exact-amount-in",
+    "to": aave_supply_tx.transaction.to,
+    "data":aave_supply_tx.transaction.data
 }
 
 
 response = requests.get(url, headers=headers, params=params)
 
-print(response.json())
-print(json.dumps(response.json()['tx']))
+print(f"swaps.xyz response: {response.json()}")
+print(f"raw transaction:", json.dumps(response.json()['tx']))
