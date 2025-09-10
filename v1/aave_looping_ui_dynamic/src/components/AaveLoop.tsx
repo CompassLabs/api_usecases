@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useMetaMask, getMetaMaskProvider } from '@/contexts/MetaMaskContext';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
+import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core';
 import { getAddress } from 'viem';
 
 export const AaveLooping = () => {
-  const { wallet } = useMetaMask();
+  const { user, primaryWallet } = useDynamicContext();
   const [isSending, setIsSending] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,13 +33,8 @@ export const AaveLooping = () => {
     setError(null);
     setTxHash(null);
     
-    if (!wallet?.address) {
-      setError('Please connect your MetaMask wallet first.');
-      return;
-    }
-
-    if (wallet.chainId !== 8453) {
-      setError('Please switch to Base network to use Aave looping.');
+    if (!user || !primaryWallet?.address) {
+      setError('Please connect a wallet first.');
       return;
     }
 
@@ -53,87 +49,100 @@ export const AaveLooping = () => {
       return;
     }
 
-    const sender = getAddress(wallet.address);
+    const sender = primaryWallet.address as `0x${string}`;
 
     try {
       setIsSending(true);
+
+      const walletClient: any = await (primaryWallet as any).getWalletClient();
 
       const compass = new CompassApiSDK({
         apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY,
       });
 
-      console.log('Preparing Aave looping transaction with params:', {
+      // Get authorization for transaction bundling
+      const auth = await compass.transactionBundler.transactionBundlerAuthorization({
+        chain: 'base',
+        sender,
+      });
+
+      const connector: any = (primaryWallet as any)?.connector;
+      if (!connector || !isDynamicWaasConnector(connector)) {
+        throw new Error('Authorization signing requires an embedded wallet');
+      }
+
+      // Sign the authorization
+      const signedAuth = await (connector as any).signAuthorization(auth);
+
+      console.log({
         collateralToken: collateralToken as any,
         borrowToken: borrowToken as any,
         initialCollateralAmount: initialAmount,
         multiplier: leverage,
         maxSlippagePercent: maxSlippage,
         loanToValue: loanToValue,
-      });
+      })
 
       const loopingTx: any = await compass.transactionBundler.transactionBundlerAaveLoop({
         chain: 'base',
         sender,
+        signedAuthorization: {
+          nonce: signedAuth.nonce,
+          address: signedAuth.address,
+          chainId: signedAuth.chainId,
+          r: signedAuth.r,
+          s: signedAuth.s,
+          yParity: signedAuth.yParity as number,
+        },
         collateralToken: collateralToken as any,
         borrowToken: borrowToken as any,
         initialCollateralAmount: initialAmount,
         multiplier: leverage,
         maxSlippagePercent: maxSlippage,
         loanToValue: loanToValue,
-        isAccountAbstraction: true,
       });
 
-      console.log('Aave looping transaction created:', loopingTx);
+    //   const loopingTx = await compass.transactionBundler.transactionBundlerExecute({
+    //     chain: 'base',
+    //     sender,
+    //     signedAuthorization: {
+    //         nonce: signedAuth.nonce,
+    //         address: signedAuth.address,
+    //         chainId: signedAuth.chainId,
+    //         r: signedAuth.r,
+    //         s: signedAuth.s,
+    //         yParity: signedAuth.yParity as number,
+    //     },
+    //     actions: [
+    //       {
+    //         body: {
+    //             actionType: 'AAVE_SUPPLY',
+    //             token: "USDC",
+    //             amount: "1",
+    //         },
+    //       },
+    //     ],
+    //   });
 
-      const calls = loopingTx.operations.map((call: any) => ({
-        to: call.to,
-        data: call.data,
-        value: `0x${call.value.toString(16)}`,
-      }));
-
+    //   console.log('Aave looping transaction:', loopingTx);
       const txRequest = {
-        method: 'wallet_sendCalls',
-        params: [{
-          version: '2.0.0',
-          chainId: "0x2105",
-          atomicRequired: true,
-          calls: calls,
-          from: loopingTx.from,
-        }],
+        ...loopingTx.transaction,
+        chainId: Number(loopingTx.transaction.chainId),
+        value: BigInt(loopingTx.transaction.value || '0x0'),
+        nonce: loopingTx.transaction.nonce ? BigInt(loopingTx.transaction.nonce) : undefined,
+        gas: loopingTx.transaction.gas ? BigInt(loopingTx.transaction.gas) : undefined,
+        maxFeePerGas: loopingTx.transaction.maxFeePerGas ? BigInt(loopingTx.transaction.maxFeePerGas) : undefined,
+        maxPriorityFeePerGas: loopingTx.transaction.maxPriorityFeePerGas ? BigInt(loopingTx.transaction.maxPriorityFeePerGas) : undefined,
+        to: getAddress(loopingTx.transaction.to as `0x${string}`),
+        from: getAddress(loopingTx.transaction.from as `0x${string}`),
       };
+      console.log('txRequest', txRequest);
 
-      console.log('Sending transaction request:', txRequest);
-      
-      // Use the robust provider helper with retry logic
-      let result;
-      try {
-        const provider = await getMetaMaskProvider();
-        result = await provider.request(txRequest);
-      } catch (providerError: any) {
-        if (providerError.message?.includes('No active wallet')) {
-          throw new Error('MetaMask is locked or not connected. Please unlock MetaMask and try again.');
-        }
-        throw providerError;
-      }
-      
-      console.log('Transaction result:', result);
-    //   setTxHash(result?.id || 'Transaction submitted');
+      const hash = await walletClient.sendTransaction(txRequest as any);
+      setTxHash(hash);
     } catch (e: any) {
-      console.error('Aave looping transaction failed:', e);
-      
-      let errorMessage = 'Failed to execute Aave looping transaction';
-      
-      if (e?.message?.includes('User rejected')) {
-        errorMessage = 'Transaction was rejected by user';
-      } else if (e?.message?.includes('insufficient')) {
-        errorMessage = 'Insufficient funds for transaction';
-      } else if (e?.message?.includes('gas')) {
-        errorMessage = 'Transaction failed due to gas estimation';
-      } else if (e?.message) {
-        errorMessage = e.message;
-      }
-      
-      setError(errorMessage);
+      console.error(e);
+      setError(e?.message ?? 'Failed to execute Aave looping transaction');
     } finally {
       setIsSending(false);
     }
@@ -145,19 +154,10 @@ export const AaveLooping = () => {
         Aave Leverage Looping
       </h2>
 
-      {!wallet ? (
+      {!user ? (
         <p className="text-gray-600 dark:text-gray-300">
-          Please connect your MetaMask wallet first to use Aave looping.
+          Please connect a wallet first to use Aave looping.
         </p>
-      ) : wallet.chainId !== 8453 ? (
-        <div className="text-center">
-          <p className="text-amber-600 dark:text-amber-400 mb-4">
-            Please switch to Base network to use Aave looping.
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Current network: {wallet.chainId === 1 ? 'Ethereum Mainnet' : `Chain ID: ${wallet.chainId}`}
-          </p>
-        </div>
       ) : (
         <div className="space-y-6">
           {/* Token Selection */}

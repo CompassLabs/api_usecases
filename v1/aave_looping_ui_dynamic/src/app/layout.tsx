@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { MetaMaskProvider } from "@/contexts/MetaMaskContext";
+import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
+import { EthereumWalletConnectors } from '@dynamic-labs/ethereum';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Compass Labs - MetaMask Aave Looping",
-  description: "A Next.js application demonstrating MetaMask integration with Compass Labs API for Aave leverage looping",
-  keywords: ["Compass Labs", "MetaMask", "Aave", "Leverage Looping", "DeFi", "Next.js", "TypeScript"],
+  title: "Compass Labs - Dynamic SDK Example",
+  description: "A Next.js application demonstrating Dynamic SDK integration for wallet connection and embedded wallets",
+  keywords: ["Compass Labs", "Dynamic SDK", "Wallet Connection", "Embedded Wallets", "Next.js", "TypeScript"],
   authors: [{ name: "Compass Labs" }],
 };
 
@@ -35,9 +36,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 transition-colors duration-200`}
       >
-        <MetaMaskProvider>
+        <DynamicContextProvider
+          settings={{
+            environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "REPLACE_WITH_YOUR_ENVIRONMENT_ID",
+            walletConnectors: [EthereumWalletConnectors],
+          }}
+        >
           {children}
-        </MetaMaskProvider>
+        </DynamicContextProvider>
       </body>
     </html>
   );

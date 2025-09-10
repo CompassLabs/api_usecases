@@ -1,6 +1,6 @@
 import { WalletConnect } from "@/components/WalletConnect";
-import { MetaMaskInfo } from "@/components/EmbeddedWallet";
-import { AaveLooping } from "@/components/AaveLoop";
+import { EmbeddedWallet } from "@/components/EmbeddedWallet";
+import { BundledTransaction } from "@/components/BundledTransaction";
 
 export default function Home() {
   return (
@@ -12,20 +12,20 @@ export default function Home() {
             Compass Labs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            MetaMask Integration with Aave Leverage Looping
+            Dynamic SDK Integration with Aave Leverage Looping
           </p>
         </header>
 
         {/* Main Content */}
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* MetaMask Connection */}
+          {/* Wallet Connection */}
           <WalletConnect />
           
-          {/* MetaMask Wallet Info */}
-          <MetaMaskInfo />
+          {/* Embedded Wallet */}
+          <EmbeddedWallet />
 
           {/* Aave Looping */}
-          <AaveLooping />
+          <BundledTransaction />
           
           {/* Info Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
@@ -35,24 +35,24 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  🦊 MetaMask Integration
+                  🔗 Wallet Connection
                 </h3>
                 <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
-                  <li>• Direct MetaMask connection</li>
-                  <li>• Base network support</li>
-                  <li>• EIP-5792 transaction batching</li>
-                  <li>• Secure wallet interaction</li>
+                  <li>• Connect MetaMask wallets</li>
+                  <li>• Support for WalletConnect</li>
+                  <li>• Coinbase Wallet integration</li>
+                  <li>• Secure authentication flow</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  ⚡ Transaction Bundling
+                  🏦 Embedded Wallets
                 </h3>
                 <ul className="text-gray-600 dark:text-gray-300 space-y-1 text-sm">
-                  <li>• Batch multiple transactions</li>
-                  <li>• Gas optimization</li>
-                  <li>• Single approval flow</li>
-                  <li>• Reduced transaction costs</li>
+                  <li>• Automatic wallet creation</li>
+                  <li>• MPC-based security</li>
+                  <li>• No seed phrase management</li>
+                  <li>• Cross-device access</li>
                 </ul>
               </div>
               <div>
@@ -72,10 +72,10 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="text-center mt-16 text-gray-600 dark:text-gray-400">
-          <p>Built with Next.js, TypeScript, and MetaMask</p>
+          <p>Built with Next.js, TypeScript, and Dynamic SDK</p>
           <p className="mt-2">
-            <a href="https://docs.metamask.io/" className="text-blue-600 dark:text-blue-400 hover:underline">
-              MetaMask Documentation
+            <a href="https://www.dynamic.xyz/docs/react-sdk/quickstart" className="text-blue-600 dark:text-blue-400 hover:underline">
+              Dynamic SDK Documentation
             </a>
           </p>
         </footer>
