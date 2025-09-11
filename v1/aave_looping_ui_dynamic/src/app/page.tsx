@@ -1,6 +1,6 @@
 import { WalletConnect } from "@/components/WalletConnect";
 import { EmbeddedWallet } from "@/components/EmbeddedWallet";
-import { BundledTransaction } from "@/components/BundledTransaction";
+import { AaveLooping } from "@/components/AaveLoop";
 
 export default function Home() {
   return (
@@ -24,8 +24,8 @@ export default function Home() {
           {/* Embedded Wallet */}
           <EmbeddedWallet />
 
-          {/* Aave Looping */}
-          <BundledTransaction />
+          {/* Looping */}
+          <AaveLooping />
           
           {/* Info Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
