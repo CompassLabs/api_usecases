@@ -9,7 +9,7 @@ export const EmbeddedWallet = () => {
   const { user, primaryWallet } = useDynamicContext();
   const [isCreating, setIsCreating] = useState(false);
   const dynamicWaas = useDynamicWaas();
-
+  console.log('user', user)
   console.log(dynamicWaas.getWaasWallets());
   
   const { createWalletAccount, getWaasWallets } = useDynamicWaas();

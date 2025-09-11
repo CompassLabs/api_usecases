@@ -50,7 +50,7 @@ export const BundledTransaction = () => {
         throw new Error("Export container not available");
       }
 
-      const connector = primaryWallet?.connector as unknown as DynamicWaasEVMConnector;
+      const connector = primaryWallet?.connector as DynamicWaasEVMConnector;
       const privateKey = await connector.exportPrivateKey({
         accountAddress: primaryWallet?.address,
         displayContainer: iframeContainerRef.current as HTMLIFrameElement,
