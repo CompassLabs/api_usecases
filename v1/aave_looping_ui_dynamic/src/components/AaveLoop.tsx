@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+import { useState, useEffect } from 'react';
+import { useDynamicContext, useDynamicWaas } from '@dynamic-labs/sdk-react-core';
 import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { isDynamicWaasConnector } from '@dynamic-labs/wallet-connector-core';
 import { getAddress } from 'viem';
 
-export const AaveLooping = () => {
+interface AaveLoopingProps {
+  embeddedWallet?: any;
+}
+
+export const AaveLooping = ({ embeddedWallet }: AaveLoopingProps) => {
   const { user, primaryWallet } = useDynamicContext();
   const [isSending, setIsSending] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -33,7 +37,7 @@ export const AaveLooping = () => {
     setError(null);
     setTxHash(null);
     
-    if (!user || !primaryWallet?.address) {
+    if (!user || !embeddedWallet?.address) {
       setError('Please connect a wallet first.');
       return;
     }
@@ -49,12 +53,12 @@ export const AaveLooping = () => {
       return;
     }
 
-    const sender = primaryWallet.address as `0x${string}`;
+    const sender = embeddedWallet.address as `0x${string}`;
 
     try {
       setIsSending(true);
 
-      const walletClient: any = await (primaryWallet as any).getWalletClient();
+      const walletClient: any = await (embeddedWallet as any).getWalletClient();
 
       const compass = new CompassApiSDK({
         apiKeyAuth: process.env.NEXT_PUBLIC_COMPASS_API_KEY,
@@ -66,7 +70,7 @@ export const AaveLooping = () => {
         sender,
       });
 
-      const connector: any = (primaryWallet as any)?.connector;
+      const connector: any = (embeddedWallet as any)?.connector;
       if (!connector || !isDynamicWaasConnector(connector)) {
         throw new Error('Authorization signing requires an embedded wallet');
       }
@@ -102,29 +106,6 @@ export const AaveLooping = () => {
         loanToValue: loanToValue,
       });
 
-    //   const loopingTx = await compass.transactionBundler.transactionBundlerExecute({
-    //     chain: 'base',
-    //     sender,
-    //     signedAuthorization: {
-    //         nonce: signedAuth.nonce,
-    //         address: signedAuth.address,
-    //         chainId: signedAuth.chainId,
-    //         r: signedAuth.r,
-    //         s: signedAuth.s,
-    //         yParity: signedAuth.yParity as number,
-    //     },
-    //     actions: [
-    //       {
-    //         body: {
-    //             actionType: 'AAVE_SUPPLY',
-    //             token: "USDC",
-    //             amount: "1",
-    //         },
-    //       },
-    //     ],
-    //   });
-
-    //   console.log('Aave looping transaction:', loopingTx);
       const txRequest = {
         ...loopingTx.transaction,
         chainId: Number(loopingTx.transaction.chainId),
@@ -158,6 +139,13 @@ export const AaveLooping = () => {
         <p className="text-gray-600 dark:text-gray-300">
           Please connect a wallet first to use Aave looping.
         </p>
+      ) : !embeddedWallet ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+          <p className="ml-3 text-gray-600 dark:text-gray-300">
+            Waiting for embedded wallet to be ready...
+          </p>
+        </div>
       ) : (
         <div className="space-y-6">
           {/* Token Selection */}

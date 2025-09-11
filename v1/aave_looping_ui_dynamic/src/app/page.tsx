@@ -1,8 +1,21 @@
+'use client';
+
+import { useState } from "react";
 import { WalletConnect } from "@/components/WalletConnect";
 import { EmbeddedWallet } from "@/components/EmbeddedWallet";
 import { AaveLooping } from "@/components/AaveLoop";
 
 export default function Home() {
+  const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
+  const [isWalletLoading, setIsWalletLoading] = useState(false);
+
+  const handleWalletLoad = (wallet: any) => {
+    setEmbeddedWallet(wallet);
+  };
+
+  const handleLoadingChange = (loading: boolean) => {
+    setIsWalletLoading(loading);
+  };
   return (
     <div className="font-sans min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
@@ -22,10 +35,25 @@ export default function Home() {
           <WalletConnect />
           
           {/* Embedded Wallet */}
-          <EmbeddedWallet />
+          <EmbeddedWallet 
+            onWalletLoad={handleWalletLoad}
+            onLoadingChange={handleLoadingChange}
+          />
 
-          {/* Looping */}
-          <AaveLooping />
+          {/* Loading State for Other Components */}
+          {isWalletLoading && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p className="ml-3 text-gray-600 dark:text-gray-300">
+                  Preparing wallet for transactions...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Looping - only show when wallet is ready */}
+          {!isWalletLoading && <AaveLooping embeddedWallet={embeddedWallet} />}
           
           {/* Info Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">

@@ -1,29 +1,75 @@
 'use client';
 
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDynamicWaas } from "@dynamic-labs/sdk-react-core";
 import { ChainEnum } from "@dynamic-labs/sdk-api-core";
 
-export const EmbeddedWallet = () => {
+interface EmbeddedWalletProps {
+  onWalletLoad?: (wallet: any) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
+}
+
+export const EmbeddedWallet = ({ onWalletLoad, onLoadingChange }: EmbeddedWalletProps) => {
   const { user, primaryWallet } = useDynamicContext();
   const [isCreating, setIsCreating] = useState(false);
-  const dynamicWaas = useDynamicWaas();
-  console.log('user', user)
-  console.log(dynamicWaas.getWaasWallets());
+  const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   const { createWalletAccount, getWaasWallets } = useDynamicWaas();
-
+  
   const onCreateWalletHandler = async () => {
     try {
-      const waasWallets = await getWaasWallets();
+      const waasWallets = getWaasWallets();
       if (waasWallets.length === 0) {
         await createWalletAccount([ChainEnum.Evm]);
       }
     } catch (e) {
       console.error(e);
     }
-};
+  };
+
+  useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      onLoadingChange?.(false);
+      return;
+    }
+
+    const loadWallet = async () => {
+      setIsLoading(true);
+      onLoadingChange?.(true);
+      
+      try {
+        // Wait a bit for Dynamic to initialize
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const waasWallets = getWaasWallets();
+        console.log('waasWallets', waasWallets);
+        
+        if (waasWallets.length > 0) {
+          setEmbeddedWallet(waasWallets[0]);
+          onWalletLoad?.(waasWallets[0]);
+        } else {
+          // If no wallet exists, try to create one
+          await createWalletAccount([ChainEnum.Evm]);
+          // Check again after creation
+          const newWallets = getWaasWallets();
+          if (newWallets.length > 0) {
+            setEmbeddedWallet(newWallets[0]);
+            onWalletLoad?.(newWallets[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading embedded wallet:', error);
+      } finally {
+        setIsLoading(false);
+        onLoadingChange?.(false);
+      }
+    };
+
+    loadWallet();
+  }, [user, onWalletLoad, onLoadingChange]);
 
   const createEmbeddedWallet = async () => {
     if (!user) return;
@@ -51,6 +97,22 @@ export const EmbeddedWallet = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Embedded Wallet
+        </h2>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <p className="ml-3 text-gray-600 dark:text-gray-300">
+            Loading embedded wallet...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -65,14 +127,14 @@ export const EmbeddedWallet = () => {
           </p>
         </div>
         
-        {primaryWallet && (
+        {embeddedWallet && (
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Current Wallet
               </label>
               <p className="text-gray-900 dark:text-white font-mono text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded">
-                {primaryWallet.address}
+                {embeddedWallet.address}
               </p>
             </div>
             
@@ -81,7 +143,7 @@ export const EmbeddedWallet = () => {
                 Wallet Type
               </label>
               <p className="text-gray-900 dark:text-white font-mono text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded capitalize">
-                {primaryWallet.connector?.name || 'Unknown'}
+                {embeddedWallet.connector?.name || 'Unknown'}
               </p>
             </div>
             
@@ -90,7 +152,7 @@ export const EmbeddedWallet = () => {
                 Wallet ID
               </label>
               <p className="text-gray-900 dark:text-white font-mono text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded">
-                {primaryWallet.id || 'No ID'}
+                {embeddedWallet.id || 'No ID'}
               </p>
             </div>
           </div>
