@@ -159,10 +159,10 @@ export function MetaMaskProvider({ children }: { children: ReactNode }) {
       // Try to get existing accounts first
       let accounts;
       try {
-        accounts = await provider.request({ method: 'eth_accounts' });
+        accounts = await provider.request({ method: 'eth_accounts' }) as string[];
         if (accounts.length === 0) {
           // No existing accounts, request permission
-          accounts = await provider.request({ method: 'eth_requestAccounts' });
+          accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
         }
       } catch (accountsError: any) {
         // If eth_accounts fails, try requesting accounts directly
