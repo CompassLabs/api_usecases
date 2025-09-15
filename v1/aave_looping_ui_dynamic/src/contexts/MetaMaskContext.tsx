@@ -105,7 +105,7 @@ export function MetaMaskProvider({ children }: { children: ReactNode }) {
           const chainId = await provider?.request({ method: 'eth_chainId' });
           setWallet({
             address: accounts[0],
-            chainId: parseInt(chainId, 16),
+            chainId: parseInt(chainId as any, 16),
           });
           console.log('MetaMask reconnected with account:', accounts[0]);
         } catch (err) {
@@ -185,7 +185,7 @@ export function MetaMaskProvider({ children }: { children: ReactNode }) {
       
       setWallet({
         address: accounts[0],
-        chainId: parseInt(chainId, 16),
+        chainId: parseInt(chainId as any, 16),
       });
 
       // Auto-switch to Base if not already on Base
