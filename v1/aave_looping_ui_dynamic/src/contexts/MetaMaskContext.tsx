@@ -71,7 +71,7 @@ export function MetaMaskProvider({ children }: { children: ReactNode }) {
           const chainId = await provider?.request({ method: 'eth_chainId' });
           setWallet({
             address: accounts[0],
-            chainId: parseInt(chainId, 16),
+            chainId: parseInt(chainId as any, 16),
           });
           console.log('Existing MetaMask connection found:', accounts[0]);
         }
