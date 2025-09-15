@@ -66,7 +66,7 @@ export function MetaMaskProvider({ children }: { children: ReactNode }) {
           provider = window.ethereum?.providers?.find((p: any) => p.isMetaMask) || window.ethereum as any;
         }
 
-        const accounts = await provider?.request({ method: 'eth_accounts' });
+        const accounts = await provider?.request({ method: 'eth_accounts' }) as string[];
         if (accounts?.length > 0) {
           const chainId = await provider?.request({ method: 'eth_chainId' });
           setWallet({
