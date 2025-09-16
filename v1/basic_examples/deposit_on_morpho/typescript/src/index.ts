@@ -17,7 +17,7 @@ const COMPASS_API_KEY = process.env.COMPASS_API_KEY;
 const SERVER_URL = process.env.SERVER_URL;
 const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
 const SPECIFIC_MORPHO_VAULT = process.env
-  .SPECIFIC_MORPHO_VAULT as `0x${string}`;
+  .SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 // SNIPPET END 21
 
 // SNIPPET START 22

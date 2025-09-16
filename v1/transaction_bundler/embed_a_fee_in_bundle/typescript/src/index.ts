@@ -11,7 +11,7 @@ dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
-const SPECIFIC_MORPHO_VAULT = process.env.SPECIFIC_MORPHO_VAULT as `0x${string}`;
+const SPECIFIC_MORPHO_VAULT = process.env.SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 console.log(SPECIFIC_MORPHO_VAULT)
 
 
