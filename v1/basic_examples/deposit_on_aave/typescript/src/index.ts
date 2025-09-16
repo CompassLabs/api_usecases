@@ -53,7 +53,7 @@ const ethPrice = await compass.token.tokenPrice({
 
 const result = await compass.token.tokenBalance({
   chain: "base",
-  user: account.address,
+  user: WALLET_ADDRESS,
   token: "ETH",
 });
 console.log(result);
@@ -75,7 +75,7 @@ console.log(`0.03 USD worth of ETH: ${amountInETH}`);
 
 const swapTx = await compass.swap.swapOdos({
   chain: "base",
-  sender: account.address,
+  sender: WALLET_ADDRESS,
   tokenIn: "ETH",
   tokenOut: "USDC",
   amount: amountInETH,
