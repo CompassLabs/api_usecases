@@ -87,7 +87,7 @@ const swapTxHash = await walletClient.sendTransaction({
   maxFeePerGas: BigInt(transaction.maxFeePerGas),
   maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
-console.log(swapTxHash)
+console.log("Odos Swap Tx Hash", swapTxHash)
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
@@ -153,7 +153,7 @@ const txHash = await walletClient.sendTransaction({
   maxPriorityFeePerGas: BigInt(bundlerTransaction.maxPriorityFeePerGas),
 });
 
-console.log(txHash)
+console.log("bunder tx hash", txHash)
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
