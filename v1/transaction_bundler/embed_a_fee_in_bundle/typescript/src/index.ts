@@ -40,6 +40,24 @@ const publicClient = createPublicClient({
 });
 // SNIPPET END 2
 
+
+
+/////////////////////////////////////////////////////////////////
+
+const result = await compass.token.tokenBalance({
+  chain: "base",
+  user: WALLET_ADDRESS,
+  token: "ETH",
+});
+console.log(result);
+// const ethPrice = await compass.token.tokenPrice({
+//   chain: "ethereum",
+//   user: account.address
+//   token: "ETH",
+// });
+/////////////////////////////////////////////////////////////////
+
+
 // SNIPPET START 3
 const auth =
   await compass.transactionBundler.transactionBundlerAuthorization({
