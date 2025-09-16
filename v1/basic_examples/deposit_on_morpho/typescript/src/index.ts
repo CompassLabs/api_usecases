@@ -11,7 +11,8 @@ dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
-const WALLET_ADDRESS = process.env.WALLET_ADDRESS as `0x${string}`;
+//const WALLET_ADDRESS = process.env.WALLET_ADDRESS as `0x${string}`;
+
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY;
 const SERVER_URL = process.env.SERVER_URL;
 const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
@@ -28,6 +29,7 @@ const compass = new CompassApiSDK({
 });
 
 const account = privateKeyToAccount(PRIVATE_KEY);
+const WALLET_ADDRESS = account.address;
 
 const walletClient = createWalletClient({
   account,
@@ -46,6 +48,21 @@ const ethPrice = await compass.token.tokenPrice({
   chain: "ethereum",
   token: "ETH",
 });
+
+/////////////////////////////////////////////////////////////////
+
+const result = await compass.token.tokenBalance({
+  chain: "ethereum",
+  user: account.address,
+  token: "ETH",
+});
+console.log(result);
+// const ethPrice = await compass.token.tokenPrice({
+//   chain: "ethereum",
+//   user: account.address
+//   token: "ETH",
+// });
+/////////////////////////////////////////////////////////////////
 
 // How much ETH equals 1 USD
 const oneUSDinETH = 1 / Number(ethPrice.price);
@@ -66,14 +83,14 @@ const swapTx = await compass.swap.swapOdos({
 });
 console.log(swapTx);
 
-const transaction = swapTx.transaction as any;
+const swapTransaction = swapTx.transaction as any;
 
 const swapTxHash = await walletClient.sendTransaction({
-  ...transaction,
-  value: BigInt(transaction.value),
-  gas: BigInt(transaction.gas),
-  maxFeePerGas: BigInt(transaction.maxFeePerGas),
-  maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
+  ...swapTransaction,
+  value: BigInt(swapTransaction.value),
+  gas: BigInt(swapTransaction.gas),
+  maxFeePerGas: BigInt(swapTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(swapTransaction.maxPriorityFeePerGas),
 });
 console.log("Swap Tx Hash:", swapTxHash);
 
