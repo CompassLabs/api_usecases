@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const COMPASS_API_KEY = process.env.COMPASS_API_KEY;
+const SERVER_URL = process.env.SERVER_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 const SPECIFIC_MORPHO_VAULT =
@@ -18,8 +20,8 @@ console.log("SPECIFIC_MORPHO_VAULT", SPECIFIC_MORPHO_VAULT);
 // SNIPPET END 1
 
 // SNIPPET START 2
-const compassApiSDK = new CompassApiSDK({
-  apiKeyAuth: process.env.COMPASS_API_KEY,
+const compass = new CompassApiSDK({
+  apiKeyAuth: COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
 });
 
@@ -40,7 +42,7 @@ const publicClient = createPublicClient({
 
 // SNIPPET START 3
 const auth =
-  await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
+  await compass.transactionBundler.transactionBundlerAuthorization({
     chain: "base",
     sender: WALLET_ADDRESS,
   });
@@ -53,7 +55,7 @@ const signedAuth = await walletClient.signAuthorization({
 // SNIPPET END 3
 
 // Get ETH price in USD
-const ethPrice = await compassApiSDK.token.tokenPrice({
+const ethPrice = await compass.token.tokenPrice({
   chain: "ethereum",
   token: "ETH",
 });
@@ -67,9 +69,9 @@ const amountInETH = 0.03 * oneUSDinETH;
 console.log(`One USD in ETH: ${oneUSDinETH}`);
 console.log(`0.03 USD worth of ETH: ${amountInETH}`);
 
-const swapTX = await compassApiSDK.swap.swapOdos({
+const swapTX = await compass.swap.swapOdos({
   chain: "base",
-  sender: account.address,
+  sender: WALLET_ADDRESS,
   tokenIn: "ETH",
   tokenOut: "USDC",
   amount: amountInETH,
@@ -77,16 +79,16 @@ const swapTX = await compassApiSDK.swap.swapOdos({
 });
 console.log(swapTX);
 
-const transaction = swapTX.transaction as any;
+const swapTransaction = swapTX.transaction as any;
 
 const swapTxHash = await walletClient.sendTransaction({
-  ...transaction,
-  value: BigInt(transaction.value),
-  gas: BigInt(transaction.gas),
-  maxFeePerGas: BigInt(transaction.maxFeePerGas),
-  maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
+  ...swapTransaction,
+  value: BigInt(swapTransaction.value),
+  gas: BigInt(swapTransaction.gas),
+  maxFeePerGas: BigInt(swapTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(swapTransaction.maxPriorityFeePerGas),
 });
-console.log("Odos Swap Tx Hash", swapTxHash);
+console.log("Odos Swap Tx Hash:", swapTxHash);
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
@@ -105,9 +107,9 @@ console.log(FEE);
 
 // Create bundle of transactions
 const bundlerTx =
-  await compassApiSDK.transactionBundler.transactionBundlerExecute({
+  await compass.transactionBundler.transactionBundlerExecute({
     chain: "base",
-    sender: account.address,
+    sender: WALLET_ADDRESS,
     signedAuthorization: {
       nonce: signedAuth.nonce,
       address: signedAuth.address,
