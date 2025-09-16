@@ -52,6 +52,19 @@ swap_tx = compass.swap.swap_odos(
     max_slippage_percent=1,
 )
 
+
+# Helper function to sign and broadcast unsigned transaction:
+def send_tx(response):
+    tx = response.model_dump(by_alias=True)
+    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
+    start = time.time()
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    end = time.time()
+    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
+    # convert receipt to a serializable dict
+    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+
 print(send_tx(swap_tx))
 
 time.sleep(1)
