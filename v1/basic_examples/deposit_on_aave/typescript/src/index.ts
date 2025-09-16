@@ -15,9 +15,8 @@ const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY;
 const SERVER_URL = process.env.SERVER_URL;
-const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
-const SPECIFIC_MORPHO_VAULT = process.env
-  .SPECIFIC_MORPHO_VAULT as `0x${string}`;
+const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Aave pool
+
 // SNIPPET END 21
 
 // SNIPPET START 22
@@ -136,8 +135,8 @@ if (allowanceTxReceipt.status !== "success") {
 // SNIPPET END 24
 
 // SNIPPET START 25
-// DEPOSIT ON MORPHO
-// Get unsigned Morpho Deposit Transaction from the Compass API
+// DEPOSIT ON AAVE
+// Get unsigned Aave Deposit Transaction from the Compass API
 const aaveDepositTx = await compass.aaveV3.aaveSupply({
   chain: "base",
   sender: WALLET_ADDRESS,
@@ -166,6 +165,6 @@ if (aaveDepositTxReceipt.status !== "success") {
   throw Error();
 }
 
-console.log("Morpho deposit tx hash:", aaveDepositTxHash);
+console.log("Aave deposit tx hash:", aaveDepositTxHash);
 
 // SNIPPET END 26
