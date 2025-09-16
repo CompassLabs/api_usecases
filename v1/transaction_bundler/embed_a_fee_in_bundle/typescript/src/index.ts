@@ -93,7 +93,7 @@ await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
 
-await new Promise(r => setTimeout(r, 1000)); // pauses 1s
+await new Promise(r => setTimeout(r, 2000)); // pauses 1s
 
 // SNIPPET START 4
 
