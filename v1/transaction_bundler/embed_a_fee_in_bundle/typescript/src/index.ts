@@ -1,7 +1,7 @@
 // SNIPPET START 1
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import {base, mainnet} from "viem/chains";
+import {base} from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
@@ -92,6 +92,8 @@ console.log("Odos Swap Tx Hash", swapTxHash)
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
+
+console.log('here');
 
 await new Promise(r => setTimeout(r, 2000)); // pauses 1s
 
