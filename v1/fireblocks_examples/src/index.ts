@@ -38,6 +38,8 @@ const eip1193Provider = new FireblocksWeb3Provider({
 
 // --- ethers v5 provider & signer ---
 const provider = new ethers.providers.Web3Provider(eip1193Provider);
+
+
 await provider.send("eth_requestAccounts", []); // ensure account is selected/available
 const signer = provider.getSigner();
 const walletAddress = await signer.getAddress();
@@ -52,16 +54,20 @@ const compass = new CompassApiSDK({
 });
 console.log("Compass SDK ready");
 
-// --- 7702-style authorization signing (replace viem.signAuthorization) ---
-// Adjust `domain.name` / `domain.version` to whatever your verifier expects.
-// Some libs use { name: "Authorization", version: "1" }.
+// ---------- 7702: delegate to WETH on Sepolia ----------
+const DELEGATE_WETH_SEPOLIA = "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9";
+
+// Per 7702: authorization.nonce = transaction.nonce + 1
+const txNonce = await provider.getTransactionCount(walletAddress, "latest");
+const authNonce = txNonce + 1;
+
+// EIP-712 (commonly used by libs) "Authorization"
 const unsignedAuth = {
-  nonce: 12,
-  address: "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8",
-  chainId: 11155111, // Sepolia
+  nonce: authNonce,
+  address: DELEGATE_WETH_SEPOLIA,  // delegate code source
+  chainId: Number(chainId),        // 11155111 for Sepolia
 };
 
-// EIP-712 types per EIP-7702 "Authorization"
 const types = {
   Authorization: [
     { name: "contractAddress", type: "address" },
@@ -70,8 +76,6 @@ const types = {
   ],
 };
 
-// Many implementations use this domain. If your backend (or viem) used a different domain
-// (e.g., name "Authorize Contract"), mirror that exactly or the signature will fail to verify.
 const domain = {
   name: "Authorization",
   version: "1",
@@ -87,44 +91,39 @@ const value = {
 const signedAuth = await (signer as any)._signTypedData(domain, types, value);
 console.log("signedAuth:", signedAuth);
 
-// If you need to broadcast a tx with ethers instead of viem, do it with `signer.sendTransaction({...})`.
-// Example placeholder:
-// const tx = await signer.sendTransaction({ to: walletAddress, value: ethers.utils.parseEther("0.0001") });
-// console.log("tx hash:", tx.hash); await tx.wait();
-
-
-// --- After signedAuth ---
-
-// after signedAuth:
-
 const { r, s, v } = ethers.utils.splitSignature(signedAuth);
 const yParity = v === 27 ? "0x0" : "0x1";
 
-// Build a type: 0x04 tx with an authorizationList.
-// Delegate is the contract you want your EOA to point to *for this tx*.
-// Use the same address you put in your Authorization (unsignedAuth.address).
+// Fees (hex) — ensure maxFee >= priority
+const feeData = await provider.getFeeData();
+const priority = feeData.maxPriorityFeePerGas ?? ethers.utils.parseUnits("2", "gwei");
+const maxFee   = feeData.maxFeePerGas       ?? ethers.utils.parseUnits("20", "gwei");
+
+const hex = (bn: ethers.BigNumber | number) => ethers.utils.hexValue(bn);
+
+// Build type: 0x04 tx to **self**; delegate = WETH (Sepolia)
 const txParams: any = {
   from: walletAddress,
-  to: walletAddress,                 // no-op self-call
+  to: walletAddress,                 // self-call; runs under WETH delegate code
   value: "0x0",
-  data: "0x",                        // empty calldata
+  data: "0x",                        // no calldata (minimal)
   type: "0x04",
-  // tip/fee fields help some RPCs; tweak if needed
-  maxPriorityFeePerGas: "0x77359400", // 2 gwei
-  maxFeePerGas: "0x3b9aca00",         // 1 gwei (bump if needed)
-  gas: "0x030d40",                    // 200k
+  nonce: hex(txNonce),
+  gas: hex(200_000),
+  maxPriorityFeePerGas: hex(priority),
+  maxFeePerGas: hex(maxFee),
+  accessList: [],
   authorizationList: [
     {
       chainId: "0x" + unsignedAuth.chainId.toString(16),
-      address: unsignedAuth.address,      // <-- DELEGATE, not your EOA
+      address: unsignedAuth.address,            // delegate contract (WETH)
       nonce: "0x" + unsignedAuth.nonce.toString(16),
-      yParity,
-      r, s,
+      r, s, yParity,
     },
   ],
 };
 
-console.log("Sending 7702 tx (no-op)...");
+console.log("Sending 7702 setCode tx (delegate=WETH Sepolia)...");
 const txHash: string = await (eip1193Provider as any).request({
   method: "eth_sendTransaction",
   params: [txParams],
@@ -134,6 +133,6 @@ console.log("tx hash:", txHash);
 const receipt = await provider.waitForTransaction(txHash);
 console.log("mined:", receipt.status, receipt.transactionHash);
 
-// Expect getCode(EOA) === "0x" (7702 code is ephemeral for the tx only)
+// 7702 code is ephemeral; this will likely remain "0x"
 const code = await provider.getCode(walletAddress);
 console.log("EOA code after tx:", code);
