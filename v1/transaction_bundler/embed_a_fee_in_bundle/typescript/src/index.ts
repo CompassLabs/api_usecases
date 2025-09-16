@@ -100,6 +100,7 @@ await new Promise((r) => setTimeout(r, 2000)); // pauses 1s
 
 // SNIPPET START 4
 
+
 const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
 const FEE_PERCENTAGE = 0.01; // percentage fee you will charge the user
 const FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE; // calculated fee
