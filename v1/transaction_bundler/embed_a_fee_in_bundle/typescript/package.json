@@ -1,5 +1,5 @@
 {
-  "name": "transaction_bundler_example",
+  "name": "transaction_bundler_embed_a_fee",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
