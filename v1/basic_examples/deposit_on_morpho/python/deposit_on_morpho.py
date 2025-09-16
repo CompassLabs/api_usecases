@@ -1,4 +1,5 @@
-# SNIPPET START 1
+# SNIPPET START 10
+# Import Libraries & Environment Variables
 import time
 
 from compass_api_sdk import CompassAPI, models
@@ -24,32 +25,22 @@ SPECIFIC_MORPHO_VAULT = (
 )  # Seamless USDC Vault on base: https://app.morpho.org/base/vault/0x616a4E1db48e22028f6bbf20444Cd3b8e3273738/seamless-usdc-vault
 account = Account.from_key(PRIVATE_KEY)
 WALLET_ADDRESS = account.address
+# SNIPPET END 10
 
-# initialize clients
+# SNIPPET START 11
+# Initialize Compass SDK and Account
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
 compass = CompassAPI(
     api_key_auth=COMPASS_API_KEY,
     server_url=os.getenv("SERVER_URL")
     or None,  # For internal testing purposes. You do not need to set this.
 )
-# SNIPPET END 1
+# SNIPPET END 11
 
 
-# SNIPPET START 2
-# Helper function to sign and broadcast unsigned transaction:
-def send_tx(response):
-    tx = response.model_dump(by_alias=True)
-    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
-    start = time.time()
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    end = time.time()
-    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
-    # convert receipt to a serializable dict
-    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+# SNIPPET START 12
 
-
-# SNIPPET END 2
+# SNIPPET END 12
 
 
 # assuming your wallet has ETH but not USDC. We sell 0.03 USD of ETH for USDC.
@@ -83,6 +74,21 @@ allowance_tx = compass.universal.generic_allowance_set(
 # SNIPPET END 3
 
 # SNIPPET START 4
+# Sign and broadcast transaction unsigned allowance transaction
+
+# Helper function to sign and broadcast unsigned transaction:
+def send_tx(response):
+    tx = response.model_dump(by_alias=True)
+    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
+    start = time.time()
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    end = time.time()
+    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
+    # convert receipt to a serializable dict
+    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+
+# Execute the helper function to sign and broadcast transaction
 print(send_tx(allowance_tx))
 # SNIPPET END 4
 
@@ -100,6 +106,21 @@ deposit_tx = compass.morpho.morpho_deposit(
 
 
 # SNIPPET START 6
+# Sign and broadcast transaction unsigned deposit transaction
+
+# Helper function to sign and broadcast unsigned transaction:
+def send_tx(response):
+    tx = response.model_dump(by_alias=True)
+    signed_tx = w3.eth.account.sign_transaction(tx["transaction"], PRIVATE_KEY)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction).hex()
+    start = time.time()
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    end = time.time()
+    print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
+    # convert receipt to a serializable dict
+    return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+
+
 
 print(send_tx(deposit_tx))
 # SNIPPET END 6

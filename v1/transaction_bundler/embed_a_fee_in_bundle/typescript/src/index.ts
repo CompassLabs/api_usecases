@@ -14,13 +14,15 @@ const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 const SPECIFIC_MORPHO_VAULT = process.env.SPECIFIC_MORPHO_VAULT as `0x${string}`;
 console.log(SPECIFIC_MORPHO_VAULT)
 
+
+// SNIPPET END 1
+
+// SNIPPET START 2
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
 });
-// SNIPPET END 1
 
-// SNIPPET START 2
 const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
