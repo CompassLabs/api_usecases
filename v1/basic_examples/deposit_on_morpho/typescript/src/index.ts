@@ -19,7 +19,7 @@ const SPECIFIC_MORPHO_VAULT = process.env
   .SPECIFIC_MORPHO_VAULT as `0x${string}`;
 // SNIPPET END 21
 
-// SNIPPET START 20
+// SNIPPET START 22
 // Initialize Compass SDK and Account
 
 const compass = new CompassApiSDK({
@@ -39,7 +39,7 @@ const publicClient = createPublicClient({
   chain: base,
   transport: http(BASE_RPC_URL),
 });
-// SNIPPET END 20
+// SNIPPET END 22
 
 // Get ETH price in USD
 const ethPrice = await compass.token.tokenPrice({
@@ -83,7 +83,7 @@ await publicClient.waitForTransactionReceipt({
 
 await new Promise((r) => setTimeout(r, 1000)); // pauses 1s
 
-// SNIPPET START 3
+// SNIPPET START 23
 // SET ALLOWANCE
 // Get unsigned Allowance Transaction from the Compass API
 const allowanceTx = await compass.universal.genericAllowanceSet({
@@ -93,10 +93,11 @@ const allowanceTx = await compass.universal.genericAllowanceSet({
   amount: DEPOSIT_AMOUNT,
   token: "USDC",
 });
-// SNIPPET END 3
-console.log(allowanceTx);
+console.log("allowanceTx", allowanceTx);
 
-// SNIPPET START 4
+// SNIPPET END 23
+
+// SNIPPET START 24
 // Sign and broadcast unsigned allowance transaction
 const allowanceTransaction = allowanceTx.transaction as any;
 const allowanceTxHash = await walletClient.sendTransaction({
@@ -114,9 +115,9 @@ const allowanceTxReceipt = await publicClient.waitForTransactionReceipt({
 if (allowanceTxReceipt.status !== "success") {
   throw Error();
 }
-// SNIPPET END 5
+// SNIPPET END 24
 
-// SNIPPET START 3
+// SNIPPET START 25
 // DEPOSIT ON MORPHO
 // Get unsigned Morpho Deposit Transaction from the Compass API
 const morphoDepositTx = await compass.morpho.morphoDeposit({
@@ -125,10 +126,10 @@ const morphoDepositTx = await compass.morpho.morphoDeposit({
   vaultAddress: SPECIFIC_MORPHO_VAULT, // seamless USDC Vault.
   amount: DEPOSIT_AMOUNT,
 });
-console.log(morphoDepositTx);
-// SNIPPET END 3
+console.log("Morpho Deposit Tx", morphoDepositTx);
+// SNIPPET END 25
 
-// SNIPPET START 4
+// SNIPPET START 26
 // Sign and broadcast unsigned Morpho Deposit transaction
 const morphoDepositTransaction = morphoDepositTx.transaction as any;
 const morphoDepositTxHash = await walletClient.sendTransaction({
@@ -139,7 +140,6 @@ const morphoDepositTxHash = await walletClient.sendTransaction({
   maxPriorityFeePerGas: BigInt(morphoDepositTransaction.maxPriorityFeePerGas),
 });
 
-console.log("Morpho deposit tx hash:", morphoDepositTxHash);
 const morphoDepositTxReceipt = await publicClient.waitForTransactionReceipt({
   hash: morphoDepositTxHash,
 });
@@ -147,4 +147,7 @@ const morphoDepositTxReceipt = await publicClient.waitForTransactionReceipt({
 if (morphoDepositTxReceipt.status !== "success") {
   throw Error();
 }
-// SNIPPET END 5
+
+console.log("Morpho deposit tx hash:", morphoDepositTxHash);
+
+// SNIPPET END 26
