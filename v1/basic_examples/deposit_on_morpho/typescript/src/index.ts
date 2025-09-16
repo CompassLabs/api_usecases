@@ -52,8 +52,8 @@ const ethPrice = await compass.token.tokenPrice({
 /////////////////////////////////////////////////////////////////
 
 const result = await compass.token.tokenBalance({
-  chain: "ethereum",
-  user: account.address,
+  chain: "base",
+  user: WALLET_ADDRESS,
   token: "ETH",
 });
 console.log(result);
