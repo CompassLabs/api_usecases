@@ -128,14 +128,14 @@ const bundlerTx =
           amount: DEPOSIT_AMOUNT,
         },
       },
-      {
-        body: {
-          actionType: "TOKEN_TRANSFER",
-          token: "USDC",
-          to: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
-          amount: FEE,
-        },
-      },
+      // {
+      //   body: {
+      //     actionType: "TOKEN_TRANSFER",
+      //     token: "USDC",
+      //     to: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
+      //     amount: FEE,
+      //   },
+      // },
       {
         body: {
           vaultAddress: SPECIFIC_MORPHO_VAULT,
