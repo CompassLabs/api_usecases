@@ -76,6 +76,7 @@ allowance_tx = compass.universal.generic_allowance_set(
 # SNIPPET START 4
 # Sign and broadcast transaction unsigned allowance transaction
 
+
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
     tx = response.model_dump(by_alias=True)
@@ -87,6 +88,7 @@ def send_tx(response):
     print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
     # convert receipt to a serializable dict
     return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
+
 
 # Execute the helper function to sign and broadcast transaction
 print(send_tx(allowance_tx))
@@ -108,6 +110,7 @@ deposit_tx = compass.morpho.morpho_deposit(
 # SNIPPET START 6
 # Sign and broadcast transaction unsigned deposit transaction
 
+
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
     tx = response.model_dump(by_alias=True)
@@ -119,7 +122,6 @@ def send_tx(response):
     print(f"⏱️ Time waiting for receipt: {end - start:.2f} seconds")
     # convert receipt to a serializable dict
     return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
-
 
 
 print(send_tx(deposit_tx))
