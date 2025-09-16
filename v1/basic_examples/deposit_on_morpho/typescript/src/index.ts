@@ -25,7 +25,7 @@ const SPECIFIC_MORPHO_VAULT = process.env
 
 const compass = new CompassApiSDK({
   apiKeyAuth: COMPASS_API_KEY,
-  serverURL: SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
+  serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
 });
 
 const account = privateKeyToAccount(PRIVATE_KEY);
