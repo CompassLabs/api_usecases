@@ -136,13 +136,13 @@ const bundlerTx =
       //     amount: FEE,
       //   },
       // },
-      {
-        body: {
-          vaultAddress: SPECIFIC_MORPHO_VAULT,
-          actionType: "MORPHO_DEPOSIT",
-          amount: DEPOSIT_AMOUNT - FEE,
-        },
-      },
+      // {
+      //   body: {
+      //     vaultAddress: SPECIFIC_MORPHO_VAULT,
+      //     actionType: "MORPHO_DEPOSIT",
+      //     amount: DEPOSIT_AMOUNT - FEE,
+      //   },
+      // },
     ],
   });
 // SNIPPET END 4
