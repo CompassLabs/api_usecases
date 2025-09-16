@@ -30,6 +30,7 @@ const compass = new CompassApiSDK({
 
 const account = privateKeyToAccount(PRIVATE_KEY);
 const WALLET_ADDRESS = account.address;
+console.log("WALLET_ADDRESS", WALLET_ADDRESS);
 
 const walletClient = createWalletClient({
   account,
@@ -106,7 +107,7 @@ await new Promise((r) => setTimeout(r, 1000)); // pauses 1s
 const allowanceTx = await compass.universal.genericAllowanceSet({
   chain: "base",
   sender: WALLET_ADDRESS,
-  contract: SPECIFIC_MORPHO_VAULT, // seamless USDC Vault.
+  contract: "AaveV3Pool",
   amount: DEPOSIT_AMOUNT,
   token: "USDC",
 });
@@ -137,34 +138,34 @@ if (allowanceTxReceipt.status !== "success") {
 // SNIPPET START 25
 // DEPOSIT ON MORPHO
 // Get unsigned Morpho Deposit Transaction from the Compass API
-const morphoDepositTx = await compass.morpho.morphoDeposit({
+const aaveDepositTx = await compass.aaveV3.aaveSupply({
   chain: "base",
   sender: WALLET_ADDRESS,
-  vaultAddress: SPECIFIC_MORPHO_VAULT, // seamless USDC Vault.
+  token: "USDC",
   amount: DEPOSIT_AMOUNT,
 });
-console.log("Morpho Deposit Tx", morphoDepositTx);
+console.log("Aave Deposit Tx", aaveDepositTx);
 // SNIPPET END 25
 
 // SNIPPET START 26
-// Sign and broadcast unsigned Morpho Deposit transaction
-const morphoDepositTransaction = morphoDepositTx.transaction as any;
-const morphoDepositTxHash = await walletClient.sendTransaction({
-  ...morphoDepositTransaction,
-  value: BigInt(morphoDepositTransaction.value || 0),
-  gas: BigInt(morphoDepositTransaction.gas),
-  maxFeePerGas: BigInt(morphoDepositTransaction.maxFeePerGas),
-  maxPriorityFeePerGas: BigInt(morphoDepositTransaction.maxPriorityFeePerGas),
+// Sign and broadcast unsigned Aave Deposit transaction
+const aaveDepositTransaction = aaveDepositTx.transaction as any;
+const aaveDepositTxHash = await walletClient.sendTransaction({
+  ...aaveDepositTransaction,
+  value: BigInt(aaveDepositTransaction.value || 0),
+  gas: BigInt(aaveDepositTransaction.gas),
+  maxFeePerGas: BigInt(aaveDepositTransaction.maxFeePerGas),
+  maxPriorityFeePerGas: BigInt(aaveDepositTransaction.maxPriorityFeePerGas),
 });
 
-const morphoDepositTxReceipt = await publicClient.waitForTransactionReceipt({
-  hash: morphoDepositTxHash,
+const aaveDepositTxReceipt = await publicClient.waitForTransactionReceipt({
+  hash: aaveDepositTxHash,
 });
 
-if (morphoDepositTxReceipt.status !== "success") {
+if (aaveDepositTxReceipt.status !== "success") {
   throw Error();
 }
 
-console.log("Morpho deposit tx hash:", morphoDepositTxHash);
+console.log("Morpho deposit tx hash:", aaveDepositTxHash);
 
 // SNIPPET END 26
