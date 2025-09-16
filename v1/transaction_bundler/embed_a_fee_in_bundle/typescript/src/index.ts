@@ -1,19 +1,19 @@
 // SNIPPET START 1
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import {base} from "viem/chains";
+import { base } from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
-
 
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
-const SPECIFIC_MORPHO_VAULT = process.env.SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
-console.log("SPECIFIC_MORPHO_VAULT", SPECIFIC_MORPHO_VAULT)
-
+const SPECIFIC_MORPHO_VAULT =
+  (process.env.SPECIFIC_MORPHO_VAULT as `0x${string}`) ||
+  "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
+console.log("SPECIFIC_MORPHO_VAULT", SPECIFIC_MORPHO_VAULT);
 
 // SNIPPET END 1
 
@@ -24,6 +24,7 @@ const compassApiSDK = new CompassApiSDK({
 });
 
 const account = privateKeyToAccount(PRIVATE_KEY);
+const WALLET_ADDRESS = account.address;
 
 const walletClient = createWalletClient({
   account,
@@ -37,12 +38,11 @@ const publicClient = createPublicClient({
 });
 // SNIPPET END 2
 
-
 // SNIPPET START 3
 const auth =
   await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
     chain: "base",
-    sender: account.address,
+    sender: WALLET_ADDRESS,
   });
 
 const signedAuth = await walletClient.signAuthorization({
@@ -51,7 +51,6 @@ const signedAuth = await walletClient.signAuthorization({
   nonce: auth.nonce,
 });
 // SNIPPET END 3
-
 
 // Get ETH price in USD
 const ethPrice = await compassApiSDK.token.tokenPrice({
@@ -76,7 +75,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   amount: amountInETH,
   maxSlippagePercent: 1,
 });
-console.log(swapTX)
+console.log(swapTX);
 
 const transaction = swapTX.transaction as any;
 
@@ -87,22 +86,22 @@ const swapTxHash = await walletClient.sendTransaction({
   maxFeePerGas: BigInt(transaction.maxFeePerGas),
   maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
-console.log("Odos Swap Tx Hash", swapTxHash)
+console.log("Odos Swap Tx Hash", swapTxHash);
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
 
-console.log('here');
+console.log("here");
 
-await new Promise(r => setTimeout(r, 2000)); // pauses 1s
+await new Promise((r) => setTimeout(r, 2000)); // pauses 1s
 
 // SNIPPET START 4
 
 const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
 const FEE_PERCENTAGE = 0.01; // percentage fee you will charge the user
 const FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE; // calculated fee
-console.log(FEE)
+console.log(FEE);
 
 // Create bundle of transactions
 const bundlerTx =
@@ -155,7 +154,7 @@ const txHash = await walletClient.sendTransaction({
   maxPriorityFeePerGas: BigInt(bundlerTransaction.maxPriorityFeePerGas),
 });
 
-console.log("bunder tx hash", txHash)
+console.log("bunder tx hash", txHash);
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
