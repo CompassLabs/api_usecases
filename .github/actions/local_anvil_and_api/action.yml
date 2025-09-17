@@ -121,7 +121,7 @@ runs:
 
         docker run -d \
           --name compass-api \
-          --network host \
+          -p 8000:80 \
           -e ETHEREUM_MAINNET_RPC_URL=http://localhost:8545 \
           -e ARBITRUM_MAINNET_RPC_URL=http://localhost:8547 \
           -e BASE_MAINNET_RPC_URL=http://localhost:8546 \
