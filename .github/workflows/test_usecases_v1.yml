@@ -123,6 +123,7 @@ jobs:
           npm install
           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
           npm list
 
       - name: Build application
@@ -353,6 +354,7 @@ jobs:
           npm install
           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
           npm list
 
       - name: Build application
@@ -447,6 +449,7 @@ jobs:
           npm install
           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
           npm list
 
       - name: Build application
