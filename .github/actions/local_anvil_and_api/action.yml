@@ -14,15 +14,18 @@ inputs:
   private_key:
     description: "Private key of the wallet to fund"
     required: true
-  mono_app_id:
-    description: "GitHub App ID for mono repo"
-    required: true
-  mono_app_private_key:
-    description: "Private key for the GitHub App for mono repo"
-    required: true
   fund_amount_eth:
     description: "ETH amount to fund the wallet with"
     default: "10"
+  environment:
+    description: "Environment to run the workflow in"
+    required: true
+  ecr_image_uri:
+    description: "ECR image URI for the API container"
+    required: true
+  aws_ecr_sts_role:
+    description: "AWS ECR STS role"
+    required: true
 
 outputs:
   ethereum_local_url:
@@ -88,54 +91,45 @@ runs:
         WEI_AMOUNT=$(cast to-wei "${{ inputs.fund_amount_eth }}" ether)
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8545
         cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8546
-        cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547
+        cast rpc anvil_setBalance $WALLET_ADDRESS $WEI_AMOUNT --rpc-url http://localhost:8547 
 
-    # - name: Verify Wallet Balance
-    #   shell: bash
-    #   run: |
-    #     WALLET_ADDRESS=$(cast wallet address --private-key "${{ inputs.private_key }}")
-    #     BALANCE=$(cast balance $WALLET_ADDRESS --rpc-url http://localhost:8547)
-    #     BALANCE_ETH=$(cast from-wei $BALANCE ether)
-    #     echo "Wallet balance: $BALANCE_ETH ETH"
-    #     if [ "$(echo "$BALANCE_ETH >= ${{ inputs.fund_amount_eth }}" | bc)" -ne 1 ]; then
-    #       echo "Balance verification failed: Wallet has less ETH than expected"
-    #       exit 1
-    #     fi
-
-    - name: Generate GitHub App Token
-      id: generate_token
-      uses: tibdex/github-app-token@v1
+    - name: Configure aws credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
       with:
-        app_id: ${{ inputs.mono_app_id }}
-        private_key: ${{ inputs.mono_app_private_key }}
+        role-to-assume: ${{ inputs.aws_ecr_sts_role }}
+        role-session-name: github-actions
+        aws-region: eu-west-2
 
-    - name: Checkout mono repo
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ steps.generate_token.outputs.token }}
-        repository: "CompassLabs/mono"
-        path: "mono"
-
-    - name: Install uv
+    - name: Authenticate with ECR
       shell: bash
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      run: aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 688567264391.dkr.ecr.eu-west-2.amazonaws.com
 
-    - name: Start API
+    - name: Start API Container
       shell: bash
-      working-directory: mono/api
-      env:
-        ETHEREUM_MAINNET_RPC_URL: http://localhost:8545
-        ARBITRUM_MAINNET_RPC_URL: http://localhost:8547
-        BASE_MAINNET_RPC_URL: http://localhost:8546
-        PENDLE_API_URL: https://api-v2.pendle.finance
-        MORPHO_GRAPHQL_API_URL: https://blue-api.morpho.org/graphql
-        THE_GRAPH_URL_AAVE_ARBITRUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-        THE_GRAPH_URL_AAVE_ETHEREUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-        THE_GRAPH_URL_AAVE_BASE: https://gateway.thegraph.com/api/subgraphs/id/notvalid
-        THE_GRAPH_API_KEY: notvalid
-        ENV: "development"
       run: |
-        make install && make run &
-        until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
+        if [[ "${{ inputs.environment }}" == "local" ]]; then
+          tag="latest"
+        else
+          tag="${{ inputs.environment }}"
+        fi
+
+        docker run -d \
+          --name compass-api \
+          --network host \
+          -e ETHEREUM_MAINNET_RPC_URL=http://localhost:8545 \
+          -e ARBITRUM_MAINNET_RPC_URL=http://localhost:8547 \
+          -e BASE_MAINNET_RPC_URL=http://localhost:8546 \
+          -e PENDLE_API_URL=https://api-v2.pendle.finance \
+          -e MORPHO_GRAPHQL_API_URL=https://blue-api.morpho.org/graphql \
+          -e THE_GRAPH_URL_AAVE_ARBITRUM=https://gateway.thegraph.com/api/subgraphs/id/notvalid \
+          -e THE_GRAPH_URL_AAVE_ETHEREUM=https://gateway.thegraph.com/api/subgraphs/id/notvalid \
+          -e THE_GRAPH_URL_AAVE_BASE=https://gateway.thegraph.com/api/subgraphs/id/notvalid \
+          -e THE_GRAPH_API_KEY=notvalid \
+          -e ENV=development \
+          ${{ inputs.ecr_image_uri }}:$tag
+        
+        echo "Waiting for API to be ready..."
+        until curl -s http://localhost:8000/health >/dev/null; do 
+          sleep 1
+        done
         echo "API is running"

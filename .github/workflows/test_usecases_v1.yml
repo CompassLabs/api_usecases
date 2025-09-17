@@ -25,6 +25,9 @@ permissions:
   id-token: write
   contents: write
 
+env:
+  AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
+
 jobs:
   validate-environment:
     runs-on: ubuntu-latest
@@ -39,8 +42,8 @@ jobs:
           else
             ENVIRONMENT="local"
           fi
-          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" && "$ENVIRONMENT" != "local" ]]; then
-            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'production' or 'local'."
+          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
+            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
             exit 1
           fi
           echo "✅ Environment '$ENVIRONMENT' is valid"
@@ -72,7 +75,7 @@ jobs:
           else
             NPM_PACKAGE_VERSION="latest"
             UV_PACKAGE_VERSION="latest"
-            if [[ "${{ needs.validate-environment.outputs.environment }}" == "production" ]]; then
+            if [[ "${{ needs.validate-environment.outputs.environment }}" == "prod" ]]; then
               SERVER_URL="https://api.compasslabs.ai"
             else
               SERVER_URL="http://localhost:8000"
@@ -116,6 +119,10 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+
 
       - name: Install dependencies
         working-directory: v1/pendle/typescript
