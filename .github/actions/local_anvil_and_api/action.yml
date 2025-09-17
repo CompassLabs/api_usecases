@@ -26,6 +26,12 @@ inputs:
   aws_ecr_sts_role:
     description: "AWS ECR STS role"
     required: true
+  mono_app_id:
+    description: "Mono repository app ID"
+    required: false
+  mono_app_private_key:
+    description: "Mono repository app private key"
+    required: false
 
 outputs:
   ethereum_local_url:

@@ -88,7 +88,7 @@ jobs:
 
 
   run-pendle-typescript:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -142,7 +142,7 @@ jobs:
         run: npm run start
 
   run-pendle-python:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -171,6 +171,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/pendle/python
@@ -187,7 +190,7 @@ jobs:
         run: ./.venv/bin/python src/main.py
         
   run-basic-examples-deposit-on-morpho-python: #
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -216,6 +219,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/basic_examples/deposit_on_morpho/python_example
@@ -232,7 +238,7 @@ jobs:
         run: ./.venv/bin/python deposit_on_morpho.py #src/main.py
         
   run-basic-examples-deposit-on-aave-python:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -261,6 +267,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/basic_examples/deposit_on_aave/python_example
@@ -277,7 +286,7 @@ jobs:
         run: ./.venv/bin/python main.py #src/main.py
 
   run-transaction_bundler_embed_a_fee_in_tx: #
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -306,6 +315,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
@@ -323,7 +335,7 @@ jobs:
 
 
   run-transaction-bundler-typescript:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -354,6 +366,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/transaction_bundler/typescript
@@ -373,7 +388,7 @@ jobs:
         run: npm run start
 
   run-transaction-bundler-python:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -402,6 +417,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/transaction_bundler/python
@@ -418,7 +436,7 @@ jobs:
         run: ./.venv/bin/python src/main.py
 
   run-aave-looping-typescript:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -449,6 +467,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/aave_looping/typescript
@@ -468,7 +489,7 @@ jobs:
         run: npm run start
 
   run-aave-looping-python:
-    needs: [set-versions]
+    needs: [validate-environment, set-versions]
     
     runs-on: ubuntu-latest
     env:
@@ -497,6 +518,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/aave_looping/python
