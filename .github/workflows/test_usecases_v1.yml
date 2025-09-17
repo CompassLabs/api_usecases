@@ -34,7 +34,7 @@ jobs:
       - name: Validate environment input
         id: validate
         run: |
-          if ${{ github.event_name }} == 'workflow_dispatch' || ${{ github.event_name }} == 'workflow_call'; then
+          if '${{ github.event_name }}'' == 'workflow_dispatch' || '${{ github.event_name }}' == 'workflow_call'; then
             ENVIRONMENT="${{ inputs.environment }}"
           else
             ENVIRONMENT="local"
