@@ -134,8 +134,26 @@ runs:
           -e ENV=development \
           ${{ inputs.ecr_image_uri }}:$tag
         
+        sleep 2
+        if ! docker ps | grep -q compass-api; then
+          echo "❌ Container failed to start. Checking logs:"
+          docker logs compass-api
+          exit 1
+        fi
+
         echo "Waiting for API to be ready..."
-        until curl -s http://localhost:8000/health >/dev/null; do 
+        # Wait up to 60 seconds for API to be ready
+        for i in {1..60}; do
+          if curl -s http://localhost:8000/health >/dev/null; then
+            echo "✅ API is running and healthy"
+            break
+          fi
+          if [ $i -eq 60 ]; then
+            echo "❌ API failed to become ready after 60 seconds. Container logs:"
+            docker logs compass-api
+            exit 1
+          fi
+          echo "Waiting for API... ($i/60)"
           sleep 1
         done
         echo "API is running"
