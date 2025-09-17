@@ -55,7 +55,6 @@ jobs:
     outputs:
       npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
       uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
-      server_url: ${{ steps.set-versions.outputs.server_url }}
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -71,20 +70,13 @@ jobs:
           if [[ "${{ needs.validate-environment.outputs.environment }}" == "staging" ]]; then
             NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
             UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
-            SERVER_URL="https://dev-api.compasslabs.ai"
           else
             NPM_PACKAGE_VERSION="latest"
             UV_PACKAGE_VERSION="latest"
-            if [[ "${{ needs.validate-environment.outputs.environment }}" == "prod" ]]; then
-              SERVER_URL="https://api.compasslabs.ai"
-            else
-              SERVER_URL="http://localhost:8000"
-            fi
           fi
 
           echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
-          echo "server_url=$SERVER_URL" >> $GITHUB_OUTPUT
 
 
   run-pendle-typescript:
@@ -95,7 +87,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: http://localhost:8547
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -149,7 +141,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ARBITRUM_RPC_URL: http://localhost:8547
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -197,7 +189,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       BASE_RPC_URL: http://localhost:8546
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -245,7 +237,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       BASE_RPC_URL: http://localhost:8546
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -293,7 +285,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       BASE_RPC_URL: http://localhost:8546
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -342,7 +334,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ETHEREUM_RPC_URL: http://localhost:8545
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -395,7 +387,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ETHEREUM_RPC_URL: http://localhost:8545
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -443,7 +435,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ETHEREUM_RPC_URL: http://localhost:8545
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
@@ -496,7 +488,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       ETHEREUM_RPC_URL: http://localhost:8545
-      SERVER_URL: ${{ needs.set-versions.outputs.server_url }}
+      SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
