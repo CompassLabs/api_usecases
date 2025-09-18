@@ -15,3 +15,5 @@ if endpoint not in spec.get("paths", {}):
     raise SystemExit(f"❌ Endpoint {endpoint} not in spec")
 
 print(f"✅ Found {endpoint} in spec")
+
+
