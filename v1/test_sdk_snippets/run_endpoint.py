@@ -46,6 +46,7 @@ def main():
     print(f"--- Running SDK snippet for {endpoint} ---")
     code = get_python_code_for_path(spec, endpoint)
     code = replace_with_secret(code, api_key)
+    print(code)
 
     # Execute snippet in isolated globals
     globs = {"__name__": "__main__"}
