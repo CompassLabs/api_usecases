@@ -8,6 +8,15 @@ on:
 jobs:
   discover:
     runs-on: ubuntu-latest
+
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      #PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      #ARBITRUM_RPC_URL: http://localhost:8547
+      #SERVER_URL: http://localhost:80
+      #NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+
     outputs:
       items: ${{ steps.collect.outputs.items }}   # <-- expose "items"
     steps:
