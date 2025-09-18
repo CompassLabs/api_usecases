@@ -27,7 +27,7 @@ jobs:
           echo "✅ Environment '$ENVIRONMENT' is valid"
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
-  discover:
+  discover_sdk_snippets:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -69,15 +69,15 @@ jobs:
         run: ./.venv/bin/python discover_endpoints.py
 
   test:
-    needs: discover
-    if: ${{ needs.discover.outputs.items != '' }}
+    needs: discover_sdk_snippets
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version || 'latest' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.discover.outputs.items) }}
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
 
     steps:
       - name: Checkout repository
