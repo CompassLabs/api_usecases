@@ -1,8 +1,6 @@
 name: workflow 1
 
 on:
-  schedule:
-    - cron: "0 0 * * *"     # daily at 00:00 UTC
   pull_request:
     branches: [ main ]
   workflow_dispatch:
