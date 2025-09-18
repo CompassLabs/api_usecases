@@ -31,7 +31,7 @@ jobs:
           python - <<'PY'
           import json, os
           # Pretend we "discovered" two items
-          values = ["foo", "bar"]
+          values = ["x", "y", "z"]
           matrix = {"item": values}
           print("Discovered:", matrix)
 
