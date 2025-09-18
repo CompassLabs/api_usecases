@@ -9,31 +9,46 @@ on:
 
 jobs:
   discover:
-#    runs-on: ubuntu-latest
-#    outputs:
-#      paths: ${{ steps.collect.outputs.paths }}
-#      count: ${{ steps.collect.outputs.count }}
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: "3.11"
-#
-#      - name: Install Python deps
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install requests
-
-
     runs-on: ubuntu-latest
     outputs:
-      items: ${{ steps.set-output.outputs.items }}
+      paths: ${{ steps.collect.outputs.paths }}
+      count: ${{ steps.collect.outputs.count }}
     steps:
-      - id: set-output
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
         run: |
-          echo 'items={"item":["x","y", "z"]}' >> $GITHUB_OUTPUT
+          python -m pip install --upgrade pip
+          pip install requests
+      steps:
+      - id: collect
+        run: |
+          python - <<'PY'
+          import json, os
+          # Pretend we "discovered" two items
+          values = ["foo", "bar"]
+          matrix = {"item": values}
+          print("Discovered:", matrix)
+          
+          # Write to GitHub Actions output file
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+            fh.write(f"items={json.dumps(matrix)}\n")
+          PY
+
+
+
+#    runs-on: ubuntu-latest
+#    outputs:
+#      items: ${{ steps.set-output.outputs.items }}
+#    steps:
+#      - id: set-output
+#        run: |
+#          echo 'items={"item":["x","y", "z"]}' >> $GITHUB_OUTPUT
 
   echo-item:
     needs: discover
