@@ -1,7 +1,8 @@
 // SNIPPET START 1
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
+//import { mainnet } from "viem/chains";
+import { base } from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
@@ -10,7 +11,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
-const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
+//const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
+const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -23,13 +25,13 @@ const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
   account,
-  chain: mainnet,
-  transport: http(ETHEREUM_RPC_URL),
+  chain: base,
+  transport: http(BASE_RPC_URL),
 });
 
 const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(ETHEREUM_RPC_URL),
+  chain: base,
+  transport: http(BASE_RPC_URL),
 });
 // SNIPPET END 2
 
@@ -71,7 +73,7 @@ console.log(result2);
 // SNIPPET START 3
 const auth =
   await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-    chain: "ethereum",
+    chain: "base",
     sender: account.address,
   });
 
@@ -83,7 +85,7 @@ const signedAuth = await walletClient.signAuthorization({
 // SNIPPET END 3
 
 const swapTX = await compassApiSDK.swap.swapOdos({
-  chain: "ethereum",
+  chain: "base",
   sender: account.address,
   tokenIn: "ETH",
   tokenOut: "WETH",
@@ -107,7 +109,7 @@ await publicClient.waitForTransactionReceipt({
 // SNIPPET START 4
 const bundlerTx =
   await compassApiSDK.transactionBundler.transactionBundlerExecute({
-    chain: "ethereum",
+    chain: "base",
     sender: account.address,
     signedAuthorization: {
       nonce: signedAuth.nonce,
