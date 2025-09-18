@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: collect
+      - id: collect
         run: |
           python - <<'PY'
           import json, os
@@ -39,6 +39,7 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
             fh.write(f"items={json.dumps(matrix)}\n")
           PY
+
   echo-item:
     needs: discover
     runs-on: ubuntu-latest
