@@ -18,7 +18,7 @@ jobs:
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Install dependencies
-        working-directory: v1/pendle/python
+        working-directory: v1/test_sdk_snippets
         run: |
           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
