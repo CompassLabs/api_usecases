@@ -9,8 +9,7 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     outputs:
-      paths: ${{ steps.collect.outputs.paths }}
-      count: ${{ steps.collect.outputs.count }}
+      items: ${{ steps.collect.outputs.items }}   # <-- expose "items"
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +27,7 @@ jobs:
         run: |
           python - <<'PY'
           import json, os
-          # Pretend we "discovered" two items
+          # Pretend we "discovered" 3 items
           values = ["x", "y", "z"]
           matrix = {"item": values}
           print("Discovered:", matrix)
