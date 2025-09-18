@@ -1,7 +1,8 @@
-// SNIPPET START 1
+// SNIPPET START 11
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
+//import { mainnet } from "viem/chains";
+import { base } from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
@@ -10,83 +11,42 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
-const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
+//const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
+const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
+//const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
+const SPECIFIC_MORPHO_VAULT = process.env
+  .SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 
+
+// SNIPPET END 11
+
+// SNIPPET START 12
+// Initialize SDK and Web3 clients
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
 });
-// SNIPPET END 1
 
-// SNIPPET START 2
 const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
   account,
-  chain: mainnet,
-  transport: http(ETHEREUM_RPC_URL),
+  chain: base,
+  transport: http(BASE_RPC_URL),
 });
 
 const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(ETHEREUM_RPC_URL),
+  chain: base,
+  transport: http(BASE_RPC_URL),
 });
-// SNIPPET END 2
+// SNIPPET END 12
 
-
-
-
-/////////////////////////////////////////////////////////////////
-
-const result = await compassApiSDK.token.tokenBalance({
-  chain: "base",
-  user: account.address,
-  token: "ETH",
-});
-console.log(result);
-// const ethPrice = await compass.token.tokenPrice({
-//   chain: "ethereum",
-//   user: account.address
-//   token: "ETH",
-// });
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-
-const result = await compassApiSDK.token.tokenBalance({
-  chain: "ethereum",
-  user: account.address,
-  token: "ETH",
-});
-console.log(result);
-// const ethPrice = await compass.token.tokenPrice({
-//   chain: "ethereum",
-//   user: account.address
-//   token: "ETH",
-// });
-/////////////////////////////////////////////////////////////////
-
-
-
-
-// SNIPPET START 3
-const auth =
-  await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-    chain: "ethereum",
-    sender: account.address,
-  });
-
-const signedAuth = await walletClient.signAuthorization({
-  account,
-  contractAddress: auth.address as `0x${string}`,
-  nonce: auth.nonce,
-});
-// SNIPPET END 3
-
+//using ODOS to perform the swap
 const swapTX = await compassApiSDK.swap.swapOdos({
-  chain: "ethereum",
+  chain: "base",
   sender: account.address,
   tokenIn: "ETH",
-  tokenOut: "WETH",
+  tokenOut: "USDC",
   amount: 1,
   maxSlippagePercent: 1,
 });
@@ -104,10 +64,40 @@ await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
 
-// SNIPPET START 4
+await new Promise((r) => setTimeout(r, 2000)); // pauses 2s
+
+
+// SNIPPET START 13
+// Get and Sign Authorization
+const auth =
+  await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
+    chain: "base",
+    sender: account.address,
+  });
+
+const signedAuth = await walletClient.signAuthorization({
+  account,
+  contractAddress: auth.address as `0x${string}`,
+  nonce: auth.nonce,
+});
+// SNIPPET END 13
+
+
+
+await new Promise((r) => setTimeout(r, 2000)); // pauses 2s
+
+// SNIPPET START 14
+
+
+const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
+const FEE_PERCENTAGE = 0.01; // percentage fee you will charge the user
+const FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE; // calculated fee
+console.log(FEE);
+
+// Create bundle of transactions
 const bundlerTx =
   await compassApiSDK.transactionBundler.transactionBundlerExecute({
-    chain: "ethereum",
+    chain: "base",
     sender: account.address,
     signedAuthorization: {
       nonce: signedAuth.nonce,
@@ -121,26 +111,44 @@ const bundlerTx =
       {
         body: {
           actionType: "SET_ALLOWANCE",
-          token: "WETH",
-          contract: "UniswapV3Router",
+          token: "USDC",
+          contract: SPECIFIC_MORPHO_VAULT,
           amount: 1,
         },
       },
       {
         body: {
-          actionType: "UNISWAP_SELL_EXACTLY",
-          amountIn: 1,
-          fee: "0.01",
-          maxSlippagePercent: 0.5,
-          tokenIn: "WETH",
-          tokenOut: "USDC",
+          actionType: "TOKEN_TRANSFER",
+          token: "USDC",
+          to: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
+          amount: FEE,
         },
       },
+
+      {
+        body: {
+          actionType: "MORPHO_DEPOSIT",
+          vaultAddress: SPECIFIC_MORPHO_VAULT,
+          amount: DEPOSIT_AMOUNT - FEE,
+        },
+      },
+
+      // {
+      //   body: {
+      //     actionType: "UNISWAP_SELL_EXACTLY",
+      //     amountIn: 1,
+      //     fee: "0.01",
+      //     maxSlippagePercent: 0.5,
+      //     tokenIn: "USDC",
+      //     tokenOut: "USDC",
+      //   },
+      // },
     ],
   });
-// SNIPPET END 4
+// SNIPPET END 14
 
-// SNIPPET START 5
+// SNIPPET START 15
+// Sign and broadcast the bundler transaction
 const bundlerTransaction = bundlerTx.transaction as any;
 const txHash = await walletClient.sendTransaction({
   ...bundlerTransaction,
@@ -153,7 +161,7 @@ const txHash = await walletClient.sendTransaction({
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
-// SNIPPET END 5
+// SNIPPET END 15
 
 ///
 

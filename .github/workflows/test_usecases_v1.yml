@@ -394,6 +394,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       BASE_RPC_URL: http://localhost:8546
+      #ETHEREUM_RPC_URL: http://localhost:8545
       SERVER_URL: http://localhost:80
       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
