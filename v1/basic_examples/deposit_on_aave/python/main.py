@@ -17,8 +17,8 @@ BASE_RPC_URL = os.getenv("BASE_RPC_URL")
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 assert COMPASS_API_KEY
 CHAIN = models.Chain.BASE
-ETH = models.TokenEnum.ETH
-USDC = models.TokenEnum.USDC
+ETH = "ETH"
+USDC = "USDC"
 SPECIFIC_MORPHO_VAULT = os.getenv("SPECIFIC_MORPHO_VAULT")
 
 w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
