@@ -423,7 +423,7 @@ jobs:
           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
-        working-directory: v1/transaction_bundler/typescript
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
         run: |
           npm install
           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
