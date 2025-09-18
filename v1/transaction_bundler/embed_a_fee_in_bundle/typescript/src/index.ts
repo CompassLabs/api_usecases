@@ -150,6 +150,14 @@ const bundlerTx =
         },
       },
 
+      {
+        body: {
+          actionType: "MORPHO_DEPOSIT",
+          vaultAddress: SPECIFIC_MORPHO_VAULT,
+          amount: DEPOSIT_AMOUNT - FEE,
+        },
+      },
+
       // {
       //   body: {
       //     actionType: "UNISWAP_SELL_EXACTLY",
