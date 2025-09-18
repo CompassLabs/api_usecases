@@ -1,4 +1,4 @@
-name: Smoke test code samples (parallel)
+name: workflow 1
 
 on:
   schedule:
