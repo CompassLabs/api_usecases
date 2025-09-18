@@ -155,6 +155,8 @@ const receipt = await publicClient.waitForTransactionReceipt({
 });
 // SNIPPET END 5
 
+///
+
 if (receipt.status !== "success") {
   throw Error();
 }
