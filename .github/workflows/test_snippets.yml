@@ -69,7 +69,7 @@ jobs:
         run: ./.venv/bin/python discover_endpoints.py
 
   test:
-    needs: discover_sdk_snippets
+    needs: discover_sdk_snippets #
     if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
     runs-on: ubuntu-latest
     env:
