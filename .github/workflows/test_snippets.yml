@@ -37,32 +37,17 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
             fh.write(f"items={json.dumps(matrix)}\n")
           PY
+      - name: Echo raw output (debug)
+        run: echo "items = ${{ steps.collect.outputs.items }}"
 
   echo-item:
     needs: discover
+    # Only run if discover produced something JSON-ish
+    if: ${{ needs.discover.outputs.items != '' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.discover.outputs.items) }}
+      fail-fast: false
+      # Fallback to an empty matrix if items is blank (prevents fromJson('') errors)
+      matrix: ${{ fromJson(needs.discover.outputs.items != '' && needs.discover.outputs.items || '{"item":[]}' ) }}
     steps:
       - run: echo "Hello from ${{ matrix.item }}"
-
-
-
-#    runs-on: ubuntu-latest
-#    outputs:
-#      items: ${{ steps.set-output.outputs.items }}
-#    steps:
-#      - id: set-output
-#        run: |
-#          echo 'items={"item":["x","y", "z"]}' >> $GITHUB_OUTPUT
-
-
-
-#      - name: Collect endpoints from spec (minus BROKEN)
-#        id: collect
-#        env:
-#          API_URL: "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
-#        run: |
-#          python - <<'PY'
-#import json, os, requests, sys
-#API_URL = os.environ["API_URL"]
