@@ -6,6 +6,26 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  validate-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.validate.outputs.environment }}
+    steps:
+      - name: Validate environment input
+        id: validate
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            ENVIRONMENT="local"
+          fi
+          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
+            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
+            exit 1
+          fi
+          echo "✅ Environment '$ENVIRONMENT' is valid"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
   discover:
     runs-on: ubuntu-latest
 
