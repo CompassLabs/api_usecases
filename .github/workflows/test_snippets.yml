@@ -1,0 +1,29 @@
+name: Smoke test code samples (parallel)
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - ".github/workflows/smoke-spec.yml"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      paths: ${{ steps.collect.outputs.paths }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Collect endpoints from spec (minus BROKEN)
+        id: collect
+        env:
+          API_URL: "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
+        run: |
+          python - <<'PY'
+          import json, os, requests, sys
+          API_URL = os.environ["API_URL"]
