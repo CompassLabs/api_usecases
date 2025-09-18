@@ -38,12 +38,12 @@ const publicClient = createPublicClient({
 
 /////////////////////////////////////////////////////////////////
 
-const result = await compassApiSDK.token.tokenBalance({
+const result1 = await compassApiSDK.token.tokenBalance({
   chain: "base",
   user: account.address,
   token: "ETH",
 });
-console.log(result);
+console.log(result1);
 // const ethPrice = await compass.token.tokenPrice({
 //   chain: "ethereum",
 //   user: account.address
@@ -52,12 +52,12 @@ console.log(result);
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-const result = await compassApiSDK.token.tokenBalance({
+const result2 = await compassApiSDK.token.tokenBalance({
   chain: "ethereum",
   user: account.address,
   token: "ETH",
 });
-console.log(result);
+console.log(result2);
 // const ethPrice = await compass.token.tokenPrice({
 //   chain: "ethereum",
 //   user: account.address
