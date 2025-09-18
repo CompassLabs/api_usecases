@@ -33,7 +33,7 @@ jobs:
     steps:
       - id: set-output
         run: |
-          echo 'items={"item":["foo","bar"]}' >> $GITHUB_OUTPUT
+          echo 'items={"item":["x","y", "z"]}' >> $GITHUB_OUTPUT
 
   echo-item:
     needs: discover
