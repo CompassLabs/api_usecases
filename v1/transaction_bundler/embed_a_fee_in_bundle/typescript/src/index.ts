@@ -88,7 +88,7 @@ const swapTX = await compassApiSDK.swap.swapOdos({
   chain: "base",
   sender: account.address,
   tokenIn: "ETH",
-  tokenOut: "WETH",
+  tokenOut: "USDC",
   amount: 1,
   maxSlippagePercent: 1,
 });
@@ -123,21 +123,21 @@ const bundlerTx =
       {
         body: {
           actionType: "SET_ALLOWANCE",
-          token: "WETH",
+          token: "USDC",
           contract: "UniswapV3Router",
           amount: 1,
         },
       },
-      {
-        body: {
-          actionType: "UNISWAP_SELL_EXACTLY",
-          amountIn: 1,
-          fee: "0.01",
-          maxSlippagePercent: 0.5,
-          tokenIn: "WETH",
-          tokenOut: "USDC",
-        },
-      },
+      // {
+      //   body: {
+      //     actionType: "UNISWAP_SELL_EXACTLY",
+      //     amountIn: 1,
+      //     fee: "0.01",
+      //     maxSlippagePercent: 0.5,
+      //     tokenIn: "USDC",
+      //     tokenOut: "USDC",
+      //   },
+      // },
     ],
   });
 // SNIPPET END 4
