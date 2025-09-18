@@ -37,6 +37,6 @@ jobs:
       # Fallback to an empty matrix if items is blank (prevents fromJson('') errors)
       matrix: ${{ fromJson(needs.discover.outputs.items != '' && needs.discover.outputs.items || '{"item":[]}' ) }}
     steps:
-      - run: python v1/test_sdk_snippets/run_endpoint.py
+      - run: python v1/test_sdk_snippets/test_endpoint_snippet.py
         env:
           ENDPOINT: ${{ matrix.item }}
