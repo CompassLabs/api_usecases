@@ -1,19 +1,60 @@
 # v1/test_sdk_snippets/run_endpoint.py
-import os, requests
-
-endpoint = os.environ.get("ENDPOINT")
-if not endpoint:
-    raise SystemExit("ENDPOINT env var is missing")
-
-print(f"Running test for endpoint: {endpoint}")
+import os
+import sys
+import requests
+from dotenv import load_dotenv
 
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
 
-# Example: fetch spec and just confirm this endpoint exists
-spec = requests.get(API_URL, timeout=(5,30)).json()
-if endpoint not in spec.get("paths", {}):
-    raise SystemExit(f"❌ Endpoint {endpoint} not in spec")
+def load_api_key() -> str:
+    load_dotenv()
+    key = os.getenv("COMPASS_API_KEY")
+    if not key:
+        raise RuntimeError("COMPASS_API_KEY not set in environment")
+    return key
 
-print(f"✅ Found {endpoint} in spec")
+def fetch_api_spec(url: str):
+    r = requests.get(url, timeout=(5, 30))
+    r.raise_for_status()
+    return r.json()
 
+def get_python_code_for_path(spec, path: str) -> str:
+    """Return the FIRST Python code sample for the given path (checks get/post)."""
+    methods = spec["paths"].get(path)
+    if not methods:
+        raise ValueError(f"Path not found in spec: {path!r}")
+    for method in ("get", "post"):
+        samples = (methods.get(method, {}) or {}).get("x-codeSamples") or []
+        for s in samples:
+            if (s.get("lang") or "").lower().startswith("python"):
+                return s["source"]
+    raise ValueError(f"No Python code sample found for path: {path!r}")
 
+def replace_with_secret(snippet: str, api_key: str) -> str:
+    return snippet.replace("<YOUR_API_KEY_HERE>", api_key)
+
+def main():
+    # Endpoint comes from env var ENDPOINT or first CLI arg
+    endpoint = os.getenv("ENDPOINT") or (len(sys.argv) > 1 and sys.argv[1])
+    if not endpoint:
+        print("Usage: run_endpoint.py <endpoint> (or set ENDPOINT env var)", file=sys.stderr)
+        sys.exit(2)
+
+    api_key = load_api_key()
+    spec = fetch_api_spec(API_URL)
+
+    print(f"--- Running SDK snippet for {endpoint} ---")
+    code = get_python_code_for_path(spec, endpoint)
+    code = replace_with_secret(code, api_key)
+
+    # Execute snippet in isolated globals
+    globs = {"__name__": "__main__"}
+    try:
+        exec(compile(code, filename=f"<sample:{endpoint}>", mode="exec"), globs, None)
+        print(f"✅ PASS: {endpoint}")
+    except Exception as e:
+        print(f"❌ FAIL: {endpoint} – {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
