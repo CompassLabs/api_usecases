@@ -1,7 +1,7 @@
 // SNIPPET START 1
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
-import {base, mainnet} from "viem/chains";
+import { mainnet } from "viem/chains";
 import { createPublicClient, http } from "viem";
 import { createWalletClient } from "viem";
 import dotenv from "dotenv";
@@ -10,9 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
-const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
-const SPECIFIC_MORPHO_VAULT = process.env.SPECIFIC_MORPHO_VAULT as `0x${string}`;
-console.log(SPECIFIC_MORPHO_VAULT)
+const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
 
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -25,21 +23,55 @@ const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
   account,
-  chain: base,
-  transport: http(BASE_RPC_URL),
+  chain: mainnet,
+  transport: http(ETHEREUM_RPC_URL),
 });
 
 const publicClient = createPublicClient({
-  chain: base,
-  transport: http(BASE_RPC_URL),
+  chain: mainnet,
+  transport: http(ETHEREUM_RPC_URL),
 });
 // SNIPPET END 2
+
+
+
+
+/////////////////////////////////////////////////////////////////
+
+const result = await compassApiSDK.token.tokenBalance({
+  chain: "base",
+  user: account.address,
+  token: "ETH",
+});
+console.log(result);
+// const ethPrice = await compass.token.tokenPrice({
+//   chain: "ethereum",
+//   user: account.address
+//   token: "ETH",
+// });
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+const result = await compassApiSDK.token.tokenBalance({
+  chain: "ethereum",
+  user: account.address,
+  token: "ETH",
+});
+console.log(result);
+// const ethPrice = await compass.token.tokenPrice({
+//   chain: "ethereum",
+//   user: account.address
+//   token: "ETH",
+// });
+/////////////////////////////////////////////////////////////////
+
+
 
 
 // SNIPPET START 3
 const auth =
   await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
-    chain: "base",
+    chain: "ethereum",
     sender: account.address,
   });
 
@@ -50,34 +82,16 @@ const signedAuth = await walletClient.signAuthorization({
 });
 // SNIPPET END 3
 
-
-// Get ETH price in USD
-const ethPrice = await compassApiSDK.token.tokenPrice({
-  chain: "ethereum",
-  token: "ETH",
-});
-
-// How much ETH equals 1 USD
-const oneUSDinETH = 1 / Number(ethPrice.price);
-
-// Example: selling $0.03 worth of ETH
-const amountInETH = 0.03 * oneUSDinETH;
-
-console.log(`One USD in ETH: ${oneUSDinETH}`);
-console.log(`0.03 USD worth of ETH: ${amountInETH}`);
-
 const swapTX = await compassApiSDK.swap.swapOdos({
-  chain: "base",
+  chain: "ethereum",
   sender: account.address,
   tokenIn: "ETH",
-  tokenOut: "USDC",
-  amount: amountInETH,
+  tokenOut: "WETH",
+  amount: 1,
   maxSlippagePercent: 1,
 });
-console.log(swapTX)
 
 const transaction = swapTX.transaction as any;
-
 const swapTxHash = await walletClient.sendTransaction({
   ...transaction,
   value: BigInt(transaction.value),
@@ -85,25 +99,15 @@ const swapTxHash = await walletClient.sendTransaction({
   maxFeePerGas: BigInt(transaction.maxFeePerGas),
   maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
-console.log(swapTxHash)
 
 await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
 
-await new Promise(r => setTimeout(r, 1000)); // pauses 1s
-
 // SNIPPET START 4
-
-const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
-const FEE_PERCENTAGE = 0.01; // percentage fee you will charge the user
-const FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE; // calculated fee
-console.log(FEE)
-
-// Create bundle of transactions
 const bundlerTx =
   await compassApiSDK.transactionBundler.transactionBundlerExecute({
-    chain: "base",
+    chain: "ethereum",
     sender: account.address,
     signedAuthorization: {
       nonce: signedAuth.nonce,
@@ -117,30 +121,25 @@ const bundlerTx =
       {
         body: {
           actionType: "SET_ALLOWANCE",
-          token: "USDC",
-          contract: SPECIFIC_MORPHO_VAULT,
-          amount: DEPOSIT_AMOUNT,
+          token: "WETH",
+          contract: "UniswapV3Router",
+          amount: 1,
         },
       },
       {
         body: {
-          actionType: "TOKEN_TRANSFER",
-          token: "USDC",
-          to: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
-          amount: FEE,
-        },
-      },
-      {
-        body: {
-          vaultAddress: SPECIFIC_MORPHO_VAULT,
-          actionType: "MORPHO_DEPOSIT",
-          amount: DEPOSIT_AMOUNT - FEE,
+          actionType: "UNISWAP_SELL_EXACTLY",
+          amountIn: 1,
+          fee: "0.01",
+          maxSlippagePercent: 0.5,
+          tokenIn: "WETH",
+          tokenOut: "USDC",
         },
       },
     ],
   });
 // SNIPPET END 4
-//
+
 // SNIPPET START 5
 const bundlerTransaction = bundlerTx.transaction as any;
 const txHash = await walletClient.sendTransaction({
@@ -151,11 +150,12 @@ const txHash = await walletClient.sendTransaction({
   maxPriorityFeePerGas: BigInt(bundlerTransaction.maxPriorityFeePerGas),
 });
 
-console.log(txHash)
 const receipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
 // SNIPPET END 5
+
+///
 
 if (receipt.status !== "success") {
   throw Error();

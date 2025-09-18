@@ -1,5 +1,5 @@
 {
-  "name": "transaction_bundler_example",
+  "name": "transaction_bundler_embed_a_fee",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
@@ -12,12 +12,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@compass-labs/api-sdk": "^1.0.6",
+    "@compass-labs/api-sdk": "^1.0.26",
     "dotenv": "^16.5.0",
     "viem": "^2.31.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
