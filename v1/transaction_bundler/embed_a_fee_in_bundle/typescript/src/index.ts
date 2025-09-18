@@ -13,6 +13,9 @@ dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 //const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
+const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
+const SPECIFIC_MORPHO_VAULT = process.env
+  .SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -124,7 +127,7 @@ const bundlerTx =
         body: {
           actionType: "SET_ALLOWANCE",
           token: "USDC",
-          contract: "UniswapV3Router",
+          contract: SPECIFIC_MORPHO_VAULT,
           amount: 1,
         },
       },
