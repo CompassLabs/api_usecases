@@ -13,7 +13,7 @@ dotenv.config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 //const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
-const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
+//const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
 const SPECIFIC_MORPHO_VAULT = process.env
   .SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 
@@ -109,7 +109,17 @@ await publicClient.waitForTransactionReceipt({
   hash: swapTxHash,
 });
 
+
+await new Promise((r) => setTimeout(r, 2000)); // pauses 2s
+
 // SNIPPET START 4
+
+
+const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
+const FEE_PERCENTAGE = 0.01; // percentage fee you will charge the user
+const FEE = DEPOSIT_AMOUNT * FEE_PERCENTAGE; // calculated fee
+console.log(FEE);
+
 const bundlerTx =
   await compassApiSDK.transactionBundler.transactionBundlerExecute({
     chain: "base",
@@ -131,6 +141,15 @@ const bundlerTx =
           amount: 1,
         },
       },
+      {
+        body: {
+          actionType: "TOKEN_TRANSFER",
+          token: "USDC",
+          to: "0xb8340945eBc917D2Aa0368a5e4E79C849c461511",
+          amount: FEE,
+        },
+      },
+
       // {
       //   body: {
       //     actionType: "UNISWAP_SELL_EXACTLY",
