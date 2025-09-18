@@ -65,6 +65,7 @@ def send_tx(response):
     # convert receipt to a serializable dict
     return tx_hash  # , dict(receipt) # <- uncomment if you need to see the tx receipt
 
+
 print(send_tx(swap_tx))
 
 time.sleep(1)
