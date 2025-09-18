@@ -68,7 +68,7 @@ jobs:
         working-directory: v1/test_sdk_snippets
         run: ./.venv/bin/python discover_endpoints.py
 
-  echo-item:
+  test:
     needs: discover
     if: ${{ needs.discover.outputs.items != '' }}
     runs-on: ubuntu-latest
