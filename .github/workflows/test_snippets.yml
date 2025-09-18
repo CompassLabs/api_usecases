@@ -1,10 +1,21 @@
 name: Smoke test code samples (parallel)
 
+
+
 on:
-  workflow_dispatch: {}
-  push:
-    paths:
-      - ".github/workflows/smoke-spec.yml"
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  pull_request:
+     branches:
+       - main
+  workflow_dispatch:
+
+#on:
+#  workflow_dispatch: {}
+#  push:
+#    paths:
+#      - ".github/workflows/smoke-spec.yml"
 
 jobs:
   discover:
