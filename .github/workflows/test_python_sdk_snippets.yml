@@ -26,13 +26,7 @@ jobs:
 
       - name: Install dependencies (uv)
         working-directory: v1/test_sdk_snippets
-#        env:
-        run: |
-#          # Default to latest if empty
-#          UV_VERSION="${UV_VERSION:-latest}"
-#          echo "UV_VERSION=$UV_VERSION"
-          # Create a venv and install deps needed by your scripts/snippets
-          uv sync
+        run: uv sync
 
 
       - id: collect
