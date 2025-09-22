@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import subprocess
 import shlex
 
+
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
 
 
