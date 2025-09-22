@@ -3,6 +3,8 @@ import os
 import sys
 import requests
 from dotenv import load_dotenv
+import subprocess
+import shlex
 
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
 
@@ -46,19 +48,18 @@ def main():
     print(f"--- Running SDK snippet for {endpoint} ---")
     code = get_python_code_for_path(spec, endpoint)
     code = replace_with_secret(code, api_key)
-    print(f"""
-    ----------
-{code}
-""")
+    # Write snippet to a simple file and run it
+    script_path = os.path.join(os.getcwd(), "snippet.py")
+    with open(script_path, "w", encoding="utf-8") as f:
+        f.write(code)   
 
-    # Execute snippet in isolated globals
-    globs = {"__name__": "__main__"}
     try:
-        exec(compile(code, filename=f"<sample:{endpoint}>", mode="exec"), globs, None)
+        cmd = f"{shlex.quote(sys.executable)} {shlex.quote(script_path)}"
+        subprocess.run(cmd, shell=True, check=True)
         print(f"✅ PASS: {endpoint}")
-    except Exception as e:
-        print(f"❌ FAIL: {endpoint} – {e}", file=sys.stderr)
-        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ FAIL: {endpoint} – exit code {e.returncode}", file=sys.stderr)
+        sys.exit(e.returncode)
 
 if __name__ == "__main__":
     main()
