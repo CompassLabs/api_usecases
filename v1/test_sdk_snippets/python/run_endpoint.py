@@ -3,8 +3,6 @@ import os
 import sys
 import requests
 from dotenv import load_dotenv
-import subprocess
-import shlex
 
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
 
@@ -51,11 +49,10 @@ def main():
     # Write snippet to a simple file and run it
     script_path = os.path.join(os.getcwd(), "snippet.py")
     with open(script_path, "w", encoding="utf-8") as f:
-        f.write(code)   
+        f.write(code)
 
     try:
-        cmd = f"{shlex.quote(sys.executable)} {shlex.quote(script_path)}"
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.check_call([sys.executable, script_path], env=os.environ.copy())
         print(f"✅ PASS: {endpoint}")
     except subprocess.CalledProcessError as e:
         print(f"❌ FAIL: {endpoint} – exit code {e.returncode}", file=sys.stderr)
