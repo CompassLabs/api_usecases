@@ -19,10 +19,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
 
       - name: Install dependencies (uv)
         working-directory: v1/test_sdk_snippets
@@ -31,4 +31,4 @@ jobs:
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
         working-directory: v1/test_sdk_snippets
-        run: ./.venv/bin/python discover_endpoints.py
+        run: uv run python discover_endpoints.py
