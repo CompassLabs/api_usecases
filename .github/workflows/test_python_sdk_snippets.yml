@@ -32,3 +32,11 @@ jobs:
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
         working-directory: v1/test_sdk_snippets
         run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items (pretty):"
+          jq . items.json | tee items.pretty.json
