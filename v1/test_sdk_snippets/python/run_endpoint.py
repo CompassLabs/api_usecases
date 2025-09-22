@@ -45,7 +45,7 @@ def main():
     api_key = load_api_key()
     spec = fetch_api_spec(API_URL)
 
-    print(f"--- Running SDK snippet for {endpoint} ---")
+    print(f"--- Running python SDK snippet for {endpoint} ---")
     code = get_python_code_for_path(spec, endpoint)
     code = replace_with_secret(code, api_key)
     # Write snippet to a simple file and run it
