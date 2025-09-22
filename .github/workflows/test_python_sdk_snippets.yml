@@ -26,21 +26,14 @@ jobs:
 
       - name: Install dependencies (uv)
         working-directory: v1/test_sdk_snippets
-        env:
-          UV_VERSION: ${{ env.UV_PACKAGE_VERSION }}
+#        env:
         run: |
-          # Default to latest if empty
-          UV_VERSION="${UV_VERSION:-latest}"
-          echo "UV_VERSION=$UV_VERSION"
+#          # Default to latest if empty
+#          UV_VERSION="${UV_VERSION:-latest}"
+#          echo "UV_VERSION=$UV_VERSION"
           # Create a venv and install deps needed by your scripts/snippets
-          uv venv .venv
-          source .venv/bin/activate
-          if [[ "$UV_VERSION" == "latest" ]]; then
-            uv pip install "compass-api-sdk" requests python-dotenv
-          else
-            uv pip install "compass-api-sdk==${UV_VERSION}" requests python-dotenv
-          fi
-          uv pip freeze
+          uv sync
+
 
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
