@@ -7,32 +7,11 @@ on:
 
 jobs:
 
-  validate-environment:
-    runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.validate.outputs.environment }}
-    steps:
-      - name: Validate environment input
-        id: validate
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
-            ENVIRONMENT="${{ inputs.environment }}"
-          else
-            ENVIRONMENT="local"
-          fi
-          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
-            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
-            exit 1
-          fi
-          echo "✅ Environment '$ENVIRONMENT' is valid"
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-
   discover_sdk_snippets:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      # Provide a default if the upstream job isn't present:
-      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version || 'latest' }}
+
     outputs:
       items: ${{ steps.collect.outputs.items }}
 
@@ -40,33 +19,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
 
       - name: Install dependencies (uv)
         working-directory: v1/test_sdk_snippets
-        env:
-          UV_VERSION: ${{ env.UV_PACKAGE_VERSION }}
-        run: |
-          # Default to latest if empty
-          UV_VERSION="${UV_VERSION:-latest}"
-          echo "UV_VERSION=$UV_VERSION"
-          # Create a venv and install deps needed by your scripts/snippets
-          uv venv .venv
-          source .venv/bin/activate
-          if [[ "$UV_VERSION" == "latest" ]]; then
-            uv pip install "compass-api-sdk" requests python-dotenv
-          else
-            uv pip install "compass-api-sdk==${UV_VERSION}" requests python-dotenv
-          fi
-          uv pip freeze
+        run: uv sync
 
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
         working-directory: v1/test_sdk_snippets
-        run: ./.venv/bin/python discover_endpoints.py
+        run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items ✅ (pretty):"
+          jq . items.json | tee items.pretty.json
 
   test:
     needs: discover_sdk_snippets #
@@ -74,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version || 'latest' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
@@ -83,29 +55,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
 
       - name: Install dependencies (uv)
         working-directory: v1/test_sdk_snippets
-        env:
-          UV_VERSION: ${{ env.UV_PACKAGE_VERSION }}
-        run: |
-          UV_VERSION="${UV_VERSION:-latest}"
-          echo "UV_VERSION=$UV_VERSION"
-          uv venv .venv
-          source .venv/bin/activate
-          if [[ "$UV_VERSION" == "latest" ]]; then
-            uv pip install "compass-api-sdk" requests python-dotenv
-          else
-            uv pip install "compass-api-sdk==${UV_VERSION}" requests python-dotenv
-          fi
-          uv pip freeze
+        run: uv sync
 
       - name: Run endpoint snippet
         working-directory: v1/test_sdk_snippets
-        run: ./.venv/bin/python run_endpoint.py
+        run: uv run python run_endpoint.py
         env:
           ENDPOINT: ${{ matrix.item }}
