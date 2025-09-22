@@ -1,4 +1,4 @@
-name: test_python_sdk_snippets
+name: test_typescript_sdk_snippets
 
 on:
   pull_request:
