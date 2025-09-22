@@ -38,5 +38,5 @@ jobs:
           cat > items.json <<'JSON'
           ${{ steps.collect.outputs.items }}
           JSON
-          echo "Collected items (pretty):"
+          echo "Collected items ✅ (pretty):"
           jq . items.json | tee items.pretty.json
