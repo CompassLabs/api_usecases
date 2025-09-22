@@ -64,6 +64,19 @@ jobs:
         working-directory: v1/test_sdk_snippets/typescript
         run: uv sync
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node deps for TS snippets
+        working-directory: v1/test_sdk_snippets/typescript
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm i -D tsx
+          # Install the TS SDK used by snippets
+          npm i compass-api-sdk
+
       - name: Run endpoint snippet
         working-directory: v1/test_sdk_snippets/typescript
         run: uv run python run_endpoint_ts.py
