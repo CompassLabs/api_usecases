@@ -1,0 +1,48 @@
+name: test_python_sdk_snippets
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  discover_sdk_snippets:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+
+    outputs:
+      items: ${{ steps.collect.outputs.items }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        env:
+          UV_VERSION: ${{ env.UV_PACKAGE_VERSION }}
+        run: |
+          # Default to latest if empty
+          UV_VERSION="${UV_VERSION:-latest}"
+          echo "UV_VERSION=$UV_VERSION"
+          # Create a venv and install deps needed by your scripts/snippets
+          uv venv .venv
+          source .venv/bin/activate
+          if [[ "$UV_VERSION" == "latest" ]]; then
+            uv pip install "compass-api-sdk" requests python-dotenv
+          else
+            uv pip install "compass-api-sdk==${UV_VERSION}" requests python-dotenv
+          fi
+          uv pip freeze
+
+      - id: collect
+        name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
+        working-directory: v1/test_sdk_snippets
+        run: ./.venv/bin/python discover_endpoints.py
