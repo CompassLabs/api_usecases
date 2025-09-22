@@ -25,12 +25,12 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies (uv)
-        working-directory: v1/test_sdk_snippets/python
+        working-directory: v1/test_sdk_snippets/typescript
         run: uv sync
 
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
-        working-directory: v1/test_sdk_snippets/python
+        working-directory: v1/test_sdk_snippets/typescript
         run: uv run python discover_endpoints.py
 
       - name: Print collected items
@@ -61,11 +61,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies (uv)
-        working-directory: v1/test_sdk_snippets/python
+        working-directory: v1/test_sdk_snippets/typescript
         run: uv sync
 
       - name: Run endpoint snippet
-        working-directory: v1/test_sdk_snippets/python
+        working-directory: v1/test_sdk_snippets/typescript
         run: uv run python run_endpoint_ts.py
         env:
           ENDPOINT: ${{ matrix.item }}
