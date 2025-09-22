@@ -28,7 +28,6 @@ jobs:
         working-directory: v1/test_sdk_snippets
         run: uv sync
 
-
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
         working-directory: v1/test_sdk_snippets
