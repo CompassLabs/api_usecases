@@ -1,0 +1,23 @@
+name: test_usecases_v_zero
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  pull_request:
+     branches:
+       - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  do-nothing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Do nothing
+        run: |
+          echo "I am doing nothing"

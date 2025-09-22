@@ -1,4 +1,4 @@
-name: workflow 1
+name: test_python_sdk_snippets
 
 on:
   pull_request:
