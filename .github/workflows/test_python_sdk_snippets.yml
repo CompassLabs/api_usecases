@@ -1,0 +1,71 @@
+name: test_python_sdk_snippets
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  discover_sdk_snippets:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+
+    outputs:
+      items: ${{ steps.collect.outputs.items }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets/python
+        run: uv sync
+
+      - id: collect
+        name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
+        working-directory: v1/test_sdk_snippets/python
+        run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items ✅ (pretty):"
+          jq . items.json | tee items.pretty.json
+
+  test:
+    needs: discover_sdk_snippets #
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets/python
+        run: uv sync
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets/python
+        run: uv run python run_endpoint.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
