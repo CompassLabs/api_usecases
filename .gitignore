@@ -2,7 +2,7 @@
 **/.idea
 **/.devcontainer
 **/node_modules
-**/*lock*
+**/*.lock
 **/.env
 **/package-lock.json
 
@@ -57,3 +57,5 @@ next-env.d.ts
 .next/
 
 **/dist/
+
+**/secret_key_file_path.txt
