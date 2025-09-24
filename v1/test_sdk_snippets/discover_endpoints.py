@@ -14,7 +14,7 @@ for p, methods in spec.get("paths", {}).items():
             paths.append(p)
             break
 
-matrix = {"item": paths}
+matrix = {"item": paths[:10]}
 print("Discovered:", matrix)
 
 with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
