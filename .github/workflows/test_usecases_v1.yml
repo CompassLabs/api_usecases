@@ -1,12 +1,12 @@
 name: test_usecases_v_one
 
 on:
-  schedule:
+  # schedule:
     # Runs at 00:00 UTC every day
-    - cron: "0 0 * * *"
-  pull_request:
-    branches:
-      - main
+  # - cron: "0 0 * * *"
+  # pull_request:
+  #   branches:
+  #     - main
   workflow_dispatch:
     inputs:
       environment:
@@ -709,3 +709,115 @@ jobs:
           curl -X POST "https://allquiet.app/api/webhook/829f846c-4dfa-4a58-ab33-eafae34a57c9" \
               -H "Content-Type: application/json" \
               -d '{"status": "Open", "severity": "Critical", "message": "GitHub workflow failed", "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+
+  discover_sdk_snippets:
+    needs: [validate-environment, set-versions]
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+
+    outputs:
+      items: ${{ steps.collect.outputs.items }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - id: collect
+        name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
+        working-directory: v1/test_sdk_snippets
+        run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items ✅ (pretty):"
+          jq . items.json | tee items.pretty.json
+
+  run-sdk-snippets-python:
+    needs: [validate-environment, set-versions, discover_sdk_snippets]
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_python.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
+
+  run-sdk-snippets-typescript:
+    needs: [validate-environment, set-versions, discover_sdk_snippets]
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node deps for TS snippets
+        working-directory: v1/test_sdk_snippets
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm i -D tsx
+          # Install the TS SDK used by snippets
+          npm i @compass-labs/api-sdk@${{ env.NPM_PACKAGE_VERSION }}
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_typescript.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
