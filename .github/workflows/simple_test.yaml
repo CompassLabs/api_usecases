@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Print environment parameter
+        run: echo "Environment parameter: ${{ inputs.environment }}"
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
