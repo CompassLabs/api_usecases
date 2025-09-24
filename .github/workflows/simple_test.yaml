@@ -21,13 +21,16 @@ env:
 
 
 jobs:
+  # Print environment parameter with emojis
   print-env:
     runs-on: ubuntu-latest
     steps:
       - name: Print environment parameter
         run: |
-          echo "Environment parameter: ${{ github.event.inputs.environment }}"
-          echo "Workflow triggered with environment: ${{ github.event.inputs.environment || 'default' }}"
+          echo "🚀 Starting workflow..."
+          echo "📋 Environment parameter: ${{ github.event.inputs.environment }}"
+          echo "⚙️  Workflow triggered with environment: ${{ github.event.inputs.environment || 'default' }}"
+          echo "✅ Environment validation complete!"
   
   test:
     runs-on: ubuntu-latest
