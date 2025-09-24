@@ -49,7 +49,7 @@ jobs:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
     strategy:
       fail-fast: false
-      max-parallel: 1   # limit concurrency
+      max-parallel: 3   # limit concurrency
       matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
 
     steps:
