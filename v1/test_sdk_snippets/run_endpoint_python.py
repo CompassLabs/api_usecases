@@ -45,7 +45,7 @@ with open(script_path, "w", encoding="utf-8") as f:
 try:
     cmd = f"{shlex.quote(sys.executable)} {shlex.quote(script_path)}"
     print(cmd)
-    # subprocess.run(cmd, shell=True, check=True)
+    subprocess.run(cmd, shell=True, check=True)
     print(f"✅ PASS: {ENDPOINT}")
 except subprocess.CalledProcessError as e:
     print(f"❌ FAIL: {ENDPOINT} – exit code {e.returncode}", file=sys.stderr)
