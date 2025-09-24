@@ -1,0 +1,29 @@
+name: simple_test
+
+on:
+  push:
+    branches:
+      - conor/com-6015-run-a-single-workflow-against-staging
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
+  
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: echo "Hello World"
+        
