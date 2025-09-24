@@ -36,6 +36,8 @@ jobs:
           cd test
           uv sync
       - name: Run test
+        env:
+          COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
         run: |
           cd test
           uv run python main.py
