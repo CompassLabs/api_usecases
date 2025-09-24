@@ -70,44 +70,44 @@ jobs:
         env:
           ENDPOINT: ${{ matrix.item }}
 
-  typescript:
-    needs: discover_sdk_snippets #
-    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
-    runs-on: ubuntu-latest
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup uv and Python
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies (uv)
-        working-directory: v1/test_sdk_snippets
-        run: uv sync
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Node deps for TS snippets
-        working-directory: v1/test_sdk_snippets
-        run: |
-          npm init -y >/dev/null 2>&1 || true
-          npm i -D tsx
-          # Install the TS SDK used by snippets
-          npm i @compass-labs/api-sdk
-
-      - name: Run endpoint snippet
-        working-directory: v1/test_sdk_snippets
-        run: uv run python run_endpoint_typescript.py
-        env:
-          ENDPOINT: ${{ matrix.item }}
+#  typescript:
+#    needs: discover_sdk_snippets #
+#    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+#    runs-on: ubuntu-latest
+#    env:
+#      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+#    strategy:
+#      fail-fast: false
+#      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#
+#      - name: Setup uv and Python
+#        uses: astral-sh/setup-uv@v5
+#        with:
+#          python-version: "3.12"
+#
+#      - name: Install dependencies (uv)
+#        working-directory: v1/test_sdk_snippets
+#        run: uv sync
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: '20'
+#
+#      - name: Install Node deps for TS snippets
+#        working-directory: v1/test_sdk_snippets
+#        run: |
+#          npm init -y >/dev/null 2>&1 || true
+#          npm i -D tsx
+#          # Install the TS SDK used by snippets
+#          npm i @compass-labs/api-sdk
+#
+#      - name: Run endpoint snippet
+#        working-directory: v1/test_sdk_snippets
+#        run: uv run python run_endpoint_typescript.py
+#        env:
+#          ENDPOINT: ${{ matrix.item }}

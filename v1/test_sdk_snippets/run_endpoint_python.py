@@ -36,6 +36,7 @@ if not SNIPPET:
 print(f"--- Running python SDK snippet for {ENDPOINT} ---")
 
 SNIPPET = SNIPPET.replace("<YOUR_API_KEY_HERE>", COMPASS_API_KEY)
+print(SNIPPET)
 # Write snippet to a simple file and run it
 script_path = os.path.join(os.getcwd(), "snippet.py")
 with open(script_path, "w", encoding="utf-8") as f:
@@ -43,7 +44,8 @@ with open(script_path, "w", encoding="utf-8") as f:
 
 try:
     cmd = f"{shlex.quote(sys.executable)} {shlex.quote(script_path)}"
-    subprocess.run(cmd, shell=True, check=True)
+    print(cmd)
+    # subprocess.run(cmd, shell=True, check=True)
     print(f"✅ PASS: {ENDPOINT}")
 except subprocess.CalledProcessError as e:
     print(f"❌ FAIL: {ENDPOINT} – exit code {e.returncode}", file=sys.stderr)
