@@ -9,6 +9,7 @@ import shlex
 load_dotenv()
 
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
+SERVER_URL = os.getenv("SERVER_URL")
 ENDPOINT = os.getenv("ENDPOINT")
 print([ENDPOINT])
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
@@ -35,7 +36,10 @@ if not SNIPPET:
 
 print(f"--- Running typescript SDK snippet for {ENDPOINT} ---")
 
-SNIPPET = SNIPPET.replace("<YOUR_API_KEY_HERE>", COMPASS_API_KEY)
+SNIPPET = SNIPPET.replace(
+    'apiKeyAuth: "<YOUR_API_KEY_HERE>",',
+    f'apiKeyAuth: "{COMPASS_API_KEY}",\n  serverURL: "{SERVER_URL}",'
+)
 # Write snippet to a simple file and run it
 script_path = os.path.join(os.getcwd(), "snippet.ts")
 with open(script_path, "w", encoding="utf-8") as f:
