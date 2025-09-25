@@ -1,4 +1,4 @@
-name: test_sdk_snippets
+name: test_sdk_snippets_against_production
 
 on:
   pull_request:
