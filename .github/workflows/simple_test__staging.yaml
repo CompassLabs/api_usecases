@@ -1,0 +1,115 @@
+name: simple_test
+
+on:
+  push:
+    branches:
+      - conor/com-6015-run-a-single-workflow-against-staging
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
+
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
+  
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
+
+
+jobs:
+  # Print environment parameter with emojis
+  print-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print environment parameter
+        run: |
+          echo "🚀 Starting workflow..."
+          echo "📋 Environment parameter: ${{ github.event.inputs.environment }}"
+          echo "⚙️  Workflow triggered with environment: ${{ github.event.inputs.environment || 'default' }}"
+          echo "✅ Environment validation complete!"
+
+  validate-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.validate.outputs.environment }}
+    steps:
+      - name: Validate environment input
+        id: validate
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            ENVIRONMENT="local"
+          fi
+          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
+            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
+            exit 1
+          fi
+          echo "✅ Environment '$ENVIRONMENT' is valid"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
+  set-versions:
+    needs: [validate-environment]
+    runs-on: ubuntu-latest
+    outputs:
+      npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
+      uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Set versions
+        id: set-versions
+        run: |
+          if [[ "${{ needs.validate-environment.outputs.environment }}" == "staging" ]]; then
+            NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
+            UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
+          else
+            NPM_PACKAGE_VERSION="latest"
+            UV_PACKAGE_VERSION="latest"
+          fi
+
+          echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+          
+  
+  test:
+    runs-on: ubuntu-latest
+    needs: print-env
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install uv
+        run: pip install uv
+      - name: Install dependencies
+        run: |
+          cd test
+          uv sync
+      - name: Run test
+        env:
+          COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+        run: |
+          cd test
+          uv run python main.py
+        
