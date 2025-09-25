@@ -98,13 +98,13 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-      #SERVER_URL: https://api.compasslabs.ai/ # production server
-      SERVER_URL: ${{ secrets.STAGING_SERVER_URL }}
-
-      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+#    env:
+#      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+#      #SERVER_URL: https://api.compasslabs.ai/ # production server
+#      SERVER_URL: ${{ secrets.STAGING_SERVER_URL }}
+#
+#      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+#      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
     outputs:
       items: ${{ steps.collect.outputs.items }}
@@ -117,16 +117,6 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-
-      # - name: Install dependencies
-      #   working-directory: v1/test_sdk_snippets
-      #   run: |
-      #     if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-      #       echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-      #       uv add compass-api-sdk==$UV_PACKAGE_VERSION
-      #     fi
-      #     uv sync
-      #     uv pip freeze
 
       - id: collect
         name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
