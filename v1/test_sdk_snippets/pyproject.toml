@@ -5,10 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "compass-api-sdk>=1.1.2",
-    "dotenv>=0.9.9",
-    "eth-account>=0.13.7",
-    "pyright>=1.1.405",
-    "ruff>=0.13.1",
-    "web3>=7.12.0",
+    "compass-api-sdk",
+    "dotenv",
+    "eth-account",
+    "pyright",
+    "ruff",
+    "web3",
 ]
