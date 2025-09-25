@@ -119,7 +119,7 @@ jobs:
           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
-        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
+        working-directory: v1/test_sdk_snippets
         run: |
           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
