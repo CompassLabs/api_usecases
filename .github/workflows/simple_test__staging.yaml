@@ -126,7 +126,7 @@ jobs:
           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
-        working-directory: v1/pendle/python
+        working-directory: test
         run: |
           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
@@ -137,7 +137,7 @@ jobs:
 
       - name: Run example
         working-directory: test
-        run: ./.venv/bin/python main.py
+        run: uv run python main.py
 
 
 #        run: |
