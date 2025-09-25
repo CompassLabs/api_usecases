@@ -1,4 +1,5 @@
-name: test_production_sdk_snippets_against_staging_api_server
+name: test_production_snippets___staging_api_server___latest_sdk
+# not sure how to test release candidate snippets
 
 on:
   pull_request:
