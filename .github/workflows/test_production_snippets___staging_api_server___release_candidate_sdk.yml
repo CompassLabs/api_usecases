@@ -278,7 +278,7 @@ jobs:
           node-version: "20"
 
       - name: Install Node deps for TS snippets
-        working-directory: v1/aave_looping/typescript
+        working-directory: v1/test_sdk_snippets
         run: | 
           npm install
           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
