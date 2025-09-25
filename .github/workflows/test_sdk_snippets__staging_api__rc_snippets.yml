@@ -78,6 +78,20 @@ jobs:
           echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
+  # Print environment parameter with emojis
+  print-environment-and-package-versions:
+    needs: [validate-environment, set-versions]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print environment parameter
+        run: |
+          echo "🚀 Starting workflow..."
+          echo "📋 Workflow input environment: ${{ github.event.inputs.environment }}"
+          echo "⚙️  Active environment: ${{ needs.validate-environment.outputs.environment }}"
+          echo "📦 npm package version: ${{ needs.set-versions.outputs.npm_package_version }}"
+          echo "🐍 uv package version: ${{ needs.set-versions.outputs.uv_package_version }}"
+          echo "✅ Environment validation complete!"          
+
 
   discover_sdk_snippets:
     needs: [validate-environment, set-versions]
