@@ -1,0 +1,13 @@
+{
+  "name": "test-sdk-snippets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@compass-labs/api-sdk": "latest"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1"
+  }
+}
+
