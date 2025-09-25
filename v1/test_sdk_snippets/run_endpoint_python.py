@@ -9,6 +9,7 @@ import shlex
 load_dotenv()
 
 COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
+SERVER_URL = os.getenv("SERVER_URL")
 ENDPOINT = os.getenv("ENDPOINT")
 print([ENDPOINT])
 API_URL = "https://spec.speakeasy.com/compasslabs/api/compass-api-with-code-samples"
@@ -35,7 +36,7 @@ if not SNIPPET:
 
 print(f"--- Running python SDK snippet for {ENDPOINT} ---")
 
-SNIPPET = SNIPPET.replace("<YOUR_API_KEY_HERE>", COMPASS_API_KEY)
+SNIPPET = SNIPPET.replace("api_key_auth=\"<YOUR_API_KEY_HERE>\",", f"api_key_auth='{COMPASS_API_KEY}', server_url='{SERVER_URL}'")
 print(SNIPPET)
 # Write snippet to a simple file and run it
 script_path = os.path.join(os.getcwd(), "snippet.py")
