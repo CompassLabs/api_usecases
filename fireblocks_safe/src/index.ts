@@ -18,13 +18,18 @@ async function main(): Promise<void> {
       };
     const eip1193Provider = new FireblocksWeb3Provider(config);
 
+    // const safeClient = await createSafeClient({
+    //   provider: eip1193Provider,
+    //   safeOptions: {
+    //       owners: ["0x79D154A7493F4d535582D5e177CE36e0a7a6C71a"],
+    //       threshold: 1,
+    //   },
+    // });
+
     const safeClient = await createSafeClient({
-      provider: eip1193Provider,
-      safeOptions: {
-          owners: ["0x79D154A7493F4d535582D5e177CE36e0a7a6C71a"],
-          threshold: 1,
-      },
-    });
+        provider: eip1193Provider,
+        safeAddress: "0x0549dd9ce5b26b97858f8bd58057906d9cab4a5c",
+      });
 
     const erc20_abi = [
         "function transfer(address to, uint256 amount) returns (bool)",
@@ -34,9 +39,9 @@ async function main(): Promise<void> {
         "function balanceOf(address owner) view returns (uint256)",
     ];
 
-    const tokenAddress = ethers.getAddress("0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"); // Example: UNI token on Sepolia
-    const spenderAddress = "0x79D154A7493F4d535582D5e177CE36e0a7a6C71a"; // Example spender address
-    const allowanceAmount = "1000000000000000000"; // 1 token (assuming 18 decimals)
+    const tokenAddress = ethers.getAddress("0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
+    const spenderAddress = "0x79D154A7493F4d535582D5e177CE36e0a7a6C71a";
+    const allowanceAmount = "1000000000000000000";
 
     const erc20Interface = new ethers.Interface(erc20_abi);
     
