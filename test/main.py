@@ -8,7 +8,7 @@ COMPASS_API_KEY = os.getenv("COMPASS_API_KEY")
 if COMPASS_API_KEY:
     print(f"API Key loaded: {COMPASS_API_KEY[:10]}...")
 
-SERVER_URL = os.getenv("COMPASS_API_KEY")
+SERVER_URL = os.getenv("SERVER_URL")
 if SERVER_URL:
     print(f"API Key loaded: {SERVER_URL[:10]}...")
 

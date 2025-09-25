@@ -1,711 +1,711 @@
-# name: test_usecases_v_one
+name: test_usecases_v_one
 
-# on:
-#   schedule:
-#     # Runs at 00:00 UTC every day
-#     - cron: "0 0 * * *"
-#   pull_request:
-#     branches:
-#       - main
-#   workflow_dispatch:
-#     inputs:
-#       environment:
-#         description: "Environment to test"
-#         required: true
-#         type: string
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+#  pull_request:
+#    branches:
+#      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
 
-#   workflow_call:
-#     inputs:
-#       environment:
-#         description: "Environment to test"
-#         required: true
-#         type: string
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
 
-# permissions:
-#   id-token: write
-#   contents: write
+permissions:
+  id-token: write
+  contents: write
 
-# env:
-#   AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
+env:
+  AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
 
-# jobs:
-#   validate-environment:
-#     runs-on: ubuntu-latest
-#     outputs:
-#       environment: ${{ steps.validate.outputs.environment }}
-#     steps:
-#       - name: Validate environment input
-#         id: validate
-#         run: |
-#           if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
-#             ENVIRONMENT="${{ inputs.environment }}"
-#           else
-#             ENVIRONMENT="local"
-#           fi
-#           if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
-#             echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
-#             exit 1
-#           fi
-#           echo "✅ Environment '$ENVIRONMENT' is valid"
-#           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+jobs:
+  validate-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.validate.outputs.environment }}
+    steps:
+      - name: Validate environment input
+        id: validate
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            ENVIRONMENT="local"
+          fi
+          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
+            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
+            exit 1
+          fi
+          echo "✅ Environment '$ENVIRONMENT' is valid"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
   
-#   set-versions:
-#     needs: [validate-environment]
-#     runs-on: ubuntu-latest
-#     outputs:
-#       npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
-#       uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
-#     steps:
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+  set-versions:
+    needs: [validate-environment]
+    runs-on: ubuntu-latest
+    outputs:
+      npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
+      uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Set versions
-#         id: set-versions
-#         run: |
-#           if [[ "${{ needs.validate-environment.outputs.environment }}" == "staging" ]]; then
-#             NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
-#             UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
-#           else
-#             NPM_PACKAGE_VERSION="latest"
-#             UV_PACKAGE_VERSION="latest"
-#           fi
+      - name: Set versions
+        id: set-versions
+        run: |
+          if [[ "${{ needs.validate-environment.outputs.environment }}" == "staging" ]]; then
+            NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
+            UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
+          else
+            NPM_PACKAGE_VERSION="latest"
+            UV_PACKAGE_VERSION="latest"
+          fi
 
-#           echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
-#           echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
 
-#   run-pendle-typescript:
-#     needs: [validate-environment, set-versions]
+  run-pendle-typescript:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ARBITRUM_RPC_URL: http://localhost:8547
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ARBITRUM_RPC_URL: http://localhost:8547
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
 
-#       - name: Install dependencies
-#         working-directory: v1/pendle/typescript
-#         run: |
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/pendle/typescript
+        run: |
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/pendle/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/pendle/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/pendle/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/pendle/typescript
+        run: npm run start
 
-#   run-pendle-python:
-#     needs: [validate-environment, set-versions]
+  run-pendle-python:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ARBITRUM_RPC_URL: http://localhost:8547
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ARBITRUM_RPC_URL: http://localhost:8547
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/pendle/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/pendle/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/pendle/python
-#         run: ./.venv/bin/python src/main.py
+      - name: Run example
+        working-directory: v1/pendle/python
+        run: ./.venv/bin/python src/main.py
 
-#   run-typescript-basic-examples-deposit-on-morpho: #
-#     needs: [validate-environment, set-versions]
+  run-typescript-basic-examples-deposit-on-morpho: #
+    needs: [validate-environment, set-versions]
 
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/basic_examples/deposit_on_morpho/typescript
-#         run: |
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/basic_examples/deposit_on_morpho/typescript
+        run: |
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/basic_examples/deposit_on_morpho/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/basic_examples/deposit_on_morpho/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/basic_examples/deposit_on_morpho/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/basic_examples/deposit_on_morpho/typescript
+        run: npm run start
 
 
-#   run-python----basic-examples-deposit-on-morpho: #
-#     needs: [validate-environment, set-versions]
+  run-python----basic-examples-deposit-on-morpho: #
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/basic_examples/deposit_on_morpho/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/basic_examples/deposit_on_morpho/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/basic_examples/deposit_on_morpho/python
-#         run: ./.venv/bin/python main.py #src/main.py
+      - name: Run example
+        working-directory: v1/basic_examples/deposit_on_morpho/python
+        run: ./.venv/bin/python main.py #src/main.py
         
 
-#   run-typescript-basic-examples-deposit-on-aave:
-#     needs: [validate-environment, set-versions]
+  run-typescript-basic-examples-deposit-on-aave:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/basic_examples/deposit_on_aave/typescript
-#         run: |
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/basic_examples/deposit_on_aave/typescript
+        run: |
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/basic_examples/deposit_on_aave/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/basic_examples/deposit_on_aave/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/basic_examples/deposit_on_aave/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/basic_examples/deposit_on_aave/typescript
+        run: npm run start
 
 
-#   run-python----basic-examples-deposit-on-aave:
-#     needs: [validate-environment, set-versions]
+  run-python----basic-examples-deposit-on-aave:
+    needs: [validate-environment, set-versions]
 
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/basic_examples/deposit_on_aave/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/basic_examples/deposit_on_aave/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/basic_examples/deposit_on_aave/python
-#         run: ./.venv/bin/python main.py #src/main.py
+      - name: Run example
+        working-directory: v1/basic_examples/deposit_on_aave/python
+        run: ./.venv/bin/python main.py #src/main.py
 
-#   run-typescript-transaction_bundler_embed_a_fee_in_tx: #
-#     needs: [validate-environment, set-versions]
+  run-typescript-transaction_bundler_embed_a_fee_in_tx: #
+    needs: [validate-environment, set-versions]
 
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       #ETHEREUM_RPC_URL: http://localhost:8545
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      #ETHEREUM_RPC_URL: http://localhost:8545
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
-#         run: |
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
+        run: |
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/typescript
+        run: npm run start
 
-#   run-python----transaction_bundler_embed_a_fee_in_tx: #
-#     needs: [validate-environment, set-versions]
+  run-python----transaction_bundler_embed_a_fee_in_tx: #
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       BASE_RPC_URL: http://localhost:8546
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      BASE_RPC_URL: http://localhost:8546
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
-#         run: ./.venv/bin/python main.py #src/main.py
+      - name: Run example
+        working-directory: v1/transaction_bundler/embed_a_fee_in_bundle/python
+        run: ./.venv/bin/python main.py #src/main.py
 
 
-#   run-transaction-bundler-typescript:
-#     needs: [validate-environment, set-versions]
+  run-transaction-bundler-typescript:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ETHEREUM_RPC_URL: http://localhost:8545
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ETHEREUM_RPC_URL: http://localhost:8545
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/transaction_bundler/typescript
-#         run: |
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/transaction_bundler/typescript
+        run: |
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/transaction_bundler/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/transaction_bundler/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/transaction_bundler/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/transaction_bundler/typescript
+        run: npm run start
 
-#   run-transaction-bundler-python:
-#     needs: [validate-environment, set-versions]
+  run-transaction-bundler-python:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ETHEREUM_RPC_URL: http://localhost:8545
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ETHEREUM_RPC_URL: http://localhost:8545
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/transaction_bundler/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/transaction_bundler/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/transaction_bundler/python
-#         run: ./.venv/bin/python src/main.py
+      - name: Run example
+        working-directory: v1/transaction_bundler/python
+        run: ./.venv/bin/python src/main.py
 
-#   run-aave-looping-typescript:
-#     needs: [validate-environment, set-versions]
+  run-aave-looping-typescript:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ETHEREUM_RPC_URL: http://localhost:8545
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ETHEREUM_RPC_URL: http://localhost:8545
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/aave_looping/typescript
-#         run: | 
-#           npm install
-#           if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
-#             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
-#           fi
-#           npm list
+      - name: Install dependencies
+        working-directory: v1/aave_looping/typescript
+        run: | 
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
 
-#       - name: Build application
-#         working-directory: v1/aave_looping/typescript
-#         run: npm run build
+      - name: Build application
+        working-directory: v1/aave_looping/typescript
+        run: npm run build
 
-#       - name: Run application
-#         working-directory: v1/aave_looping/typescript
-#         run: npm run start
+      - name: Run application
+        working-directory: v1/aave_looping/typescript
+        run: npm run start
 
-#   run-aave-looping-python:
-#     needs: [validate-environment, set-versions]
+  run-aave-looping-python:
+    needs: [validate-environment, set-versions]
     
-#     runs-on: ubuntu-latest
-#     env:
-#       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-#       ETHEREUM_RPC_URL: http://localhost:8545
-#       SERVER_URL: http://localhost:80
-#       NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#       UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ETHEREUM_RPC_URL: http://localhost:8545
+      SERVER_URL: http://localhost:80
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Install uv
-#         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-#       - name: Start up full local API and anvil
-#         uses: ./.github/actions/local_anvil_and_api
-#         id: local_anvil_and_api
-#         with:
-#           ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-#           arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-#           base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-#           private_key: ${{ secrets.PRIVATE_KEY }}
-#           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-#           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-#           fund_amount_eth: "10"
-#           environment: ${{ needs.validate-environment.outputs.environment }}
-#           aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-#           ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+      - name: Start up full local API and anvil
+        uses: ./.github/actions/local_anvil_and_api
+        id: local_anvil_and_api
+        with:
+          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+          fund_amount_eth: "10"
+          environment: ${{ needs.validate-environment.outputs.environment }}
+          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
-#       - name: Install dependencies
-#         working-directory: v1/aave_looping/python
-#         run: |
-#           if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
-#             echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
-#             uv add compass-api-sdk==$UV_PACKAGE_VERSION
-#           fi
-#           uv sync
-#           uv pip freeze
+      - name: Install dependencies
+        working-directory: v1/aave_looping/python
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
 
-#       - name: Run example
-#         working-directory: v1/aave_looping/python
-#         run: ./.venv/bin/python src/main.py
+      - name: Run example
+        working-directory: v1/aave_looping/python
+        run: ./.venv/bin/python src/main.py
 
-#   failure-alert:
-#     if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
-#     runs-on: ubuntu-latest
-#     needs:
-#       [
-#         run-pendle-typescript,
-#         run-pendle-python,
-#         run-transaction-bundler-typescript,
-#         run-transaction-bundler-python,
-#         run-aave-looping-typescript,
-#         run-aave-looping-python,
-#       ]
-#     steps:
-#       - name: Send failure notification
-#         run: |
-#           curl -X POST "https://allquiet.app/api/webhook/829f846c-4dfa-4a58-ab33-eafae34a57c9" \
-#               -H "Content-Type: application/json" \
-#               -d '{"status": "Open", "severity": "Critical", "message": "GitHub workflow failed", "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+  failure-alert:
+    if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
+    runs-on: ubuntu-latest
+    needs:
+      [
+        run-pendle-typescript,
+        run-pendle-python,
+        run-transaction-bundler-typescript,
+        run-transaction-bundler-python,
+        run-aave-looping-typescript,
+        run-aave-looping-python,
+      ]
+    steps:
+      - name: Send failure notification
+        run: |
+          curl -X POST "https://allquiet.app/api/webhook/829f846c-4dfa-4a58-ab33-eafae34a57c9" \
+              -H "Content-Type: application/json" \
+              -d '{"status": "Open", "severity": "Critical", "message": "GitHub workflow failed", "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
