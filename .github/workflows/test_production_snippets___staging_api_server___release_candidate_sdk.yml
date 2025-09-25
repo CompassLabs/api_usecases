@@ -158,6 +158,10 @@ jobs:
           uv sync
           uv pip freeze
 
+      - name: Print compass-api-sdk version (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv pip freeze | grep -i '^compass-api-sdk' || echo "compass-api-sdk not installed"
+
       - name: Print pyproject.toml after installing dependencies
         working-directory: v1/test_sdk_snippets
         run: cat pyproject.toml          
@@ -204,6 +208,10 @@ jobs:
           fi
           uv sync
           uv pip freeze
+
+      - name: Print compass-api-sdk version (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv pip freeze | grep -i '^compass-api-sdk' || echo "compass-api-sdk not installed"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
