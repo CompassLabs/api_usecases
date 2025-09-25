@@ -1,4 +1,4 @@
-name: test_release_candidate_sdk_snippets_against_staging_api_server
+name: test_production_snippets___staging_api_server___release_candidate_sdk
 
 on:
   schedule:
