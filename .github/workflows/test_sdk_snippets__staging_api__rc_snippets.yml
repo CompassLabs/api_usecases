@@ -232,20 +232,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Start up full local API and anvil
-        uses: ./.github/actions/local_anvil_and_api
-        id: local_anvil_and_api
-        with:
-          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
-          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
-          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
-          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
-          fund_amount_eth: "10"
-          environment: ${{ needs.validate-environment.outputs.environment }}
-          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+#      - name: Start up full local API and anvil
+#        uses: ./.github/actions/local_anvil_and_api
+#        id: local_anvil_and_api
+#        with:
+#          ethereum_rpc_url: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+#          arbitrum_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+#          base_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+#          private_key: ${{ secrets.PRIVATE_KEY }}
+#          mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
+#          mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
+#          fund_amount_eth: "10"
+#          environment: ${{ needs.validate-environment.outputs.environment }}
+#          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+#          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
 
       - name: Install dependencies (uv)
