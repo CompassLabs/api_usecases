@@ -94,17 +94,7 @@ jobs:
 
 
   discover_sdk_snippets:
-    #needs: [validate-environment, set-versions]
-
     runs-on: ubuntu-latest
-
-#    env:
-#      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
-#      #SERVER_URL: https://api.compasslabs.ai/ # production server
-#      SERVER_URL: ${{ secrets.STAGING_SERVER_URL }}
-#
-#      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
-#      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
 
     outputs:
       items: ${{ steps.collect.outputs.items }}
