@@ -24,14 +24,14 @@ SNIPPET = None
 for method in ("get", "post"):
     samples = (methods.get(method, {}) or {}).get("x-codeSamples") or []
     for s in samples:
-        if (s.get("lang") or "").lower().startswith("python"):
+        if (s.get("lang") or "").lower().startswith("typescript"):
             SNIPPET = s["source"]
             break
     if SNIPPET:
         break
 
 if not SNIPPET:
-    raise ValueError(f"No Python code sample found for endpoint: {ENDPOINT!r}")
+    raise ValueError(f"No Typescript code sample found for endpoint: {ENDPOINT!r}")
 
 
 print(f"--- Running typescript SDK snippet for {ENDPOINT} ---")
