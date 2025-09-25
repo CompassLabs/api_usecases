@@ -136,7 +136,7 @@ jobs:
           uv pip freeze
 
       - name: Run example
-        working-directory: v1/pendle/python
+        working-directory: test
         run: ./.venv/bin/python src/main.py
 
 
