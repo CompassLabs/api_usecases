@@ -50,7 +50,7 @@ jobs:
       SERVER_URL: ${{ secrets.STAGING_SERVER_URL }} #https://api.compasslabs.ai/
     strategy:
       fail-fast: false
-      max-parallel: 3   # limit concurrency
+      max-parallel: 30000000   # limit concurrency
       matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
 
     steps:
@@ -81,7 +81,7 @@ jobs:
       SERVER_URL: ${{ secrets.STAGING_SERVER_URL }} #https://api.compasslabs.ai/
     strategy:
       fail-fast: false
-      max-parallel: 3   # limit concurrency
+      max-parallel: 30000000   # limit concurrency
       matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
 
     steps:
