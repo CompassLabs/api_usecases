@@ -277,6 +277,10 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Print package.json
+        working-directory: v1/test_sdk_snippets
+        run: cat package.json
+
       - name: Install Node deps for TS snippets
         working-directory: v1/test_sdk_snippets
         run: | 
@@ -285,6 +289,10 @@ jobs:
             npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
           fi
           npm list
+
+      - name: Print package.json after installing dependencies
+        working-directory: v1/test_sdk_snippets
+        run: cat package.json          
 
       - name: Run endpoint snippet
         working-directory: v1/test_sdk_snippets
