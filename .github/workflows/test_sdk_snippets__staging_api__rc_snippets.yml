@@ -67,7 +67,7 @@ jobs:
       - name: Set versions
         id: set-versions
         run: |
-          if [[ "${{ needs.validate-environment.outputs.environment }}" == "staging" ]]; then
+          if [[ "${{ needs.validate-environment.outputs.environment }}" == "local" ]]; then
             NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
             UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
           else
