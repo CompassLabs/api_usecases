@@ -1,4 +1,4 @@
-name: simple_test
+name: simple_test_on_staging
 
 on:
   push:
