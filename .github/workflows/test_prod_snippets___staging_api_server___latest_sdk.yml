@@ -1,4 +1,4 @@
-name: test_production_snippets___staging_api_server___latest_sdk
+name: test_prod_snippets___staging_api_server___latest_sdk
 # not sure how to test release candidate snippets
 
 on:
