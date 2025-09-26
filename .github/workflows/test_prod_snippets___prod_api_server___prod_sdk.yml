@@ -1,0 +1,132 @@
+name: test_production_snippets___staging_api_server___latest_sdk
+# not sure how to test release candidate snippets
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  discover_sdk_snippets:
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+
+    outputs:
+      items: ${{ steps.collect.outputs.items }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - id: collect
+        name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
+        working-directory: v1/test_sdk_snippets
+        run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items ✅ (pretty):"
+          jq . items.json | tee items.pretty.json
+
+  python:
+    needs: discover_sdk_snippets #
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      #SERVER_URL: ${{ secrets.STAGING_SERVER_URL }}
+      SERVER_URL: https://api.compasslabs.ai/
+    strategy:
+      fail-fast: false
+      max-parallel: 3   # limit concurrency
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - name: Print compass-api-sdk version (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv pip freeze | grep -i '^compass-api-sdk' || echo "compass-api-sdk not installed"
+
+      - name: Print pyproject.toml after installing dependencies
+        working-directory: v1/test_sdk_snippets
+        run: cat pyproject.toml    
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_python.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
+
+  typescript:
+    needs: discover_sdk_snippets #
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
+      #SERVER_URL: ${{ secrets.STAGING_SERVER_URL }}
+      SERVER_URL: https://api.compasslabs.ai/
+    strategy:
+      fail-fast: false
+      max-parallel: 3   # limit concurrency
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv sync
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node deps for TS snippets
+        working-directory: v1/test_sdk_snippets
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm i -D tsx
+          # Install the TS SDK used by snippets
+          npm i @compass-labs/api-sdk
+
+      - name: List installed @compass-labs/api-sdk
+        working-directory: v1/test_sdk_snippets
+        run: npm ls @compass-labs/api-sdk || true
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_typescript.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
