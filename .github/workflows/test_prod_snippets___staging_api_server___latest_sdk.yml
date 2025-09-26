@@ -49,6 +49,7 @@ jobs:
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
       SERVER_URL: ${{ secrets.STAGING_SERVER_URL }} #https://api.compasslabs.ai/
+
     strategy:
       fail-fast: false
       #max-parallel: 3   # limit concurrency
