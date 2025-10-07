@@ -127,7 +127,7 @@ jobs:
 
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python
-        run: ./.venv/bin/python main.py #src/main.py
+        run: ./.venv/bin/python main.py #src/main.py #
         
 
 
