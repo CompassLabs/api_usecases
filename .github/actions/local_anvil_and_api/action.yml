@@ -131,7 +131,7 @@ runs:
           -e THE_GRAPH_URL_AAVE_ETHEREUM=https://gateway.thegraph.com/api/subgraphs/id/notvalid \
           -e THE_GRAPH_URL_AAVE_BASE=https://gateway.thegraph.com/api/subgraphs/id/notvalid \
           -e THE_GRAPH_API_KEY=notvalid \
-          -e ENV=development \
+          -e ENV=production \
           ${{ inputs.ecr_image_uri }}:$tag
         
         sleep 2
