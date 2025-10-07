@@ -15,6 +15,11 @@ on:
         required: true
         type: string
 
+  # ✅ Cancel previous runs on same branch or PR when a new run starts
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
   workflow_call:
     inputs:
       environment:
