@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-      - fix-failing-tests
+      #- fix-failing-tests
   workflow_dispatch:
     inputs:
       environment:
