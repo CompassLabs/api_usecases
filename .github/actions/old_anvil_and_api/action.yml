@@ -134,7 +134,7 @@ runs:
         THE_GRAPH_URL_AAVE_ETHEREUM: https://gateway.thegraph.com/api/subgraphs/id/notvalid
         THE_GRAPH_URL_AAVE_BASE: https://gateway.thegraph.com/api/subgraphs/id/notvalid
         THE_GRAPH_API_KEY: notvalid
-        ENV: "development"
+        ENV: "production"
       run: |
         make install && make run &
         until curl -s http://localhost:8000/health >/dev/null; do sleep 1; done
