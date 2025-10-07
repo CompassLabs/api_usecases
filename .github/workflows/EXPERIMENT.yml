@@ -132,6 +132,9 @@ jobs:
           uv sync
           uv pip freeze
 
+      - name: Show pyproject.toml
+        run: cat /Users/johncosnett/PycharmProjects/api_usecases/v1/basic_examples/deposit_on_morpho/python/pyproject.toml
+
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python
         run: ./.venv/bin/python main.py #src/main.py #
