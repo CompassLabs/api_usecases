@@ -12,6 +12,8 @@ import devtools
 
 load_dotenv()
 
+print(os.getenv("SERVER_URL"))
+
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 assert PRIVATE_KEY
 BASE_RPC_URL = os.getenv("BASE_RPC_URL")
