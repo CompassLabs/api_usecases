@@ -131,9 +131,9 @@ jobs:
           mono_app_id: ${{ secrets.MONOREPOAPP_ID }}
           mono_app_private_key: ${{ secrets.MONOREPOAPP_PRIVATE_KEY }}
           fund_amount_eth: "10"
-          environment: ${{ needs.validate-environment.outputs.environment }}
-          aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
-          ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
+          #environment: ${{ needs.validate-environment.outputs.environment }}
+          #aws_ecr_sts_role: ${{ env.AWS_ECR_STS_ROLE }}
+          #ecr_image_uri: 688567264391.dkr.ecr.eu-west-2.amazonaws.com/dojo_api
 
       - name: Install dependencies
         working-directory: v1/basic_examples/deposit_on_morpho/python
