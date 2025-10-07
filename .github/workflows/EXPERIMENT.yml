@@ -80,6 +80,16 @@ jobs:
           echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
 
+  print-context:
+    needs: [validate-environment, set-versions]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show resolved values
+        run: |
+          echo "environment: ${{ needs.validate-environment.outputs.environment }}"
+          echo "uv_package_version: ${{ needs.set-versions.outputs.uv_package_version }}"
+
+
 
   run-python----basic-examples-deposit-on-morpho: #
     needs: [validate-environment, set-versions]
