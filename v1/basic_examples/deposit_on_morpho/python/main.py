@@ -53,8 +53,9 @@ swap_tx = compass.swap.swap_odos(
     amount=0.03 * one_USD_in_ETH,  # amount in = 0.03 USD in ETH
     max_slippage_percent=1,
 )
-
+devtools.debug('tx')
 devtools.debug(swap_tx)
+devtools.debug('-------------')
 
 
 # Helper function to sign and broadcast unsigned transaction:
