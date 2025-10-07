@@ -54,6 +54,8 @@ swap_tx = compass.swap.swap_odos(
     max_slippage_percent=1,
 )
 
+devtools.debug(swap_tx)
+
 
 # Helper function to sign and broadcast unsigned transaction:
 def send_tx(response):
