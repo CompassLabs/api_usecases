@@ -57,17 +57,13 @@ jobs:
       npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
       uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "20"
 
-      - name: Setup uv and Python
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Set versions
         id: set-versions
@@ -102,12 +98,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Setup uv and Python
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
 #      - name: Start up full local API and anvil
 #        uses: ./.github/actions/local_anvil_and_api
@@ -133,9 +127,6 @@ jobs:
           fi
           uv sync
           uv pip freeze
-
-      - name: Show pyproject.toml
-        run: cat /Users/johncosnett/PycharmProjects/api_usecases/v1/basic_examples/deposit_on_morpho/python/pyproject.toml
 
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python
