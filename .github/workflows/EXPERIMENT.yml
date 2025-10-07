@@ -142,6 +142,10 @@ jobs:
         working-directory: v1/basic_examples/deposit_on_morpho/python
         run: cat pyproject.toml
 
+      - name: Show compass-api-sdk version
+        working-directory: v1/basic_examples/deposit_on_morpho/python
+        run: uv pip show compass-api-sdk || echo "compass-api-sdk not installed"
+
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python
         run: ./.venv/bin/python main.py #src/main.py #
