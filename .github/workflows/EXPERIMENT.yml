@@ -62,8 +62,10 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
 
       - name: Set versions
         id: set-versions
@@ -100,8 +102,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
 
 #      - name: Start up full local API and anvil
 #        uses: ./.github/actions/local_anvil_and_api
