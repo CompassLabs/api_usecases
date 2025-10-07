@@ -48,7 +48,7 @@ jobs:
             exit 1
           fi
           echo "✅ Environment '$ENVIRONMENT' is valid"
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "environment=prod" >> $GITHUB_OUTPUT
   
   set-versions:
     needs: [validate-environment]
