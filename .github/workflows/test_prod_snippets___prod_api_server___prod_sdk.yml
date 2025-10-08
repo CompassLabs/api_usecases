@@ -4,6 +4,9 @@ name: test_prod_snippets___prod_api_server___prod_sdk
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches:
+      - 'conor/com-5939-create-workflow-for-sdk-snippets-test'
   workflow_dispatch:
 
 jobs:
