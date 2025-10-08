@@ -48,7 +48,7 @@ jobs:
           fi
           echo "✅ Environment '$ENVIRONMENT' is valid"
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-  
+
   set-versions:
     needs: [validate-environment]
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
 
   run-pendle-typescript:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -135,7 +135,7 @@ jobs:
 
   run-pendle-python:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -237,7 +237,7 @@ jobs:
 
   run-python----basic-examples-deposit-on-morpho: #
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -282,11 +282,11 @@ jobs:
       - name: Run example
         working-directory: v1/basic_examples/deposit_on_morpho/python
         run: ./.venv/bin/python main.py #src/main.py
-        
+
 
   run-typescript-basic-examples-deposit-on-aave:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -442,7 +442,7 @@ jobs:
 
   run-python----transaction_bundler_embed_a_fee_in_tx: #
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -491,7 +491,7 @@ jobs:
 
   run-transaction-bundler-typescript:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -544,7 +544,7 @@ jobs:
 
   run-transaction-bundler-python:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -592,7 +592,7 @@ jobs:
 
   run-aave-looping-typescript:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}
@@ -645,7 +645,7 @@ jobs:
 
   run-aave-looping-python:
     needs: [validate-environment, set-versions]
-    
+
     runs-on: ubuntu-latest
     env:
       COMPASS_API_KEY: ${{ secrets.COMPASS_API_KEY }}

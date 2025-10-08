@@ -1,0 +1,242 @@
+name: test_production_snippets___staging_api_server___release_candidate_sdk
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
+
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_ECR_STS_ROLE: arn:aws:iam::688567264391:role/DojoApiCIRole
+
+jobs:
+  validate-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.validate.outputs.environment }}
+    steps:
+      - name: Validate environment input
+        id: validate
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            ENVIRONMENT="local"
+          fi
+          if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "local" ]]; then
+            echo "❌ Error: Invalid environment '$ENVIRONMENT'. Must be 'staging' or 'prod' or 'local'."
+            exit 1
+          fi
+          echo "✅ Environment '$ENVIRONMENT' is valid"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
+  set-versions:
+    needs: [validate-environment]
+    runs-on: ubuntu-latest
+    outputs:
+      npm_package_version: ${{ steps.set-versions.outputs.npm_package_version }}
+      uv_package_version: ${{ steps.set-versions.outputs.uv_package_version }}
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Set versions
+        id: set-versions
+        run: |
+          if [[ "${{ needs.validate-environment.outputs.environment }}" == "local" ]]; then
+            NPM_PACKAGE_VERSION=$(npm view @compass-labs/api-sdk versions --json | jq -r '.[]' | grep -E 'rc|alpha|beta' | sort -V | tail -1)
+            UV_PACKAGE_VERSION="$(curl -s https://pypi.org/pypi/compass-api-sdk/json | jq -r '.releases | keys | .[]' | grep -E 'rc|a|b|dev' | sort -V | tail -1)"
+          else
+            NPM_PACKAGE_VERSION="latest"
+            UV_PACKAGE_VERSION="latest"
+          fi
+
+          echo "npm_package_version=$NPM_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "uv_package_version=$UV_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+  # Print environment parameter with emojis
+  print-environment-and-package-versions:
+    needs: [validate-environment, set-versions]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print environment parameter
+        run: |
+          echo "🚀 Starting workflow..."
+          echo "📋 Workflow input environment: ${{ github.event.inputs.environment }}"
+          echo "⚙️  Active environment: ${{ needs.validate-environment.outputs.environment }}"
+          echo "📦 npm package version: ${{ needs.set-versions.outputs.npm_package_version }}"
+          echo "🐍 uv package version: ${{ needs.set-versions.outputs.uv_package_version }}"
+          echo "✅ Environment validation complete!"          
+
+
+  discover_sdk_snippets:
+    runs-on: ubuntu-latest
+
+    outputs:
+      items: ${{ steps.collect.outputs.items }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - id: collect
+        name: Collect endpoints (writes items=... to $GITHUB_OUTPUT)
+        working-directory: v1/test_sdk_snippets
+        run: uv run python discover_endpoints.py
+
+      - name: Print collected items
+        run: |
+          cat > items.json <<'JSON'
+          ${{ steps.collect.outputs.items }}
+          JSON
+          echo "Collected items ✅ (pretty):"
+          jq . items.json | tee items.pretty.json
+          
+
+  python: # Job is called `python` so that subjobs are called `python(<endpoint>)`
+          # to distinguish them from `typescript(<endpoint>)`
+    needs: [validate-environment, set-versions, discover_sdk_snippets ]
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.STAGING_COMPASS_API_KEY }}
+      #SERVER_URL: https://api.compasslabs.ai/ # production server
+      SERVER_URL: ${{ secrets.STAGING_SERVER_URL }} 
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+
+    strategy:
+      fail-fast: false
+      #max-parallel: 3   # limit concurrency
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: v1/test_sdk_snippets
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
+
+      - name: Print compass-api-sdk version (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv pip freeze | grep -i '^compass-api-sdk' || echo "compass-api-sdk not installed"
+
+      - name: Print pyproject.toml after installing dependencies
+        working-directory: v1/test_sdk_snippets
+        run: cat pyproject.toml          
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_python.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
+
+  typescript:
+    needs: [validate-environment, set-versions, discover_sdk_snippets]
+ #
+    if: ${{ needs.discover_sdk_snippets.outputs.items != '' }}
+    runs-on: ubuntu-latest
+    env:
+      COMPASS_API_KEY: ${{ secrets.STAGING_COMPASS_API_KEY }}
+      SERVER_URL: ${{ secrets.STAGING_SERVER_URL }} #https://api.compasslabs.ai/
+
+      NPM_PACKAGE_VERSION: ${{ needs.set-versions.outputs.npm_package_version }}
+      UV_PACKAGE_VERSION: ${{ needs.set-versions.outputs.uv_package_version }}
+
+    strategy:
+      fail-fast: false
+      #max-parallel: 3   # limit concurrency
+      matrix: ${{ fromJson(needs.discover_sdk_snippets.outputs.items) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+
+      - name: Install dependencies (uv)
+        working-directory: v1/test_sdk_snippets
+        run: |
+          if [[ "$UV_PACKAGE_VERSION" != "latest" ]]; then
+            echo "Installing compass-api-sdk==$UV_PACKAGE_VERSION"
+            uv add compass-api-sdk==$UV_PACKAGE_VERSION
+          fi
+          uv sync
+          uv pip freeze
+
+      - name: Print compass-api-sdk version (uv)
+        working-directory: v1/test_sdk_snippets
+        run: uv pip freeze | grep -i '^compass-api-sdk' || echo "compass-api-sdk not installed"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Print package.json
+        working-directory: v1/test_sdk_snippets
+        run: cat package.json
+
+      - name: Install Node deps for TS snippets
+        working-directory: v1/test_sdk_snippets
+        run: | 
+          npm install
+          if [[ "$NPM_PACKAGE_VERSION" != "latest" ]]; then
+            npm install @compass-labs/api-sdk@$NPM_PACKAGE_VERSION
+          fi
+          npm list
+
+      - name: Print package.json after installing dependencies
+        working-directory: v1/test_sdk_snippets
+        run: cat package.json          
+
+      - name: Run endpoint snippet
+        working-directory: v1/test_sdk_snippets
+        run: uv run python run_endpoint_typescript.py
+        env:
+          ENDPOINT: ${{ matrix.item }}
