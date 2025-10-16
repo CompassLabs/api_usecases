@@ -1,7 +1,7 @@
 // SNIPPET START 1
 import { createSafeClient } from '@safe-global/sdk-starter-kit';
 import dotenv from 'dotenv';
-import { CompassApiSDK } from "@compass-labs/api-sdk";
+import { CompassApiSDK } from '@compass-labs/api-sdk';
 import { SafeProvider } from '@safe-global/protocol-kit';
 
 dotenv.config();
@@ -12,9 +12,6 @@ const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY as string;
 // const SIGNER_ADDRESS = process.env.SIGNER_ADDRESS as string;
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY as string;
 const SAFE_ADDRESS = process.env.SAFE_ADDRESS as string;
-const DEPOSIT_AMOUNT = 0.01; // amount the user will deposit in a Morpho vault
-const SPECIFIC_MORPHO_VAULT = process.env
-  .SPECIFIC_MORPHO_VAULT as `0x${string}` || "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738";
 
 // SNIPPET END 1
 
@@ -37,23 +34,6 @@ const main = async () => {
   });
 
   console.log('Safe client created at:', await safeClient.getAddress());
-
-
-  const WALLET_ADDRESS = await safeClient.getAddress();
-
-  const compass = new CompassApiSDK({
-    apiKeyAuth: COMPASS_API_KEY,
-    serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
-  });
-
-  const allowanceTx = await compass.universal.genericAllowanceSet({
-    chain: "base",
-    sender: '0x01E62835dd7F52173546A325294762143eE4a882',
-    contract: SPECIFIC_MORPHO_VAULT, // seamless USDC Vault.
-    amount: DEPOSIT_AMOUNT,
-    token: "USDC",
-  });
-  console.log("allowanceTx", allowanceTx);
 
   // const compassApiSDK = new CompassApiSDK({
   //   apiKeyAuth: COMPASS_API_KEY,
