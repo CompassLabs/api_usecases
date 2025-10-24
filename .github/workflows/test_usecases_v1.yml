@@ -441,7 +441,7 @@ jobs:
         run: npm run start
 
   run-python----transaction_bundler_embed_a_fee_in_tx: #
-    needs: [validate-environment, set-versions, run-typescript-transaction_bundler_embed_a_fee_in_tx]
+    needs: [validate-environment, set-versions, run-python----basic-examples-deposit-on-aave]
     
     runs-on: ubuntu-latest
     env:
