@@ -236,7 +236,7 @@ jobs:
 
 
   run-python----basic-examples-deposit-on-morpho: #
-    needs: [validate-environment, set-versions, run-typescript-basic-examples-deposit-on-morpho]
+    needs: [validate-environment, set-versions, run-pendle-python]
     
     runs-on: ubuntu-latest
     env:
