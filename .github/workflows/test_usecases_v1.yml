@@ -339,7 +339,7 @@ jobs:
 
 
   run-python----basic-examples-deposit-on-aave:
-    needs: [validate-environment, set-versions, run-typescript-basic-examples-deposit-on-aave]
+    needs: [validate-environment, set-versions, run-python----basic-examples-deposit-on-morpho]
 
     runs-on: ubuntu-latest
     env:
