@@ -25,7 +25,7 @@ source .venv/bin/activate
 ```bash
 COMPASS_API_KEY=your_api_key
 PRIVATE_KEY=your_private_key
-RPC_URL=your_rpc_url
+ETHEREUM_RPC_URL=your_rpc_url
 ```
 
 3. Run the example:

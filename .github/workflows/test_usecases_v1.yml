@@ -134,7 +134,7 @@ jobs:
         run: npm run start
 
   run-pendle-python:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-pendle-typescript]
     
     runs-on: ubuntu-latest
     env:
@@ -182,7 +182,7 @@ jobs:
         run: ./.venv/bin/python src/main.py
 
   run-typescript-basic-examples-deposit-on-morpho: #
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-pendle-python]
 
     runs-on: ubuntu-latest
     env:
@@ -236,7 +236,7 @@ jobs:
 
 
   run-python----basic-examples-deposit-on-morpho: #
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-typescript-basic-examples-deposit-on-morpho]
     
     runs-on: ubuntu-latest
     env:
@@ -285,7 +285,7 @@ jobs:
         
 
   run-typescript-basic-examples-deposit-on-aave:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-python----basic-examples-deposit-on-morpho]
     
     runs-on: ubuntu-latest
     env:
@@ -339,7 +339,7 @@ jobs:
 
 
   run-python----basic-examples-deposit-on-aave:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-typescript-basic-examples-deposit-on-aave]
 
     runs-on: ubuntu-latest
     env:
@@ -387,7 +387,7 @@ jobs:
         run: ./.venv/bin/python main.py #src/main.py
 
   run-typescript-transaction_bundler_embed_a_fee_in_tx: #
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-python----basic-examples-deposit-on-aave]
 
     runs-on: ubuntu-latest
     env:
@@ -441,7 +441,7 @@ jobs:
         run: npm run start
 
   run-python----transaction_bundler_embed_a_fee_in_tx: #
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-typescript-transaction_bundler_embed_a_fee_in_tx]
     
     runs-on: ubuntu-latest
     env:
@@ -490,7 +490,7 @@ jobs:
 
 
   run-transaction-bundler-typescript:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-python----transaction_bundler_embed_a_fee_in_tx]
     
     runs-on: ubuntu-latest
     env:
@@ -543,7 +543,7 @@ jobs:
         run: npm run start
 
   run-transaction-bundler-python:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-transaction-bundler-typescript]
     
     runs-on: ubuntu-latest
     env:
@@ -591,7 +591,7 @@ jobs:
         run: ./.venv/bin/python src/main.py
 
   run-aave-looping-typescript:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-transaction-bundler-python]
     
     runs-on: ubuntu-latest
     env:
@@ -644,7 +644,7 @@ jobs:
         run: npm run start
 
   run-aave-looping-python:
-    needs: [validate-environment, set-versions]
+    needs: [validate-environment, set-versions, run-aave-looping-typescript]
     
     runs-on: ubuntu-latest
     env:
