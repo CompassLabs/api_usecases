@@ -543,7 +543,7 @@ jobs:
         run: npm run start
 
   run-transaction-bundler-python:
-    needs: [validate-environment, set-versions, run-transaction-bundler-typescript]
+    needs: [validate-environment, set-versions, run-python----transaction_bundler_embed_a_fee_in_tx]
     
     runs-on: ubuntu-latest
     env:
@@ -644,7 +644,7 @@ jobs:
         run: npm run start
 
   run-aave-looping-python:
-    needs: [validate-environment, set-versions, run-aave-looping-typescript]
+    needs: [validate-environment, set-versions, run-transaction-bundler-python]
     
     runs-on: ubuntu-latest
     env:
