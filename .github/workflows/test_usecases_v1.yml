@@ -40,6 +40,25 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{"status": "Open", "severity": "Critical", "message": "GitHub workflow test ping", "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
 
+
+      - name: Test AllQuiet webhook 2
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          payload=$(jq -n \
+            --arg status "Open" \
+            --arg severity "Critical" \
+            --arg message "GitHub workflow test ping" \
+            --arg run_url "$RUN_URL" \
+            '{status:$status, severity:$severity, message:$message, run_url:$run_url}')
+          echo "Sending payload: $payload"
+          curl --fail --show-error \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://allquiet.app/api/webhook/829f846c-4dfa-4a58-ab33-eafae34a57c9"
+          
+
       - name: Validate environment input
         id: validate
         run: |
