@@ -692,7 +692,7 @@ jobs:
         run: ./.venv/bin/python src/main.py
 
   failure-alert:
-    if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron
+    if: failure() && github.event_name == 'schedule' # Runs only if a previous job failed & triggered by cron.
     runs-on: ubuntu-latest
     needs:
       [
