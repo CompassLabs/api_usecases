@@ -16,17 +16,19 @@ This Python project demonstrates how to perform Aave looping using the Compass L
 
 1. Install dependencies:
 ```bash
+cd ./v1/aave_looping/python
 uv sync
+source .venv/bin/activate
 ```
 
 2. Create a `.env` file with your configuration:
 ```bash
 COMPASS_API_KEY=your_api_key
 PRIVATE_KEY=your_private_key
-RPC_URL=your_rpc_url
+ETHEREUM_RPC_URL=your_rpc_url
 ```
 
 3. Run the example:
 ```bash
-poetry run python src/main.py
+uv run ./src/main.py 
 ``` 
