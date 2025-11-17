@@ -257,7 +257,7 @@ function EarnForm({
           </div>
           <button
             className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-            onClick={() => setAmount(Number(token.amount))}
+            onClick={() => setAmount(Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0))}
             disabled={isLoading}
           >
             All
