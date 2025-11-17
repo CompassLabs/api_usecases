@@ -5,7 +5,7 @@ import { type UnsignedTransaction } from "@compass-labs/api-sdk/models/component
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
-// SNIPPET START 6
+// SNIPPET END 6
 
 export async function POST(request: Request) {
   try {
