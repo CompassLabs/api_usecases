@@ -1,9 +1,11 @@
+// SNIPPET START 6
 import { CHAIN } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { type UnsignedTransaction } from "@compass-labs/api-sdk/models/components";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
+// SNIPPET START 6
 
 export async function POST(request: Request) {
   try {
