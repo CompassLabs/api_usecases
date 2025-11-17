@@ -10,7 +10,7 @@ export async function GET() {
     // Call the SDK method - it will validate the response
     const vaultsResponse = await compassApiSDK.earn.earnVaults({
       chain: CHAIN,
-      orderBy: "lifetime_return",
+      orderBy: "one_month_returns",
       direction: "desc",
       offset: 0,
       limit: 50,

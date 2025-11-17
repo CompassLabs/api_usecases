@@ -3,7 +3,7 @@ import { Screen, Token, TokenData } from "./Screens";
 import {
   VaultsListResponse,
   EarnPositionsResponse,
-  Vault as VaultListItem,
+  VaultInfo,
   CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition,
 } from "@compass-labs/api-sdk/models/components";
 import { Loading } from "@geist-ui/core";
@@ -14,7 +14,7 @@ import EarnItem from "./EarnItem";
 import Skeleton from "./primitives/Skeleton";
 
 // Merged data type combining vault info and user position
-export type EnrichedVaultData = VaultListItem & {
+export type EnrichedVaultData = VaultInfo & {
   userPosition?: CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition;
 };
 

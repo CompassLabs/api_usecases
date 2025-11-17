@@ -1,7 +1,7 @@
 import React from "react";
 import { TokenData } from "./Screens";
 import { EnrichedVaultData } from "./TokenScreen";
-import { TrendingUp, User } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Slider } from "./primitives/Slider";
 import { Spinner } from "@geist-ui/core";
@@ -51,9 +51,9 @@ export default function EarnItem({
                   className="absolute -translate-x-full -left-1 text-green-600"
                   size={14}
                 />
-                {(Number(vaultData.cagr) * 100).toFixed(2)}%
+                {(Number(vaultData.oneMonthReturns) * 100).toFixed(2)}%
               </div>
-              <div className="text-neutral-500 text-[13px] -mt-0.5">annual</div>
+              <div className="text-[13px] text-neutral-500 -mt-0.5">1 month</div>
             </div>
           </div>
           <div className="flex.">
@@ -123,7 +123,7 @@ function EarnForm({
   isLoading,
   setIsClosing,
 }: {
-  vaultData: VaultData;
+  vaultData: EnrichedVaultData;
   token: TokenData;
   handleRefresh: () => void;
   setIsLoading: (v: boolean) => void;
@@ -201,12 +201,6 @@ function EarnForm({
             <div className="text-neutral-500 text-[13px] -mt-0.5">
               Lifetime
             </div>
-          </li>
-          <li className="flex flex-col items-center">
-            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
-              {(Number(vaultData.fees) * 100).toFixed(2)}%
-            </div>
-            <div className="text-neutral-500 text-[13px] -mt-0.5">Fees</div>
           </li>
         </ul>
       </div>

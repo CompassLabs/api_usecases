@@ -1,5 +1,6 @@
 import React from "react";
-import { Screen, Token, TokenData, VaultsListResponse, vaultsByToken } from "./Screens";
+import { Screen, Token, TokenData, vaultsByToken } from "./Screens";
+import { VaultsListResponse } from "@compass-labs/api-sdk/models/components";
 import Skeleton from "./primitives/Skeleton";
 
 export default function WalletScreen({

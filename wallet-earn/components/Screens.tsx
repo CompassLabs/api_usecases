@@ -56,9 +56,14 @@ export default function Screens() {
     const response = await fetch(`/api/vaults`);
     const vaultsData: VaultsListResponse = await response.json();
 
-    // Build vaultsByToken index from vault list
+    // Filter to only show USDC vaults
+    const filteredVaults = vaultsData.vaults.filter(
+      (vault) => vault.denomination.toUpperCase() === "USDC"
+    );
+
+    // Build vaultsByToken index from filtered vault list
     const vaultsByTokenMap: { [key: string]: string[] } = {};
-    vaultsData.vaults.forEach((vault) => {
+    filteredVaults.forEach((vault) => {
       const tokenSymbol = vault.denomination.toUpperCase();
       if (!vaultsByTokenMap[tokenSymbol]) {
         vaultsByTokenMap[tokenSymbol] = [];
@@ -66,10 +71,14 @@ export default function Screens() {
       vaultsByTokenMap[tokenSymbol].push(vault.address);
     });
 
-    // Update the module-level variable
     vaultsByToken = vaultsByTokenMap;
 
-    setVaultsListData(vaultsData);
+    // Update the response with filtered vaults
+    setVaultsListData({
+      ...vaultsData,
+      vaults: filteredVaults,
+      total: filteredVaults.length,
+    });
   };
 
   const getPositionsData = async () => {
