@@ -1,7 +1,7 @@
 import React from "react";
 import { TokenData } from "./Screens";
 import { EnrichedVaultData } from "./TokenScreen";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Slider } from "./primitives/Slider";
 import { Spinner } from "@geist-ui/core";
@@ -131,17 +131,16 @@ function EarnForm({
   setIsClosing: (v: boolean) => void;
 }) {
   const [amount, setAmount] = React.useState(
-    Number(vaultData.userPosition?.amountInUnderlyingToken)
+    Number(vaultData.userPosition?.amountInUnderlyingToken || 0)
   );
 
   const submitEarnTransaction = async () => {
     setIsLoading(true);
     try {
       let response: Response;
-      if (amount > Number(vaultData.userPosition?.amountInUnderlyingToken)) {
-        const depositAmount = (
-          amount - Number(vaultData.userPosition?.amountInUnderlyingToken)
-        ).toFixed(token.decimals);
+      const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
+      if (amount > currentPosition) {
+        const depositAmount = (amount - currentPosition).toFixed(token.decimals);
         response = await fetch("/api/deposit", {
           method: "POST",
           body: JSON.stringify({
@@ -151,9 +150,7 @@ function EarnForm({
           }),
         });
       } else {
-        const withdrawAmount = (
-          Number(vaultData.userPosition?.amountInUnderlyingToken) - amount
-        ).toFixed(token.decimals);
+        const withdrawAmount = (currentPosition - amount).toFixed(token.decimals);
         console.log("amount", amount);
         response = await fetch("/api/withdraw", {
           method: "POST",
@@ -177,8 +174,34 @@ function EarnForm({
     }
   };
 
+  const [copied, setCopied] = React.useState(false);
+
+  const copyAddress = () => {
+    navigator.clipboard.writeText(vaultData.address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="flex flex-col justify-center items-center gap-12 h-full pt-12 pb-8">
+      <div className="flex flex-col w-full items-center gap-2">
+        <h3 className="text-base font-semibold text-zinc-800">
+          {vaultData.name}
+        </h3>
+        <button
+          onClick={copyAddress}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition-colors group"
+        >
+          <code className="text-xs text-neutral-600 font-mono">
+            {vaultData.address.slice(0, 6)}...{vaultData.address.slice(-4)}
+          </code>
+          {copied ? (
+            <Check size={14} className="text-green-600" />
+          ) : (
+            <Copy size={14} className="text-neutral-400 group-hover:text-neutral-600" />
+          )}
+        </button>
+      </div>
       <div className="flex flex-col w-full">
         <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
           Performance Metrics
@@ -234,12 +257,7 @@ function EarnForm({
           </div>
           <button
             className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-            onClick={() =>
-              setAmount(
-                Number(token.amount) +
-                  Number(vaultData.userPosition?.amountInUnderlyingToken)
-              )
-            }
+            onClick={() => setAmount(Number(token.amount))}
             disabled={isLoading}
           >
             All
@@ -249,15 +267,8 @@ function EarnForm({
       <div className="w-full px-8">
         <Slider
           value={[amount]}
-          max={
-            Number(token.amount) +
-            Number(vaultData.userPosition?.amountInUnderlyingToken)
-          }
-          step={
-            (Number(token.amount) +
-              Number(vaultData.userPosition?.amountInUnderlyingToken)) /
-            400
-          }
+          max={Number(token.amount)}
+          step={Number(token.amount) / 400}
           onValueChange={(v) => setAmount(v[0])}
           disabled={isLoading}
         />

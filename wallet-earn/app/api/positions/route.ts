@@ -1,10 +1,10 @@
 import { CHAIN } from "@/utils/constants";
+import { getWalletAddress } from "@/utils/utils";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
-import { privateKeyToAccount } from "viem/accounts";
 
 export async function GET() {
   try {
-    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+    const walletAddress = getWalletAddress();
 
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -13,7 +13,7 @@ export async function GET() {
     // Fetch user's earn positions
     const positionsResponse = await compassApiSDK.earn.earnPositions({
       chain: CHAIN,
-      userAddress: account.address,
+      userAddress: walletAddress,
       offset: 0,
       limit: 100,
       days: 30,
