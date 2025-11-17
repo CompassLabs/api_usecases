@@ -1,26 +1,72 @@
 import { ChevronLeft, Inbox } from "lucide-react";
-import { Screen, Token, TokenData, VaultData } from "./Screens";
+import { Screen, Token, TokenData } from "./Screens";
+import {
+  VaultsListResponse,
+  EarnPositionsResponse,
+  VaultInfo,
+  CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition,
+} from "@compass-labs/api-sdk/models/components";
 import { Loading } from "@geist-ui/core";
 import React from "react";
-import { addTokenTotal, cn } from "@/utils/utils";
+import { cn } from "@/utils/utils";
 import { motion } from "motion/react";
 import EarnItem from "./EarnItem";
 import Skeleton from "./primitives/Skeleton";
+
+// Merged data type combining vault info and user position
+export type EnrichedVaultData = VaultInfo & {
+  userPosition?: CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition;
+};
 
 export default function TokenScreen({
   setScreen,
   tokenSymbol,
   tokenData,
-  vaultData,
+  vaultsListData,
+  positionsData,
   handleRefresh,
 }: {
   setScreen: (screen: Screen) => void;
   tokenSymbol: Token;
   tokenData?: TokenData;
-  vaultData?: VaultData[];
+  vaultsListData?: VaultsListResponse;
+  positionsData?: EarnPositionsResponse;
   handleRefresh: () => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  // Filter vaults for this specific token and merge with user positions
+  const enrichedVaults = React.useMemo<EnrichedVaultData[]>(() => {
+    if (!vaultsListData) return [];
+
+    const tokenVaults = vaultsListData.vaults.filter(
+      (vault) => vault.denomination.toUpperCase() === tokenSymbol
+    );
+
+    // Merge with user positions
+    return tokenVaults.map((vault) => {
+      const userPosition = positionsData?.userPositions?.find(
+        (pos) => pos.type === "VAULT" && pos.vaultAddress === vault.address
+      ) as CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition | undefined;
+
+      return {
+        ...vault,
+        userPosition,
+      };
+    });
+  }, [vaultsListData, positionsData, tokenSymbol]);
+
+  // Calculate total including positions
+  const totalAmount = React.useMemo(() => {
+    if (!tokenData) return 0;
+
+    const walletAmount = Number(tokenData.amount);
+    const positionsAmount = enrichedVaults.reduce((sum, vault) => {
+      return sum + (Number(vault.userPosition?.amountInUnderlyingToken) || 0);
+    }, 0);
+
+    return walletAmount + positionsAmount;
+  }, [tokenData, enrichedVaults]);
 
   return (
     <div
@@ -44,14 +90,12 @@ export default function TokenScreen({
       </motion.button>
       <div className="flex-[0.9] flex flex-col items-center justify-center mt-4 relative">
         <h1 className="relative text-5xl font-bold mb-2 font-sans tracking-tighter">
-          {tokenData && vaultData ? (
+          {tokenData ? (
             <>
               <span className="absolute top-1/2 -translate-y-1/2 -translate-x-full -left-0.5 text-3xl">
                 $
               </span>
-              {(
-                addTokenTotal(tokenData, vaultData) * Number(tokenData.price)
-              ).toFixed(2)}
+              {(totalAmount * Number(tokenData.price)).toFixed(2)}
             </>
           ) : (
             <Skeleton className="w-32 h-10 rounded-xl" />
@@ -64,8 +108,8 @@ export default function TokenScreen({
           />
         </div>
         <div className="font-medium text-neutral-500 flex">
-          {tokenData && vaultData ? (
-            addTokenTotal(tokenData, vaultData).toFixed(3)
+          {tokenData ? (
+            totalAmount.toFixed(3)
           ) : (
             <Skeleton className="w-10 mr-1 h-3" />
           )}{" "}
@@ -79,22 +123,21 @@ export default function TokenScreen({
             You can earn yield on your idle crypto by staking it!
           </p>
         </div>
-        {tokenData && vaultData && vaultData.length > 0 ? (
+        {tokenData && enrichedVaults && enrichedVaults.length > 0 ? (
           <ul className="flex flex-col gap-2 -mx-3 pt-3 pb-3 px-3">
-            {tokenData &&
-              vaultData?.map((vD) => (
-                <EarnItem
-                  vaultData={vD}
-                  token={tokenData}
-                  key={vD.symbol}
-                  setIsOpen={setIsOpen}
-                  handleRefresh={handleRefresh}
-                />
-              ))}
+            {enrichedVaults.map((vault) => (
+              <EarnItem
+                vaultData={vault}
+                token={tokenData}
+                key={vault.address}
+                setIsOpen={setIsOpen}
+                handleRefresh={handleRefresh}
+              />
+            ))}
           </ul>
         ) : (
           <div className="w-full flex flex-col justify-center items-center my-auto">
-            {vaultData?.length === 0 ? (
+            {enrichedVaults?.length === 0 ? (
               <>
                 <Inbox className="stroke-[0.4] text-zinc-400/70" size={64} />
                 <div className="text-[13px] text-zinc-400 text-center">

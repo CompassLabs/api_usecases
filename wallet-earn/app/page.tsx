@@ -1,9 +1,8 @@
 import Screens from "@/components/Screens";
-import { cn, generateWalletGradient } from "@/utils/utils";
-import { privateKeyToAccount } from "viem/accounts";
+import { cn, generateWalletGradient, getWalletAddress } from "@/utils/utils";
 
 export default async function Home() {
-  const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+  const walletAddress = getWalletAddress();
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
@@ -13,11 +12,11 @@ export default async function Home() {
             className={cn(
               "w-6 h-6 border border-neutral-200 rounded-full mr-2 outline -outline-offset-2 outline-neutral-900/15"
             )}
-            style={{ background: generateWalletGradient(account.address) }}
+            style={{ background: generateWalletGradient(walletAddress) }}
           />
-          {account.address.slice(0, 6)}
+          {walletAddress.slice(0, 6)}
           <span className="text-xs">●●●●</span>
-          {account.address.slice(-4)}
+          {walletAddress.slice(-4)}
         </div>
         <Screens />
       </div>

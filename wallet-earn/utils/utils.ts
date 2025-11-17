@@ -1,9 +1,29 @@
-import { TokenData, VaultData } from "@/components/Screens";
+import { TokenData } from "@/components/Screens";
+import { EnrichedVaultData } from "@/components/TokenScreen";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * Gets the Compass Wallet address from environment variables
+ * @throws {Error} If COMPASS_WALLET_ADDRESS is not set or invalid
+ * @returns The validated wallet address
+ */
+export function getWalletAddress(): `0x${string}` {
+  const address = process.env.COMPASS_WALLET_ADDRESS;
+
+  if (!address) {
+    throw new Error("COMPASS_WALLET_ADDRESS not set in environment variables");
+  }
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    throw new Error("Invalid COMPASS_WALLET_ADDRESS format. Expected 0x followed by 40 hex characters");
+  }
+
+  return address as `0x${string}`;
 }
 
 export function generateWalletGradient(walletAddress: `0x${string}`) {
@@ -28,9 +48,9 @@ export function generateWalletGradient(walletAddress: `0x${string}`) {
   return `linear-gradient(to right, ${color1}, ${color2})`;
 }
 
-export const addTokenTotal = (tokenData: TokenData, vaultData: VaultData[]) =>
+export const addTokenTotal = (tokenData: TokenData, vaultData: EnrichedVaultData[]) =>
   vaultData
-    .filter((vD) => vD.underlyingToken.symbol == tokenData.tokenSymbol)
+    .filter((vD) => vD.denomination === tokenData.tokenSymbol)
     .reduce(
       (sum, vD) => sum + Number(vD?.userPosition?.amountInUnderlyingToken) || 0,
       0
@@ -38,7 +58,7 @@ export const addTokenTotal = (tokenData: TokenData, vaultData: VaultData[]) =>
 
 export const addTotalBalance = (
   tokenData: TokenData[],
-  vaultData: VaultData[]
+  vaultData: EnrichedVaultData[]
 ) =>
   tokenData.reduce((sum, token) => {
     const tokenSingle = tokenData?.find(

@@ -1,6 +1,6 @@
 import { CHAIN } from "@/utils/constants";
+import { getWalletAddress } from "@/utils/utils";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
-import { privateKeyToAccount } from "viem/accounts";
 
 export async function GET(
   _: Request,
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { address } = await params;
 
-  const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+  const walletAddress = getWalletAddress();
 
   const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -17,7 +17,7 @@ export async function GET(
   const vaultResponse = await compassApiSDK.erc4626Vaults.vaultsVault({
     chain: CHAIN,
     vaultAddress: address,
-    userAddress: account.address,
+    userAddress: walletAddress,
   });
 
   return new Response(JSON.stringify(vaultResponse), {

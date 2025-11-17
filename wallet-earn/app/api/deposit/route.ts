@@ -32,54 +32,29 @@ export async function POST(request: Request) {
       apiKeyAuth: process.env.COMPASS_API_KEY,
     });
 
-    const allowance = await compassApiSDK.universal.genericAllowance({
+    const deposit = await compassApiSDK.earn.earnManage({
+      owner: account.address,
       chain: CHAIN,
-      user: account.address,
-      token,
-      contract: vaultAddress,
-    });
-
-    if (Number(allowance.amount) < amount) {
-      const allowance = await compassApiSDK.universal.genericAllowanceSet({
-        chain: CHAIN,
-        sender: account.address,
-        contract: vaultAddress,
-        amount,
-        token,
-      });
-
-      const transaction = allowance.transaction as UnsignedTransaction;
-
-      const setAllowanceTxHash = await walletClient.sendTransaction({
-        ...(transaction as any),
-        value: BigInt(transaction.value),
-        gas: BigInt(transaction.gas),
-        maxFeePerGas: BigInt(transaction.maxFeePerGas),
-        maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
-      });
-
-      const tx = await publicClient.waitForTransactionReceipt({
-        hash: setAllowanceTxHash,
-      });
-
-      if (tx.status !== "success") {
-        throw new Error("Allowance transaction reverted.");
-      }
-    }
-
-    const deposit = await compassApiSDK.erc4626Vaults.vaultsDeposit({
-      chain: CHAIN,
-      sender: account.address,
-      vaultAddress,
+      venue: {
+        type: "VAULT",
+        vaultAddress,
+      },
+      action: "DEPOSIT",
       amount,
     });
 
     const transaction = deposit.transaction as UnsignedTransaction;
 
+    console.log(transaction)
+
+    if (!transaction) {
+      throw new Error("No transaction returned from earnManage");
+    }
+
     const depositTxHash = await walletClient.sendTransaction({
       ...(transaction as any),
       value: BigInt(transaction.value),
-      gas: BigInt(transaction.gas),
+      gas: transaction.gas ? BigInt(transaction.gas) : undefined,
       maxFeePerGas: BigInt(transaction.maxFeePerGas),
       maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
     });

@@ -21,6 +21,7 @@ npm run start
 ## Environment variables
 
 ```
+COMPASS_WALLET_ADDRESS=<>
 PRIVATE_KEY=<>
 COMPASS_API_KEY=<>
 ```

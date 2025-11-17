@@ -1,29 +1,34 @@
 import React from "react";
-import { Screen, Token, TokenData, VaultData, vaultsByToken } from "./Screens";
-import { addTokenTotal, addTotalBalance } from "@/utils/utils";
+import { Screen, Token, TokenData, vaultsByToken } from "./Screens";
+import { VaultsListResponse } from "@compass-labs/api-sdk/models/components";
 import Skeleton from "./primitives/Skeleton";
 
 export default function WalletScreen({
   setScreen,
   setToken,
   tokenData,
-  vaultData,
+  vaultsListData,
 }: {
   setScreen: (screen: Screen) => void;
   setToken: (token: Token) => void;
   tokenData?: TokenData[];
-  vaultData?: VaultData[];
+  vaultsListData?: VaultsListResponse;
 }) {
+  // Calculate total balance from token data only (wallet balances)
+  const totalBalance = tokenData?.reduce((sum, token) => {
+    return sum + (Number(token.amount) * Number(token.price));
+  }, 0) || 0;
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col justify-center items-center h-full">
         <div className="relative text-5xl font-bold font-sans">
-          {tokenData && vaultData ? (
+          {tokenData ? (
             <>
               <span className="absolute top-1/2 -translate-y-1/2 -translate-x-full -left-0.5 text-4xl">
                 $
               </span>
-              {addTotalBalance(tokenData, vaultData).toFixed(2)}
+              {totalBalance.toFixed(2)}
             </>
           ) : (
             <Skeleton className="w-32 h-10 rounded-xl" />
@@ -32,13 +37,12 @@ export default function WalletScreen({
         <div className="text-neutral-400 -mt-0.5">Total value</div>
       </div>
       <ul className="flex flex-col gap-2 mt-auto w-full pb-4">
-        {Object.keys(vaultsByToken).map((tokenSymbol) => (
+        {Object.keys(Token).map((tokenSymbol) => (
           <TokenCard
             tokenSymbol={tokenSymbol}
             token={tokenData?.find((tD) => tD.tokenSymbol === tokenSymbol)}
             setScreen={setScreen}
             setToken={setToken}
-            vaultData={vaultData}
             key={tokenSymbol + "-card"}
           />
         ))}
@@ -52,13 +56,11 @@ function TokenCard({
   token,
   setScreen,
   setToken,
-  vaultData,
 }: {
   tokenSymbol: string;
   token?: TokenData;
   setScreen: (screen: Screen) => void;
   setToken: (token: Token) => void;
-  vaultData?: VaultData[];
 }) {
   return (
     <li
@@ -76,7 +78,7 @@ function TokenCard({
       </div>
       <div className="ml-4 flex items-center gap-2">
         <div className="font-semibold font-sans">{tokenSymbol}</div>{" "}
-        {vaultsByToken[`${tokenSymbol}`].length > 0 && (
+        {vaultsByToken[`${tokenSymbol}`]?.length > 0 && (
           <div className="border border-sky-600/30 bg-sky-400/5 px-1.5 rounded-full text-[11px] text-sky-600/80 font-medium">
             Earn
           </div>
@@ -84,17 +86,15 @@ function TokenCard({
       </div>
       <div className="ml-auto flex flex-col items-end">
         <div className="font-semibold font-sans">
-          {vaultData && token ? (
-            `$${(addTokenTotal(token, vaultData) * Number(token.price)).toFixed(
-              2
-            )}`
+          {token ? (
+            `$${(Number(token.amount) * Number(token.price)).toFixed(2)}`
           ) : (
             <Skeleton className="w-10 h-3 ml-1" />
           )}
         </div>
         <div className="text-[13px] text-neutral-400">
-          {vaultData && token ? (
-            addTokenTotal(token, vaultData).toFixed(3)
+          {token ? (
+            Number(token.amount).toFixed(3)
           ) : (
             <Skeleton className="w-10 mr-1 bg-neutral-100/90" />
           )}{" "}

@@ -1,6 +1,7 @@
 import React from "react";
-import { TokenData, VaultData } from "./Screens";
-import { TrendingUp, User } from "lucide-react";
+import { TokenData } from "./Screens";
+import { EnrichedVaultData } from "./TokenScreen";
+import { TrendingUp, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Slider } from "./primitives/Slider";
 import { Spinner } from "@geist-ui/core";
@@ -11,7 +12,7 @@ export default function EarnItem({
   setIsOpen,
   handleRefresh,
 }: {
-  vaultData: VaultData;
+  vaultData: EnrichedVaultData;
   token: TokenData;
   setIsOpen: (value: boolean) => void;
   handleRefresh: () => void;
@@ -37,7 +38,7 @@ export default function EarnItem({
           setOpen(true);
           setIsOpen(true);
         }}
-        key={vaultData.symbol}
+        key={vaultData.address}
       >
         <div className="flex justify-between w-full px-6">
           <div className="flex flex-col">
@@ -50,9 +51,9 @@ export default function EarnItem({
                   className="absolute -translate-x-full -left-1 text-green-600"
                   size={14}
                 />
-                {Number(vaultData.apy.apy7Day).toFixed(2)}%
+                {(Number(vaultData.oneMonthReturns) * 100).toFixed(2)}%
               </div>
-              <div className="text-neutral-500 text-[13px] -mt-0.5">7 day</div>
+              <div className="text-[13px] text-neutral-500 -mt-0.5">1 month</div>
             </div>
           </div>
           <div className="flex.">
@@ -63,15 +64,15 @@ export default function EarnItem({
               <div className="text-lg font-bold font-sans">
                 $
                 {(
-                  Number(vaultData.userPosition?.amountInUnderlyingToken) *
+                  Number(vaultData.userPosition?.amountInUnderlyingToken || 0) *
                   Number(token.price)
                 ).toFixed(2)}
               </div>
               <div className="text-[13px] text-neutral-500 -mt-0.5">
                 {Number(
-                  vaultData.userPosition?.amountInUnderlyingToken
+                  vaultData.userPosition?.amountInUnderlyingToken || 0
                 ).toFixed(3)}{" "}
-                {vaultData.underlyingToken.symbol}
+                {vaultData.denomination}
               </div>
             </div>
           </div>
@@ -122,7 +123,7 @@ function EarnForm({
   isLoading,
   setIsClosing,
 }: {
-  vaultData: VaultData;
+  vaultData: EnrichedVaultData;
   token: TokenData;
   handleRefresh: () => void;
   setIsLoading: (v: boolean) => void;
@@ -130,34 +131,31 @@ function EarnForm({
   setIsClosing: (v: boolean) => void;
 }) {
   const [amount, setAmount] = React.useState(
-    Number(vaultData.userPosition?.amountInUnderlyingToken)
+    Number(vaultData.userPosition?.amountInUnderlyingToken || 0)
   );
 
   const submitEarnTransaction = async () => {
     setIsLoading(true);
     try {
       let response: Response;
-      if (amount > Number(vaultData.userPosition?.amountInUnderlyingToken)) {
-        const depositAmount = (
-          amount - Number(vaultData.userPosition?.amountInUnderlyingToken)
-        ).toFixed(token.decimals);
+      const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
+      if (amount > currentPosition) {
+        const depositAmount = (amount - currentPosition).toFixed(token.decimals);
         response = await fetch("/api/deposit", {
           method: "POST",
           body: JSON.stringify({
-            vaultAddress: vaultData.vaultAddress,
+            vaultAddress: vaultData.address,
             amount: depositAmount,
             token: token.tokenSymbol,
           }),
         });
       } else {
-        const withdrawAmount = (
-          Number(vaultData.userPosition?.amountInUnderlyingToken) - amount
-        ).toFixed(token.decimals);
+        const withdrawAmount = (currentPosition - amount).toFixed(token.decimals);
         console.log("amount", amount);
         response = await fetch("/api/withdraw", {
           method: "POST",
           body: JSON.stringify({
-            vaultAddress: vaultData.vaultAddress,
+            vaultAddress: vaultData.address,
             amount: withdrawAmount,
             isAll: amount === 0 ? true : false,
             token: token.tokenSymbol,
@@ -176,30 +174,57 @@ function EarnForm({
     }
   };
 
+  const [copied, setCopied] = React.useState(false);
+
+  const copyAddress = () => {
+    navigator.clipboard.writeText(vaultData.address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="flex flex-col justify-center items-center gap-12 h-full pt-12 pb-8">
+      <div className="flex flex-col w-full items-center gap-2">
+        <h3 className="text-base font-semibold text-zinc-800">
+          {vaultData.name}
+        </h3>
+        <button
+          onClick={copyAddress}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition-colors group"
+        >
+          <code className="text-xs text-neutral-600 font-mono">
+            {vaultData.address.slice(0, 6)}...{vaultData.address.slice(-4)}
+          </code>
+          {copied ? (
+            <Check size={14} className="text-green-600" />
+          ) : (
+            <Copy size={14} className="text-neutral-400 group-hover:text-neutral-600" />
+          )}
+        </button>
+      </div>
       <div className="flex flex-col w-full">
         <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
-          Historical Earnings
+          Performance Metrics
         </h3>
         <ul className="flex justify-around w-full">
-          {Object.entries(vaultData.apy).map(
-            ([key, value]) =>
-              key !== "current" && (
-                <li className="flex flex-col items-center" key={key}>
-                  <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
-                    <TrendingUp
-                      className="absolute -translate-x-full -left-1 text-green-600"
-                      size={14}
-                    />
-                    {Number(value).toFixed(2)}%
-                  </div>
-                  <div className="text-neutral-500 text-[13px] -mt-0.5">
-                    {key.replace("apy", "").replace("Day", " day")}
-                  </div>
-                </li>
-              )
-          )}
+          <li className="flex flex-col items-center">
+            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+              <TrendingUp
+                className="absolute -translate-x-full -left-1 text-green-600"
+                size={14}
+              />
+              {(Number(vaultData.cagr) * 100).toFixed(2)}%
+            </div>
+            <div className="text-neutral-500 text-[13px] -mt-0.5">CAGR</div>
+          </li>
+          <li className="flex flex-col items-center">
+            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+              {(Number(vaultData.lifetimeReturn) * 100).toFixed(2)}%
+            </div>
+            <div className="text-neutral-500 text-[13px] -mt-0.5">
+              Lifetime
+            </div>
+          </li>
         </ul>
       </div>
       <div className="flex flex-col w-full">
@@ -232,12 +257,7 @@ function EarnForm({
           </div>
           <button
             className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-            onClick={() =>
-              setAmount(
-                Number(token.amount) +
-                  Number(vaultData.userPosition?.amountInUnderlyingToken)
-              )
-            }
+            onClick={() => setAmount(Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0))}
             disabled={isLoading}
           >
             All
@@ -247,15 +267,8 @@ function EarnForm({
       <div className="w-full px-8">
         <Slider
           value={[amount]}
-          max={
-            Number(token.amount) +
-            Number(vaultData.userPosition?.amountInUnderlyingToken)
-          }
-          step={
-            (Number(token.amount) +
-              Number(vaultData.userPosition?.amountInUnderlyingToken)) /
-            400
-          }
+          max={Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0)}
+          step={Number(token.amount) / 400}
           onValueChange={(v) => setAmount(v[0])}
           disabled={isLoading}
         />

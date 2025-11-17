@@ -1,15 +1,14 @@
 import { CHAIN } from "@/utils/constants";
+import { getWalletAddress } from "@/utils/utils";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
-import { TokenEnum } from "@compass-labs/api-sdk/models/components";
-import { privateKeyToAccount } from "viem/accounts";
 
 export async function GET(
   _: Request,
-  { params }: { params: Promise<{ token: TokenEnum | `0x${string}` }> }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
 
-  const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+  const walletAddress = getWalletAddress();
 
   const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.COMPASS_API_KEY,
@@ -18,7 +17,7 @@ export async function GET(
   const tokenBalance = compassApiSDK.token.tokenBalance({
     chain: CHAIN,
     token,
-    user: account.address,
+    user: walletAddress,
   });
 
   const tokenPrice = compassApiSDK.token.tokenPrice({
