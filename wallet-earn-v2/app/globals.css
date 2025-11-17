@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  /* background: var(--background); */
+  /* color: var(--foreground); */
+  font-family: Helvetica, Arial, Helvetica, sans-serif;
+}
+
+/* Custom CSS for AppKit Modal */
+w3m-modal {
+  @apply w-full max-w-[calc(410px-20px)] h-[calc(800px-20px)] left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-[32px];
+}
+
+/* Target modal backdrop */
+w3m-modal::part(overlay) {
+  /* backdrop-filter: blur(8px); */
+  /* background-color: rgba(0, 0, 0, 0.5); */
+}
+
+/* Target modal content */
+w3m-modal::part(content) {
+  /* max-width: 400px; */
+  /* border-radius: 24px; */
+}
+
+/* Use CSS selectors to target internal elements */
+w3m-modal * {
+  /* Apply styles to all elements inside modal */
+}
+
+/* Example: Custom button styling */
+w3m-modal button {
+  /* border-radius: 12px; */
+  /* font-weight: 600; */
+}
