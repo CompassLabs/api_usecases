@@ -28,23 +28,6 @@ export async function GET() {
   } catch (error: any) {
     console.error("Error fetching earn positions:", error);
 
-    // If it's a validation error from the SDK, extract the raw response body
-    if (error?.rawResponse) {
-      console.log("Validation failed, extracting raw response body");
-      try {
-        const clonedResponse = error.rawResponse.clone();
-        const rawData = await clonedResponse.json();
-        return new Response(JSON.stringify(rawData), {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      } catch (parseError) {
-        console.error("Failed to parse raw response:", parseError);
-      }
-    }
-
     return new Response(
       JSON.stringify({
         error: "Failed to fetch earn positions",
