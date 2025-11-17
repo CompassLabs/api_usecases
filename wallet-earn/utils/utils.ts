@@ -1,4 +1,5 @@
-import { TokenData, VaultData } from "@/components/Screens";
+import { TokenData } from "@/components/Screens";
+import { EnrichedVaultData } from "@/components/TokenScreen";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -47,9 +48,9 @@ export function generateWalletGradient(walletAddress: `0x${string}`) {
   return `linear-gradient(to right, ${color1}, ${color2})`;
 }
 
-export const addTokenTotal = (tokenData: TokenData, vaultData: VaultData[]) =>
+export const addTokenTotal = (tokenData: TokenData, vaultData: EnrichedVaultData[]) =>
   vaultData
-    .filter((vD) => vD.underlyingToken.symbol == tokenData.tokenSymbol)
+    .filter((vD) => vD.denomination === tokenData.tokenSymbol)
     .reduce(
       (sum, vD) => sum + Number(vD?.userPosition?.amountInUnderlyingToken) || 0,
       0
@@ -57,7 +58,7 @@ export const addTokenTotal = (tokenData: TokenData, vaultData: VaultData[]) =>
 
 export const addTotalBalance = (
   tokenData: TokenData[],
-  vaultData: VaultData[]
+  vaultData: EnrichedVaultData[]
 ) =>
   tokenData.reduce((sum, token) => {
     const tokenSingle = tokenData?.find(
