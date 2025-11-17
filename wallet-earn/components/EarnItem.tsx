@@ -267,7 +267,7 @@ function EarnForm({
       <div className="w-full px-8">
         <Slider
           value={[amount]}
-          max={Number(token.amount)}
+          max={Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0)}
           step={Number(token.amount) / 400}
           onValueChange={(v) => setAmount(v[0])}
           disabled={isLoading}

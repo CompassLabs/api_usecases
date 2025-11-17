@@ -37,7 +37,7 @@ export default function WalletScreen({
         <div className="text-neutral-400 -mt-0.5">Total value</div>
       </div>
       <ul className="flex flex-col gap-2 mt-auto w-full pb-4">
-        {Object.keys(vaultsByToken).map((tokenSymbol) => (
+        {Object.keys(Token).map((tokenSymbol) => (
           <TokenCard
             tokenSymbol={tokenSymbol}
             token={tokenData?.find((tD) => tD.tokenSymbol === tokenSymbol)}
