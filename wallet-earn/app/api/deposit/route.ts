@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       apiKeyAuth: process.env.COMPASS_API_KEY,
     });
 
+    // SNIPPET START 1
     // Step 1: Call earnManage with gas sponsorship enabled
     const deposit = await compassApiSDK.earn.earnManage({
       owner: ownerAccount.address,
@@ -50,8 +51,9 @@ export async function POST(request: Request) {
       amount,
       gasSponsorship: true,
     });
+    // SNIPPET END 1
 
-    // Step 2: Extract EIP-712 typed data
+    // SNIPPET START 2
     const eip712TypedData = deposit.eip712;
 
     if (!eip712TypedData) {
@@ -59,7 +61,9 @@ export async function POST(request: Request) {
     }
 
     console.log("EIP-712 Typed Data:", eip712TypedData);
+    // SNIPPET END 2
 
+    // SNIPPET START 3
     // Step 3: Owner signs the EIP-712 typed data
     // Note: SDK returns camelCase keys (safeTx, eip712Domain) but primaryType as "SafeTx"
     // We need to normalize the types object to match what viem expects
@@ -76,7 +80,9 @@ export async function POST(request: Request) {
     });
 
     console.log("Owner Signature:", signature);
+    // SNIPPET END 3
 
+    // SNIPPET START 4
     // Step 4: Prepare gas-sponsored transaction
     const sponsorGasResponse = await compassApiSDK.gasSponsorship.gasSponsorshipPrepare({
       owner: ownerAccount.address,
@@ -93,7 +99,9 @@ export async function POST(request: Request) {
     }
 
     console.log("Sponsored Transaction:", sponsoredTransaction);
+    // SNIPPET END 4
 
+    // SNIPPET START 5
     // Step 5: Sponsor signs and submits the transaction
     const depositTxHash = await sponsorWalletClient.sendTransaction({
       ...(sponsoredTransaction as any),
@@ -106,6 +114,7 @@ export async function POST(request: Request) {
     const tx = await publicClient.waitForTransactionReceipt({
       hash: depositTxHash,
     });
+    // SNIPPET END 5
 
     if (tx.status !== "success") {
       throw new Error("Deposit transaction reverted.");
