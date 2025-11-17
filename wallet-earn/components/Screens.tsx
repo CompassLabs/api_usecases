@@ -6,7 +6,8 @@ import TokenScreen from "./TokenScreen";
 import {
   TokenBalanceResponse,
   TokenPriceResponse,
-  VaultGetVaultResponse,
+  VaultsListResponse,
+  EarnPositionsResponse,
 } from "@compass-labs/api-sdk/models/components";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -23,31 +24,17 @@ export enum Token {
   wstETH = "wstETH",
 }
 
-export const vaultsByToken: { [key: string]: string[] } = {
-  ETH: [],
-  WETH: [
-    "0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1",
-    "0x27D8c7273fd3fcC6956a0B370cE5Fd4A7fc65c18",
-  ],
-  USDC: [
-    "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
-    "0x616a4E1db48e22028f6bbf20444Cd3b8e3273738",
-  ],
-  // cbBTC: ["0x543257eF2161176D7C8cD90BA65C2d4CaEF5a796"],
-  cbBTC: [],
-  // wstETH: ["0x3E3Cbfd1046C9D1863F83879cc5541B0B789Ec03"],
-  wstETH: [],
-};
-
 export type TokenData = TokenBalanceResponse & TokenPriceResponse;
 
-export type VaultData = VaultGetVaultResponse & { vaultAddress: string };
+// Dynamic vaults indexed by token denomination
+export let vaultsByToken: { [key: string]: string[] } = {};
 
 export default function Screens() {
   const [screen, setScreen] = React.useState<Screen>(Screen.Wallet);
   const [token, setToken] = React.useState<Token>(Token.ETH);
   const [tokenData, setTokenData] = React.useState<TokenData[]>();
-  const [vaultData, setVaultData] = React.useState<VaultData[]>();
+  const [vaultsListData, setVaultsListData] = React.useState<VaultsListResponse>();
+  const [positionsData, setPositionsData] = React.useState<EarnPositionsResponse>();
 
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
@@ -64,25 +51,38 @@ export default function Screens() {
     setTokenData(tokenData);
   };
 
-  const getVaultData = async () => {
-    setVaultData(undefined);
-    const vaultDataPromises = Object.keys(vaultsByToken).flatMap((tokenKey) =>
-      vaultsByToken[tokenKey].map((vaultAddress) =>
-        fetch(`/api/vault/${vaultAddress}`)
-          .then((res) => res.json())
-          .then((data) => ({ ...data, vaultAddress }))
-      )
-    );
-    const vaultData: VaultData[] = await Promise.all(vaultDataPromises);
-    setVaultData(vaultData);
+  const getVaultsListData = async () => {
+    setVaultsListData(undefined);
+    const response = await fetch(`/api/vaults`);
+    const vaultsData: VaultsListResponse = await response.json();
+
+    // Build vaultsByToken index from vault list
+    const vaultsByTokenMap: { [key: string]: string[] } = {};
+    vaultsData.vaults.forEach((vault) => {
+      const tokenSymbol = vault.denomination.toUpperCase();
+      if (!vaultsByTokenMap[tokenSymbol]) {
+        vaultsByTokenMap[tokenSymbol] = [];
+      }
+      vaultsByTokenMap[tokenSymbol].push(vault.address);
+    });
+
+    // Update the module-level variable
+    vaultsByToken = vaultsByTokenMap;
+
+    setVaultsListData(vaultsData);
+  };
+
+  const getPositionsData = async () => {
+    setPositionsData(undefined);
+    const response = await fetch(`/api/positions`);
+    const positions: EarnPositionsResponse = await response.json();
+    setPositionsData(positions);
   };
 
   React.useEffect(() => {
     getTokenData();
-  }, [refreshTrigger]);
-
-  React.useEffect(() => {
-    getVaultData();
+    getVaultsListData();
+    getPositionsData();
   }, [refreshTrigger]);
 
   const renderScreen = () => {
@@ -109,7 +109,7 @@ export default function Screens() {
               setScreen={setScreen}
               setToken={setToken}
               tokenData={tokenData}
-              vaultData={vaultData}
+              vaultsListData={vaultsListData}
             />
           </motion.div>
         );
@@ -137,9 +137,8 @@ export default function Screens() {
                     (tB) => tB.tokenSymbol === token
                   ))() as TokenData
               }
-              vaultData={vaultData?.filter(
-                (vD) => vD.underlyingToken.symbol === token
-              )}
+              vaultsListData={vaultsListData}
+              positionsData={positionsData}
               handleRefresh={handleRefresh}
             />
           </motion.div>

@@ -1,5 +1,6 @@
 import React from "react";
-import { TokenData, VaultData } from "./Screens";
+import { TokenData } from "./Screens";
+import { EnrichedVaultData } from "./TokenScreen";
 import { TrendingUp, User } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Slider } from "./primitives/Slider";
@@ -11,7 +12,7 @@ export default function EarnItem({
   setIsOpen,
   handleRefresh,
 }: {
-  vaultData: VaultData;
+  vaultData: EnrichedVaultData;
   token: TokenData;
   setIsOpen: (value: boolean) => void;
   handleRefresh: () => void;
@@ -37,7 +38,7 @@ export default function EarnItem({
           setOpen(true);
           setIsOpen(true);
         }}
-        key={vaultData.symbol}
+        key={vaultData.address}
       >
         <div className="flex justify-between w-full px-6">
           <div className="flex flex-col">
@@ -50,9 +51,9 @@ export default function EarnItem({
                   className="absolute -translate-x-full -left-1 text-green-600"
                   size={14}
                 />
-                {Number(vaultData.apy.apy7Day).toFixed(2)}%
+                {(Number(vaultData.cagr) * 100).toFixed(2)}%
               </div>
-              <div className="text-neutral-500 text-[13px] -mt-0.5">7 day</div>
+              <div className="text-neutral-500 text-[13px] -mt-0.5">annual</div>
             </div>
           </div>
           <div className="flex.">
@@ -63,15 +64,15 @@ export default function EarnItem({
               <div className="text-lg font-bold font-sans">
                 $
                 {(
-                  Number(vaultData.userPosition?.amountInUnderlyingToken) *
+                  Number(vaultData.userPosition?.amountInUnderlyingToken || 0) *
                   Number(token.price)
                 ).toFixed(2)}
               </div>
               <div className="text-[13px] text-neutral-500 -mt-0.5">
                 {Number(
-                  vaultData.userPosition?.amountInUnderlyingToken
+                  vaultData.userPosition?.amountInUnderlyingToken || 0
                 ).toFixed(3)}{" "}
-                {vaultData.underlyingToken.symbol}
+                {vaultData.denomination}
               </div>
             </div>
           </div>
@@ -144,7 +145,7 @@ function EarnForm({
         response = await fetch("/api/deposit", {
           method: "POST",
           body: JSON.stringify({
-            vaultAddress: vaultData.vaultAddress,
+            vaultAddress: vaultData.address,
             amount: depositAmount,
             token: token.tokenSymbol,
           }),
@@ -157,7 +158,7 @@ function EarnForm({
         response = await fetch("/api/withdraw", {
           method: "POST",
           body: JSON.stringify({
-            vaultAddress: vaultData.vaultAddress,
+            vaultAddress: vaultData.address,
             amount: withdrawAmount,
             isAll: amount === 0 ? true : false,
             token: token.tokenSymbol,
@@ -180,26 +181,33 @@ function EarnForm({
     <div className="flex flex-col justify-center items-center gap-12 h-full pt-12 pb-8">
       <div className="flex flex-col w-full">
         <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
-          Historical Earnings
+          Performance Metrics
         </h3>
         <ul className="flex justify-around w-full">
-          {Object.entries(vaultData.apy).map(
-            ([key, value]) =>
-              key !== "current" && (
-                <li className="flex flex-col items-center" key={key}>
-                  <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
-                    <TrendingUp
-                      className="absolute -translate-x-full -left-1 text-green-600"
-                      size={14}
-                    />
-                    {Number(value).toFixed(2)}%
-                  </div>
-                  <div className="text-neutral-500 text-[13px] -mt-0.5">
-                    {key.replace("apy", "").replace("Day", " day")}
-                  </div>
-                </li>
-              )
-          )}
+          <li className="flex flex-col items-center">
+            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+              <TrendingUp
+                className="absolute -translate-x-full -left-1 text-green-600"
+                size={14}
+              />
+              {(Number(vaultData.cagr) * 100).toFixed(2)}%
+            </div>
+            <div className="text-neutral-500 text-[13px] -mt-0.5">CAGR</div>
+          </li>
+          <li className="flex flex-col items-center">
+            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+              {(Number(vaultData.lifetimeReturn) * 100).toFixed(2)}%
+            </div>
+            <div className="text-neutral-500 text-[13px] -mt-0.5">
+              Lifetime
+            </div>
+          </li>
+          <li className="flex flex-col items-center">
+            <div className="relative font-bold text-lg flex items-center gap-1 font-sans">
+              {(Number(vaultData.fees) * 100).toFixed(2)}%
+            </div>
+            <div className="text-neutral-500 text-[13px] -mt-0.5">Fees</div>
+          </li>
         </ul>
       </div>
       <div className="flex flex-col w-full">
