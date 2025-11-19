@@ -3,7 +3,6 @@ import { TokenData } from "./Screens";
 import { EnrichedVaultData } from "./TokenScreen";
 import { TrendingUp, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
-import { Slider } from "./primitives/Slider";
 import { Spinner } from "@geist-ui/core";
 
 export default function EarnItem({
@@ -130,38 +129,46 @@ function EarnForm({
   isLoading: boolean;
   setIsClosing: (v: boolean) => void;
 }) {
-  const [amount, setAmount] = React.useState(
-    Number(vaultData.userPosition?.amountInUnderlyingToken || 0)
-  );
+  type TabType = 'deposit' | 'withdraw';
+  const [activeTab, setActiveTab] = React.useState<TabType>('deposit');
+  const [amount, setAmount] = React.useState('');
 
-  const submitEarnTransaction = async () => {
+  const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
+  const availableBalance = Number(token.amount);
+  const maxAmount = activeTab === 'deposit' ? availableBalance : currentPosition;
+
+  const numericAmount = Number(amount) || 0;
+  const isValidAmount = numericAmount > 0 && numericAmount <= maxAmount;
+
+  const submitTransaction = async () => {
+    if (!isValidAmount) return;
+
     setIsLoading(true);
     try {
+      const formattedAmount = numericAmount.toFixed(token.decimals);
       let response: Response;
-      const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
-      if (amount > currentPosition) {
-        const depositAmount = (amount - currentPosition).toFixed(token.decimals);
+
+      if (activeTab === 'deposit') {
         response = await fetch("/api/deposit", {
           method: "POST",
           body: JSON.stringify({
             vaultAddress: vaultData.address,
-            amount: depositAmount,
+            amount: formattedAmount,
             token: token.tokenSymbol,
           }),
         });
       } else {
-        const withdrawAmount = (currentPosition - amount).toFixed(token.decimals);
-        console.log("amount", amount);
         response = await fetch("/api/withdraw", {
           method: "POST",
           body: JSON.stringify({
             vaultAddress: vaultData.address,
-            amount: withdrawAmount,
-            isAll: amount === 0 ? true : false,
+            amount: formattedAmount,
+            isAll: numericAmount === currentPosition,
             token: token.tokenSymbol,
           }),
         });
       }
+
       if (response.status === 200) {
         setIsClosing(true);
         setIsLoading(false);
@@ -174,6 +181,11 @@ function EarnForm({
     }
   };
 
+  const setQuickAmount = (percentage: number) => {
+    const value = maxAmount * percentage;
+    setAmount(value.toFixed(token.decimals));
+  };
+
   const [copied, setCopied] = React.useState(false);
 
   const copyAddress = () => {
@@ -183,7 +195,7 @@ function EarnForm({
   };
 
   return (
-    <div className="flex flex-col justify-center items-center gap-12 h-full pt-12 pb-8">
+    <div className="flex flex-col justify-center items-center gap-8 h-full pt-12 pb-8">
       <div className="flex flex-col w-full items-center gap-2">
         <h3 className="text-base font-semibold text-zinc-800">
           {vaultData.name}
@@ -202,6 +214,7 @@ function EarnForm({
           )}
         </button>
       </div>
+
       <div className="flex flex-col w-full">
         <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
           Performance Metrics
@@ -227,71 +240,145 @@ function EarnForm({
           </li>
         </ul>
       </div>
+
       <div className="flex flex-col w-full">
         <h3 className="self-center mb-2 text-sm font-medium flex items-center gap-1.5 text-zinc-700">
-          Staked Position
+          Current Position
         </h3>
-        <div className="flex w-full justify-around items-center">
-          <button
-            className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-            onClick={() => setAmount(0)}
-            disabled={isLoading}
-          >
-            None
-          </button>
-          <div className="flex flex-col items-center">
-            <div className="text-5xl font-bold font-mono tracking-tighter">
-              ${(amount * Number(token.price)).toFixed(2)}
+        <div className="flex flex-col items-center">
+          <div className="text-3xl font-bold font-mono tracking-tighter">
+            ${(currentPosition * Number(token.price)).toFixed(2)}
+          </div>
+          <div className="flex items-center gap-1.5 mt-1">
+            <img
+              className="w-4 h-4"
+              src={`${token.tokenSymbol}.${
+                token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
+              }`}
+            />
+            <div className="text-neutral-500 text-sm">
+              {currentPosition.toFixed(4)} {token.tokenSymbol}
             </div>
-            <div className="flex items-center gap-1.5 mt-px">
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col w-full gap-4 px-2">
+        <div className="flex w-full border border-neutral-200 rounded-lg p-1 bg-neutral-50">
+          <button
+            onClick={() => {
+              setActiveTab('deposit');
+              setAmount('');
+            }}
+            disabled={isLoading}
+            className={cn(
+              "flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200",
+              activeTab === 'deposit'
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-700"
+            )}
+          >
+            Deposit
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('withdraw');
+              setAmount('');
+            }}
+            disabled={isLoading}
+            className={cn(
+              "flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200",
+              activeTab === 'withdraw'
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-700"
+            )}
+          >
+            Withdraw
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3 px-1">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-neutral-500">
+              {activeTab === 'deposit' ? 'Available' : 'Deposited'}
+            </span>
+            <span className="font-medium text-neutral-700">
+              {maxAmount.toFixed(4)} {token.tokenSymbol}
+            </span>
+          </div>
+
+          <div className="relative">
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              disabled={isLoading}
+              className="w-full px-4 py-3 text-2xl font-bold font-mono border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              step="any"
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <img
                 className="w-5 h-5"
                 src={`${token.tokenSymbol}.${
                   token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
                 }`}
               />
-              <div className="text-neutral-500 font-medium">
+              <span className="text-sm font-medium text-neutral-600">
                 {token.tokenSymbol}
-              </div>
+              </span>
             </div>
           </div>
-          <button
-            className="w-16 border border-neutral-300 text-neutral-600 text-[13px] font-medium h-fit rounded-full px-3 cursor-pointer"
-            onClick={() => setAmount(Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0))}
-            disabled={isLoading}
-          >
-            All
-          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setQuickAmount(0.25)}
+              disabled={isLoading || maxAmount === 0}
+              className="flex-1 py-2 px-3 text-xs font-medium border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              25%
+            </button>
+            <button
+              onClick={() => setQuickAmount(0.5)}
+              disabled={isLoading || maxAmount === 0}
+              className="flex-1 py-2 px-3 text-xs font-medium border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              50%
+            </button>
+            <button
+              onClick={() => setQuickAmount(1)}
+              disabled={isLoading || maxAmount === 0}
+              className="flex-1 py-2 px-3 text-xs font-medium border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Max
+            </button>
+          </div>
+
+          {numericAmount > maxAmount && (
+            <div className="text-xs text-red-600 px-1">
+              Insufficient {activeTab === 'deposit' ? 'balance' : 'deposited amount'}
+            </div>
+          )}
         </div>
       </div>
-      <div className="w-full px-8">
-        <Slider
-          value={[amount]}
-          max={Number(token.amount) + Number(vaultData.userPosition?.amountInUnderlyingToken || 0)}
-          step={Number(token.amount) / 400}
-          onValueChange={(v) => setAmount(v[0])}
-          disabled={isLoading}
-        />
-      </div>
-      <div className="w-full">
+
+      <div className="w-full px-2">
         <button
           className={cn(
-            "flex flex-row items-center justify-center bg-neutral-900/90 shadow-[0_0_0_1px_black,inset_0_0_1px_1px_hsla(0,0%,100%,0.14)] text-white font-semibold tracking-tighter. w-full rounded-xl py-1.5 cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed duration-200 bg-gradient-to-b from-neutral-700 via-neutral-900 to-neutral-800",
+            "flex flex-row items-center justify-center bg-neutral-900/90 shadow-[0_0_0_1px_black,inset_0_0_1px_1px_hsla(0,0%,100%,0.14)] text-white font-semibold w-full rounded-xl py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed duration-200 bg-gradient-to-b from-neutral-700 via-neutral-900 to-neutral-800",
             isLoading && "cursor-wait"
           )}
-          disabled={
-            amount === Number(vaultData.userPosition?.amountInUnderlyingToken)
-          }
-          onClick={() => !isLoading && submitEarnTransaction()}
+          disabled={!isValidAmount || isLoading}
+          onClick={() => !isLoading && submitTransaction()}
         >
           {!isLoading ? (
-            "Stake"
+            activeTab === 'deposit' ? 'Deposit' : 'Withdraw'
           ) : (
             <>
               <span className="mr-2.5">
                 <Spinner className="[&_*_span]:!bg-white" scale={0.8} />
               </span>
-              Staking...
+              {activeTab === 'deposit' ? 'Depositing...' : 'Withdrawing...'}
             </>
           )}
         </button>
