@@ -8,6 +8,7 @@ export async function GET() {
     });
 
     // Call the SDK method - it will validate the response
+    // SNIPPET START 1
     const vaultsResponse = await compassApiSDK.earn.earnVaults({
       chain: CHAIN,
       orderBy: "one_month_returns",
@@ -15,7 +16,19 @@ export async function GET() {
       offset: 0,
       limit: 50,
     });
-
+    // Log vault names and returns
+    vaultsResponse.vaults.forEach((vault) => {
+      const oneMonthAPY = vault.oneMonthReturns
+        ? (parseFloat(vault.oneMonthReturns) * 100).toFixed(2)
+        : "N/A";
+      const threeMonthsAPY = vault.threeMonthsReturns
+        ? (parseFloat(vault.threeMonthsReturns) * 100).toFixed(2)
+        : "N/A";
+      console.log(
+        `${vault.name}: 1M APY: ${oneMonthAPY}%, 3M APY: ${threeMonthsAPY}%`
+      );
+    });
+    // SNIPPET END 1
     return new Response(JSON.stringify(vaultsResponse), {
       status: 200,
       headers: {
