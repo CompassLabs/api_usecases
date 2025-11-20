@@ -1,4 +1,5 @@
 # SNIPPET START 1
+# IMPORT LIBRARIES & ENVIRONMENT VARIABLES
 from compass_api_sdk import CompassAPI, models
 from eth_account import Account
 import os
@@ -9,28 +10,43 @@ dotenv.load_dotenv()
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 ETHEREUM_RPC_URL = os.getenv("ETHEREUM_RPC_URL")
+# SNIPPET END 1
 
+# SNIPPET START 2
+# INITIALIZE SDK AND ACCOUNT
+# Initialize Web3 client
 w3 = Web3(Web3.HTTPProvider(ETHEREUM_RPC_URL))
 
+# Initialize Compass API SDK
 compass_api_sdk = CompassAPI(
     api_key_auth=os.getenv("COMPASS_API_KEY"),
     server_url=os.getenv("SERVER_URL")
     or None,  # For internal testing purposes. You do not need to set this.
 )
 
+# Initialize account
 account = Account.from_key(PRIVATE_KEY)
-# SNIPPET END 1
+# SNIPPET END 2 
 
-# SNIPPET START 2
+# SNIPPET START 3
+# GET AND SIGN AUTHORIZATION
+
+
+# Get unsigned authorization from Compass API
 auth = compass_api_sdk.transaction_bundler.transaction_bundler_authorization(
     chain="ethereum", sender=account.address
 )
 
+# Convert unsigned authorization to dictionary
 auth_dict = auth.model_dump(mode="json", by_alias=True)
 
+# Sign unsigned authorization using Compass API SDK
 signed_auth = Account.sign_authorization(auth_dict, PRIVATE_KEY)
+
+# Convert signed authorization to dictionary
 signed_authorization = signed_auth.model_dump(by_alias=True)
-# SNIPPET END 2
+# SNIPPET END 3 
+
 
 swap_tx = compass_api_sdk.swap.swap_odos(
     chain="ethereum",
@@ -46,7 +62,10 @@ signed_tx = w3.eth.account.sign_transaction(
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
-# SNIPPET START 3
+# SNIPPET START 4
+# CREATE BUNDLED TRANSACTIONS
+
+# Perform bundle execution using Compass API SDK
 bundler_tx = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
     chain="ethereum",
     sender=account.address,
@@ -72,15 +91,18 @@ bundler_tx = compass_api_sdk.transaction_bundler.transaction_bundler_execute(
         ),
     ],
 )
-# SNIPPET END 3
+# SNIPPET END 4
 
-# SNIPPET START 4
+# SNIPPET START 5
+# SIGN AND BROADCAST TRANSACTION
+
+# Sign bundle execution transaction using Web3
 signed_transaction = w3.eth.account.sign_transaction(
     bundler_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY
 )
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-# SNIPPET END 4
+# SNIPPET END 5
 
 if receipt.status != 1:
     raise Exception()
