@@ -1,4 +1,6 @@
 // SNIPPET START 1
+// IMPORT LIBRARIES & ENVIRONMENT VARIABLES
+
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { privateKeyToAccount } from "viem/accounts";
 import { mainnet } from "viem/chains";
@@ -11,14 +13,17 @@ dotenv.config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string;
+// SNIPPET END 1
 
+
+// SNIPPET START 2
+// INITIALIZE SDK AND ACCOUNT
 const compassApiSDK = new CompassApiSDK({
   apiKeyAuth: process.env.COMPASS_API_KEY,
   serverURL: process.env.SERVER_URL || undefined, // For internal testing purposes. You do not need to set this.
 });
-// SNIPPET END 1
 
-// SNIPPET START 2
+
 const account = privateKeyToAccount(PRIVATE_KEY);
 
 const walletClient = createWalletClient({
@@ -34,6 +39,8 @@ const publicClient = createPublicClient({
 // SNIPPET END 2
 
 // SNIPPET START 3
+// GET AND SIGN AUTHORIZATION
+
 const auth =
   await compassApiSDK.transactionBundler.transactionBundlerAuthorization({
     chain: "ethereum",
@@ -70,6 +77,8 @@ await publicClient.waitForTransactionReceipt({
 });
 
 // SNIPPET START 4
+// CREATE BUNDLED TRANSACTIONS
+
 const bundlerTx =
   await compassApiSDK.transactionBundler.transactionBundlerExecute({
     chain: "ethereum",
@@ -106,6 +115,8 @@ const bundlerTx =
 // SNIPPET END 4
 
 // SNIPPET START 5
+// SIGN AND BROADCAST TRANSACTION
+
 const bundlerTransaction = bundlerTx.transaction as any;
 const txHash = await walletClient.sendTransaction({
   ...bundlerTransaction,

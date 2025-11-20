@@ -1,4 +1,5 @@
 # SNIPPET START 1
+# IMPORT LIBRARIES & ENVIRONMENT VARIABLES
 from compass_api_sdk import CompassAPI
 import os
 import dotenv
@@ -10,6 +11,11 @@ dotenv.load_dotenv()
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 ETHEREUM_RPC_URL = os.getenv("ETHEREUM_RPC_URL")
 
+# SNIPPET END 1
+
+
+# SNIPPET START 2
+# INITIALIZE SDK AND ACCOUNT
 w3 = Web3(Web3.HTTPProvider(ETHEREUM_RPC_URL))
 
 compass_api_sdk = CompassAPI(
@@ -19,16 +25,17 @@ compass_api_sdk = CompassAPI(
 )
 
 account = Account.from_key(PRIVATE_KEY)
-# SNIPPET END 1
 
+# SNIPPET END 2
 
-# SNIPPET START 2
+# SNIPPET START 3
+# GET AND SIGN AUTHORIZATION
 auth = compass_api_sdk.transaction_bundler.transaction_bundler_authorization(
     chain="ethereum", sender=account.address
 )
 
 signed_auth = Account.sign_authorization(auth.model_dump(by_alias=True), PRIVATE_KEY)
-# SNIPPET END 2
+# SNIPPET END 3
 
 swap_tx = compass_api_sdk.swap.swap_odos(
     chain="ethereum",
@@ -44,7 +51,8 @@ signed_tx = w3.eth.account.sign_transaction(
 tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 w3.eth.wait_for_transaction_receipt(tx_hash)
 
-# SNIPPET START 3
+# SNIPPET START 4
+# CONFIGURE LEVERAGE PARAMETERS
 looping_tx = compass_api_sdk.transaction_bundler.transaction_bundler_aave_loop(
     chain="ethereum",
     sender=account.address,
@@ -56,15 +64,16 @@ looping_tx = compass_api_sdk.transaction_bundler.transaction_bundler_aave_loop(
     max_slippage_percent=2.5,
     loan_to_value=70,
 )
-# SNIPPET END 3
+# SNIPPET END 4
 
-# SNIPPET START 4
+# SNIPPET START 5
+# SIGN AND BROADCAST TRANSACTION
 signed_transaction = w3.eth.account.sign_transaction(
     looping_tx.transaction.model_dump(by_alias=True), PRIVATE_KEY
 )
 tx_hash = w3.eth.send_raw_transaction(signed_transaction.raw_transaction)
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-# SNIPPET END 4
+# SNIPPET END 5
 
 if receipt.status != 1:
     raise Exception()
