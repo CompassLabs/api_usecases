@@ -1,0 +1,9 @@
+[project]
+name = "create_earn_account_python_example"
+version = "1.0.0"
+description = "Example: Create an Earn Account using Compass API"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+]
+
