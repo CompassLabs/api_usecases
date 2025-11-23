@@ -9,7 +9,9 @@ dotenv.config();
 
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY as string;
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS as `0x${string}`;
-const PRIVATE_KEY = process.env.PRIVATE_KEY as `0x${string}`;
+const PRIVATE_KEY = (process.env.PRIVATE_KEY?.startsWith("0x")
+  ? process.env.PRIVATE_KEY
+  : `0x${process.env.PRIVATE_KEY}`) as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 // SNIPPET END 1
 
@@ -20,12 +22,14 @@ const compass = new CompassApiSDK({
 // SNIPPET END 2
 
 // SNIPPET START 3
-// Get unsigned transaction to create Earn Account
-const createAccountResponse = await compass.earn.earnCreateAccount({
-  chain: "base",
-  sender: WALLET_ADDRESS,
+// Get unsigned transaction to fund Earn Account with USDC
+const transferResponse = await compass.earn.earnTransfer({
   owner: WALLET_ADDRESS,
-  estimateGas: true,
+  chain: "base",
+  token: "USDC",
+  amount: "2",
+  action: "DEPOSIT",
+  gasSponsorship: false,
 });
 // SNIPPET END 3
 
@@ -42,7 +46,7 @@ const publicClient = createPublicClient({
   transport: http(BASE_RPC_URL),
 });
 
-const transaction = createAccountResponse.transaction as any;
+const transaction = transferResponse.transaction as any;
 const txHash = await walletClient.sendTransaction({
   ...transaction,
   value: BigInt(transaction.value || 0),
@@ -51,7 +55,11 @@ const txHash = await walletClient.sendTransaction({
   maxPriorityFeePerGas: BigInt(transaction.maxPriorityFeePerGas),
 });
 
-await publicClient.waitForTransactionReceipt({ hash: txHash });
-console.log("Earn Account Address:", createAccountResponse.earnAccountAddress);
+console.log(`Transaction hash: ${txHash}`);
+console.log(`View on BaseScan: https://basescan.org/tx/${txHash}`);
+
+const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+console.log(`Transaction confirmed in block: ${receipt.blockNumber}`);
+console.log("Earn Account funded successfully!");
 // SNIPPET END 4
 

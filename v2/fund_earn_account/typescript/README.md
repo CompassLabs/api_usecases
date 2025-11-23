@@ -1,11 +1,13 @@
-# Create Earn Account - TypeScript Example
+# Fund Earn Account - TypeScript Example
 
-This example demonstrates how to create an Earn Account using the Compass API TypeScript SDK.
+This example demonstrates how to fund an Earn Account by transferring USDC from your wallet to the Earn Account using the Compass API TypeScript SDK.
 
 ## Prerequisites
 
 - Node.js 18+ installed
 - A Compass API key ([Get one here](https://auth-compasslabs-ai.auth.eu-west-2.amazoncognito.com/login?client_id=2l366l2b3dok7k71nbnu8r1u36&redirect_uri=https://api.compasslabs.ai/auth/callback&response_type=code&scope=openid+email+profile))
+- An existing Earn Account
+- USDC balance in your wallet on Base
 
 ## Setup
 
@@ -21,7 +23,7 @@ cp .env.example .env
 
 3. Fill in your `.env` file with your actual values:
    - `COMPASS_API_KEY`: Your Compass API key
-   - `WALLET_ADDRESS`: Your wallet address (will own the Earn Account)
+   - `WALLET_ADDRESS`: Your wallet address (owner of the Earn Account)
    - `PRIVATE_KEY`: Your wallet's private key (to sign the transaction)
    - `BASE_RPC_URL`: Your Base mainnet RPC URL (to broadcast the transaction)
 
@@ -40,14 +42,16 @@ npm start
 ## What This Does
 
 This example:
-1. Gets an unsigned transaction to create an Earn Account on Base
+1. Gets an unsigned transaction to transfer 2 USDC from your wallet to your Earn Account
 2. Signs the transaction with your private key
 3. Broadcasts it to the Base network
 4. Waits for confirmation
 
 ## Notes
 
-- **No Gas Sponsorship**: The `owner` (who controls the account) is also the `sender` (who pays for gas). Note that Earn Account creation can also be done WITH gas sponsorship (using the `/gas_sponsorship/prepare` endpoint), but this example does not use gas sponsorship.
-- The Earn Account address is deterministic and returned before the transaction is confirmed.
-- Make sure your wallet has enough ETH on Base to cover gas fees.
+- This example transfers 2 USDC from your wallet to your Earn Account
+- The `owner` must be the address that owns the Earn Account
+- Make sure your wallet has sufficient USDC balance on Base
+- Make sure your wallet has enough ETH on Base to cover gas fees
+- Gas sponsorship is disabled (`gasSponsorship: false`)
 
