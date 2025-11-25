@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@compass-labs/api-sdk": "1.3.5",
+    "@compass-labs/api-sdk": "2.1.6",
     "@geist-ui/core": "^2.3.8",
+    "@privy-io/react-auth": "^3.8.0",
     "@radix-ui/react-slider": "^1.3.6",
+    "@solana-program/system": "^0.10.0",
+    "@solana/web3.js": "^1.98.4",
+    "@tanstack/react-query": "^5.90.10",
     "@vercel/analytics": "^1.5.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.540.0",

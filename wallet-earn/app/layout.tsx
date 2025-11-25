@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import { PrivyProvider } from "@/lib/providers/privy-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +35,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.className} antialiased text-neutral-900 tracking-tight`}
       >
-        {children}
+        <PrivyProvider>
+          {children}
+        </PrivyProvider>
         <Analytics />
       </body>
     </html>

@@ -1,9 +1,14 @@
+"use client";
+
 import React from "react";
 import { TokenData } from "./Screens";
 import { EnrichedVaultData } from "./TokenScreen";
 import { TrendingUp, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Spinner } from "@geist-ui/core";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useWallet } from "@/lib/hooks/use-wallet";
+import { base } from "viem/chains";
 
 export default function EarnItem({
   vaultData,
@@ -129,9 +134,17 @@ function EarnForm({
   isLoading: boolean;
   setIsClosing: (v: boolean) => void;
 }) {
+  const { signTypedData } = usePrivy();
+  const { wallets } = useWallets();
+  const { ownerAddress } = useWallet();
+
   type TabType = 'deposit' | 'withdraw';
   const [activeTab, setActiveTab] = React.useState<TabType>('deposit');
   const [amount, setAmount] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+
+  // Find the wallet matching the owner address to switch chains if needed
+  const activeWallet = wallets.find(w => w.address.toLowerCase() === ownerAddress?.toLowerCase());
 
   const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
   const availableBalance = Number(token.amount);
@@ -141,41 +154,98 @@ function EarnForm({
   const isValidAmount = numericAmount > 0 && numericAmount <= maxAmount;
 
   const submitTransaction = async () => {
-    if (!isValidAmount) return;
+    if (!isValidAmount || !ownerAddress) return;
 
     setIsLoading(true);
+    setError(null);
+
     try {
+      // Step 0: Ensure wallet is on Base network before signing
+      if (activeWallet) {
+        const currentChainId = activeWallet.chainId;
+        if (currentChainId !== `eip155:${base.id}`) {
+          try {
+            await activeWallet.switchChain(base.id);
+          } catch (switchError) {
+            throw new Error("Please switch to Base network to continue");
+          }
+        }
+      }
+
       const formattedAmount = numericAmount.toFixed(token.decimals);
-      let response: Response;
+      const isDeposit = activeTab === 'deposit';
+      const prepareEndpoint = isDeposit ? '/api/deposit/prepare' : '/api/withdraw/prepare';
+      const executeEndpoint = isDeposit ? '/api/deposit/execute' : '/api/withdraw/execute';
 
-      if (activeTab === 'deposit') {
-        response = await fetch("/api/deposit", {
-          method: "POST",
-          body: JSON.stringify({
-            vaultAddress: vaultData.address,
-            amount: formattedAmount,
-            token: token.tokenSymbol,
-          }),
-        });
-      } else {
-        response = await fetch("/api/withdraw", {
-          method: "POST",
-          body: JSON.stringify({
-            vaultAddress: vaultData.address,
-            amount: formattedAmount,
-            isAll: numericAmount === currentPosition,
-            token: token.tokenSymbol,
-          }),
-        });
+      // Step 1: Get EIP-712 typed data from backend
+      // owner is the wallet that owns the earn account (external wallet or embedded wallet)
+      const prepareResponse = await fetch(prepareEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vaultAddress: vaultData.address,
+          amount: formattedAmount,
+          token: token.tokenSymbol,
+          owner: ownerAddress,
+          ...(activeTab === 'withdraw' && { isAll: numericAmount === currentPosition }),
+        }),
+      });
+
+      if (!prepareResponse.ok) {
+        const errorData = await prepareResponse.json();
+        throw new Error(errorData.error || "Failed to prepare transaction");
       }
 
-      if (response.status === 200) {
-        setIsClosing(true);
-        setIsLoading(false);
-        handleRefresh();
+      const { eip712, normalizedTypes, domain, message } = await prepareResponse.json();
+
+      // Step 2: Sign with the owner wallet
+      // If user connected with external wallet, sign with that wallet
+      // Otherwise, sign with embedded wallet (for social login users)
+      const signatureResult = await signTypedData(
+        {
+          domain,
+          types: normalizedTypes,
+          primaryType: "SafeTx",
+          message,
+        },
+        {
+          // Specify which wallet address to use for signing
+          // This ensures external wallets (MetaMask, etc.) are used when connected
+          address: ownerAddress as `0x${string}`,
+          uiOptions: {
+            title: isDeposit ? "Sign Deposit" : "Sign Withdrawal",
+            description: `${isDeposit ? "Deposit" : "Withdraw"} ${formattedAmount} ${token.tokenSymbol}`,
+            buttonText: "Sign",
+          },
+        }
+      );
+
+      const signature = typeof signatureResult === "string"
+        ? signatureResult
+        : signatureResult.signature;
+
+      // Step 3: Execute with sponsor
+      const executeResponse = await fetch(executeEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          owner: ownerAddress,
+          eip712,
+          signature,
+        }),
+      });
+
+      if (!executeResponse.ok) {
+        const errorData = await executeResponse.json();
+        throw new Error(errorData.error || "Failed to execute transaction");
       }
-    } catch (error) {
-      console.log("error", error);
+
+      // Success!
+      setIsClosing(true);
+      handleRefresh();
+    } catch (err) {
+      console.error("Transaction error:", err);
+      setError(err instanceof Error ? err.message : "Transaction failed");
     } finally {
       setIsLoading(false);
     }
@@ -357,6 +427,11 @@ function EarnForm({
           {numericAmount > maxAmount && (
             <div className="text-xs text-red-600 px-1">
               Insufficient {activeTab === 'deposit' ? 'balance' : 'deposited amount'}
+            </div>
+          )}
+          {error && (
+            <div className="text-xs text-red-600 px-1">
+              {error}
             </div>
           )}
         </div>
