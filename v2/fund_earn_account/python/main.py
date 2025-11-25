@@ -17,22 +17,29 @@ with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
 # SNIPPET END 2
 
 # SNIPPET START 3
-    # Get unsigned transaction to create Earn Account
-    create_account_response = compass_api.earn.earn_create_account(
-        chain=models.CreateAccountRequestChain.BASE,
-        sender=WALLET_ADDRESS,
+    # Get unsigned transaction to fund Earn Account with USDC
+    transfer_response = compass_api.earn.earn_transfer(
         owner=WALLET_ADDRESS,
-        estimate_gas=True,
+        chain=models.Chain.BASE,
+        token="USDC",
+        amount="2",
+        action=models.EarnTransferRequestAction.DEPOSIT,
+        gas_sponsorship=False,
     )
 # SNIPPET END 3
 
 # SNIPPET START 4
     # Sign and broadcast transaction
     w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
-    tx_dict = create_account_response.model_dump(by_alias=True)
+    tx_dict = transfer_response.model_dump(by_alias=True)
     signed_tx = w3.eth.account.sign_transaction(tx_dict["transaction"], PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-    w3.eth.wait_for_transaction_receipt(tx_hash)
-    print("Earn Account Address:", create_account_response.earn_account_address)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+    print(f"Transaction hash: {tx_hash.hex()}")
+    print(f"View on BaseScan: https://basescan.org/tx/{tx_hash.hex()}")
+
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    print(f"Transaction confirmed in block: {receipt.blockNumber}")
+    print("Earn Account funded successfully!")
 # SNIPPET END 4
 

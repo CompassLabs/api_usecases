@@ -1,0 +1,11 @@
+[project]
+name = "manage_earn_position_python_example"
+version = "1.0.0"
+description = "Example: Manage Earn Position (Deposit into Morpho Vault) using Compass API"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+    "web3",
+    "eth-account",
+]
+
