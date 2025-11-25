@@ -5,6 +5,8 @@ import { Screen, Token, TokenData, vaultsByToken } from "./Screens";
 import { VaultsListResponse } from "@compass-labs/api-sdk/models/components";
 import Skeleton from "./primitives/Skeleton";
 import { useWallet } from "@/lib/hooks/use-wallet";
+import { useFundWallet } from "@privy-io/react-auth";
+import { base } from "viem/chains";
 import { LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/utils/utils";
 
@@ -27,7 +29,23 @@ export default function WalletScreen({
     hasEarnAccount,
     isCreatingEarnAccount,
     createEarnAccount,
+    earnAccountAddress,
   } = useWallet();
+
+  const { fundWallet } = useFundWallet();
+
+  const handleFundAccount = async () => {
+    if (!earnAccountAddress) return;
+
+    await fundWallet({
+      address: earnAccountAddress,
+      options: {
+        chain: base,
+        asset: "USDC",
+        amount: "10",
+      },
+    });
+  };
 
   // Calculate total from wallet balances only
   const totalBalance =
@@ -109,8 +127,14 @@ export default function WalletScreen({
   // Connected with earn account - show main wallet view
   return (
     <div className="flex flex-col h-full">
-      {/* Header with logout only */}
-      <div className="flex items-center justify-end px-2 py-2">
+      {/* Header with fund and logout */}
+      <div className="flex items-center justify-end px-2 py-2 gap-2">
+        <button
+          onClick={handleFundAccount}
+          className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors"
+        >
+          Deposit
+        </button>
         <button
           onClick={logout}
           className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
