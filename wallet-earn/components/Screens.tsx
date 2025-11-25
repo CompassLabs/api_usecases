@@ -10,6 +10,7 @@ import {
   EarnPositionsResponse,
 } from "@compass-labs/api-sdk/models/components";
 import { AnimatePresence, motion } from "motion/react";
+import { useWallet } from "@/lib/hooks/use-wallet";
 
 export enum Screen {
   Wallet,
@@ -30,6 +31,8 @@ export type TokenData = TokenBalanceResponse & TokenPriceResponse;
 export let vaultsByToken: { [key: string]: string[] } = {};
 
 export default function Screens() {
+  const { earnAccountAddress, hasEarnAccount } = useWallet();
+
   const [screen, setScreen] = React.useState<Screen>(Screen.Wallet);
   const [token, setToken] = React.useState<Token>(Token.ETH);
   const [tokenData, setTokenData] = React.useState<TokenData[]>();
@@ -42,10 +45,10 @@ export default function Screens() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const getTokenData = async () => {
+  const getTokenData = async (walletAddress: string) => {
     setTokenData(undefined);
     const tokenDataPromises = Object.keys(Token).map((token) =>
-      fetch(`/api/token/${token}`).then((res) => res.json())
+      fetch(`/api/token/${token}?wallet=${walletAddress}`).then((res) => res.json())
     );
     const tokenData: TokenData[] = await Promise.all(tokenDataPromises);
     setTokenData(tokenData);
@@ -81,18 +84,25 @@ export default function Screens() {
     });
   };
 
-  const getPositionsData = async () => {
+  const getPositionsData = async (walletAddress: string) => {
     setPositionsData(undefined);
-    const response = await fetch(`/api/positions`);
+    const response = await fetch(`/api/positions?wallet=${walletAddress}`);
     const positions: EarnPositionsResponse = await response.json();
     setPositionsData(positions);
   };
 
+  // Fetch data when earn account is available
   React.useEffect(() => {
-    getTokenData();
-    getVaultsListData();
-    getPositionsData();
-  }, [refreshTrigger]);
+    if (hasEarnAccount && earnAccountAddress) {
+      getTokenData(earnAccountAddress);
+      getVaultsListData();
+      getPositionsData(earnAccountAddress);
+    } else {
+      // Clear data when not connected
+      setTokenData(undefined);
+      setPositionsData(undefined);
+    }
+  }, [hasEarnAccount, earnAccountAddress, refreshTrigger]);
 
   const renderScreen = () => {
     switch (screen) {

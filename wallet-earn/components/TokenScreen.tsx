@@ -8,7 +8,7 @@ import {
 } from "@compass-labs/api-sdk/models/components";
 import { Loading } from "@geist-ui/core";
 import React from "react";
-import { cn } from "@/utils/utils";
+import { cn, calculateTokenAmount } from "@/utils/utils";
 import { motion } from "motion/react";
 import EarnItem from "./EarnItem";
 import Skeleton from "./primitives/Skeleton";
@@ -56,17 +56,10 @@ export default function TokenScreen({
     });
   }, [vaultsListData, positionsData, tokenSymbol]);
 
-  // Calculate total including positions
-  const totalAmount = React.useMemo(() => {
-    if (!tokenData) return 0;
-
-    const walletAmount = Number(tokenData.amount);
-    const positionsAmount = enrichedVaults.reduce((sum, vault) => {
-      return sum + (Number(vault.userPosition?.amountInUnderlyingToken) || 0);
-    }, 0);
-
-    return walletAmount + positionsAmount;
-  }, [tokenData, enrichedVaults]);
+  const totalAmount = React.useMemo(
+    () => calculateTokenAmount(tokenData, enrichedVaults),
+    [tokenData, enrichedVaults]
+  );
 
   return (
     <div
@@ -89,32 +82,21 @@ export default function TokenScreen({
         <ChevronLeft size={28} />
       </motion.button>
       <div className="flex-[0.9] flex flex-col items-center justify-center mt-4 relative">
-        <h1 className="relative text-5xl font-bold mb-2 font-sans tracking-tighter">
-          {tokenData ? (
-            <>
-              <span className="absolute top-1/2 -translate-y-1/2 -translate-x-full -left-0.5 text-3xl">
-                $
-              </span>
-              {(totalAmount * Number(tokenData.price)).toFixed(2)}
-            </>
-          ) : (
-            <Skeleton className="w-32 h-10 rounded-xl" />
-          )}
-        </h1>
         <div className="p-px shadow-inner shadow-neutral-300 rounded-full mb-2">
           <img
             src={`/${tokenSymbol}.${tokenSymbol !== "cbBTC" ? "svg" : "webp"}`}
             className="w-14 h-14 rounded-full outline outline-offset-[-1px] outline-neutral-900/20"
           />
         </div>
-        <div className="font-medium text-neutral-500 flex">
+        <div className="text-3xl font-bold font-sans tracking-tighter">
           {tokenData ? (
             totalAmount.toFixed(3)
           ) : (
-            <Skeleton className="w-10 mr-1 h-3" />
+            <Skeleton className="w-20 h-8 rounded-xl" />
           )}{" "}
           {tokenSymbol}
         </div>
+        <div className="text-sm text-neutral-400">Available balance</div>
       </div>
       <div className="flex-1 flex flex-col">
         <div className="px-1">

@@ -67,3 +67,17 @@ export const addTotalBalance = (
     const tokenTotal = addTokenTotal(tokenSingle, vaultData);
     return sum + tokenTotal * Number(token.price);
   }, 0);
+
+/**
+ * Calculate total token amount (wallet + positions) for a specific token
+ */
+export function calculateTokenAmount(
+  tokenData: TokenData | undefined,
+  enrichedVaults: EnrichedVaultData[]
+): number {
+  if (!tokenData) return 0;
+
+  const walletAmount = Number(tokenData.amount);
+
+  return walletAmount;
+}

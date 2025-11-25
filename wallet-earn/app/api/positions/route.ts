@@ -1,10 +1,17 @@
 import { CHAIN } from "@/utils/constants";
-import { getWalletAddress } from "@/utils/utils";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const walletAddress = getWalletAddress();
+    const { searchParams } = new URL(request.url);
+    const walletAddress = searchParams.get("wallet");
+
+    if (!walletAddress) {
+      return new Response(
+        JSON.stringify({ error: "Missing wallet address" }),
+        { status: 400 }
+      );
+    }
 
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,

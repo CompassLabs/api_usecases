@@ -1,23 +1,9 @@
 import Screens from "@/components/Screens";
-import { cn, generateWalletGradient, getWalletAddress } from "@/utils/utils";
 
 export default async function Home() {
-  const walletAddress = getWalletAddress();
-
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
       <div className="relative max-w-[400px] w-full border-[10px] border-neutral-800 bg-neutral-50 h-full max-h-[800px] shadow-xl rounded-[42px] outline-3 outline-neutral-300 overflow-hidden px-2.5">
-        <div className="absolute z-10 top-5 left-1/2 -translate-x-1/2 flex items-center text-neutral-600 border border-neutral-200 px-4 py-1 rounded-xl bg-white">
-          <div
-            className={cn(
-              "w-6 h-6 border border-neutral-200 rounded-full mr-2 outline -outline-offset-2 outline-neutral-900/15"
-            )}
-            style={{ background: generateWalletGradient(walletAddress) }}
-          />
-          {walletAddress.slice(0, 6)}
-          <span className="text-xs">●●●●</span>
-          {walletAddress.slice(-4)}
-        </div>
         <Screens />
       </div>
       <div className="flex justify-center mt-4">
