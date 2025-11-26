@@ -100,7 +100,9 @@ export default function SwapModal({
 
         if (response.ok) {
           const data = await response.json();
+          console.log(data)
           if (data.estimatedAmountOut) {
+            console.log(data.estimatedAmountOut)
             setEstimatedAmountOut(data.estimatedAmountOut);
           }
         }
@@ -312,13 +314,17 @@ export default function SwapModal({
                 </span>
               </div>
               <div className="relative flex items-center border border-neutral-200 rounded-xl p-3 bg-neutral-50">
-                <input
-                  type="text"
-                  value="~"
-                  disabled
-                  placeholder="~"
-                  className="flex-1 min-w-0 text-2xl font-bold font-mono bg-transparent text-neutral-400 focus:outline-none"
-                />
+                <div className="flex-1 min-w-0 text-2xl font-bold font-mono text-neutral-400">
+                  {isQuoteLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner scale={0.6} />
+                    </span>
+                  ) : estimatedAmountOut ? (
+                    <span className="text-neutral-900">~{estimatedAmountOut}</span>
+                  ) : (
+                    "~"
+                  )}
+                </div>
                 <div className="relative flex-shrink-0 ml-2" data-token-select>
                   <button
                     onClick={() => setShowTokenOutSelect(!showTokenOutSelect)}
