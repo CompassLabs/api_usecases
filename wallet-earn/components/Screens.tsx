@@ -129,6 +129,7 @@ export default function Screens() {
               setToken={setToken}
               tokenData={tokenData}
               vaultsListData={vaultsListData}
+              handleRefresh={handleRefresh}
             />
           </motion.div>
         );

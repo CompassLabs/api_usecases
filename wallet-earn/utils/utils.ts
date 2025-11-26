@@ -69,7 +69,7 @@ export const addTotalBalance = (
   }, 0);
 
 /**
- * Calculate total token amount (wallet + positions) for a specific token
+ * Calculate total token amount (wallet only) for a specific token
  */
 export function calculateTokenAmount(
   tokenData: TokenData | undefined,
