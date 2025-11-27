@@ -1,0 +1,8 @@
+[project]
+name = "vault_data_python_example"
+version = "1.0.0"
+description = "Example: List vaults and display one-month CAGR net"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+]

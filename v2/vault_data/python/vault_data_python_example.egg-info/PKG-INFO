@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: vault_data_python_example
+Version: 1.0.0
+Summary: Example: List vaults and display one-month CAGR net
+Requires-Dist: compass-api-sdk
+Requires-Dist: python-dotenv

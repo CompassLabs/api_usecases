@@ -1,0 +1,8 @@
+README.md
+main.py
+pyproject.toml
+vault_data_python_example.egg-info/PKG-INFO
+vault_data_python_example.egg-info/SOURCES.txt
+vault_data_python_example.egg-info/dependency_links.txt
+vault_data_python_example.egg-info/requires.txt
+vault_data_python_example.egg-info/top_level.txt
