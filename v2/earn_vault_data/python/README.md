@@ -29,12 +29,12 @@ python main.py
 
 This example fetches the top vault sorted by 30-day net annualized APY (after fees) from the `/v2/earn/vaults` endpoint. It displays the vault name and its 30-day annualized return percentage.
 
-The example uses `order_by="one_month_cagr_net"` and `direction="desc"` to get the highest performing vault by 30-day net annualized return.
+The example uses `order_by="one_month_cagr_net"` and `direction="desc"` to get vault with the highest 30-day net annualized return.
 
 ## Endpoint Overview
 
 The `/v2/earn/vaults` endpoint provides access to all available Earn vaults with comprehensive metrics. You can:
 
-- **Sort by different metrics**: `lifetime_return`, `one_month_cagr_net`, `three_months_cagr_net`, `three_months_sharpe_net`, `current_nav` (TVL)
+- **Sort by different metrics**: `lifetime_return`, `one_month_cagr_net`, `three_months_cagr_net`, `three_months_sharpe_net`, `current_nav` 
 - **Filter by chain**: `ETHEREUM`, `BASE`, `ARBITRUM`
 - **Paginate results**: Use `offset` and `limit` to fetch multiple vaults
