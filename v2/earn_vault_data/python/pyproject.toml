@@ -1,0 +1,9 @@
+[project]
+name = "earn_vault_ranker_python_example"
+version = "1.0.0"
+description = "Example: Earn Vault Ranker using Compass API"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+]
+
