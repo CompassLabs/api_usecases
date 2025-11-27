@@ -1,6 +1,6 @@
-# Earn Vault Ranker - Python Example
+# Earn Vault Data - Python Example
 
-This example demonstrates how to get the top 3 vaults sorted by 30d Net APY (after fees) using the Compass API Python SDK.
+This example demonstrates how to get the top vault sorted by 30-day net annualized APY (after fees) using the Compass API Python SDK.
 
 ## Prerequisites
 
@@ -9,23 +9,15 @@ This example demonstrates how to get the top 3 vaults sorted by 30d Net APY (aft
 
 ## Setup
 
-1. Install dependencies (make sure you have the latest version):
+1. Install dependencies:
 ```bash
-pip install --upgrade compass-api-sdk python-dotenv
+pip install compass-api-sdk python-dotenv
 ```
 
-Or if using `uv`:
-```bash
-uv pip install compass-api-sdk python-dotenv
+2. Create a `.env` file with your API key:
 ```
-
-2. Copy the example environment file:
-```bash
-cp .env.example .env
+COMPASS_API_KEY=your_api_key_here
 ```
-
-3. Fill in your `.env` file with your actual values:
-   - `COMPASS_API_KEY`: Your Compass API key
 
 ## Run
 
@@ -35,13 +27,14 @@ python main.py
 
 ## What This Does
 
-This example fetches the top 3 vaults sorted by 30d Net APY (after fees) from highest to lowest. For each vault, it displays:
+This example fetches the top vault sorted by 30-day net annualized APY (after fees) from the `/v2/earn/vaults` endpoint. It displays the vault name and its 30-day annualized return percentage.
 
-- **Protocol name** & **Vault address**
-- **30d Net APY (after fees)** - `one_month_cagr_net`
-- **3m Net APY (after fees)** - `three_months_cagr_net`
-- **3m Sharpe Ratio** - `three_months_sharpe_net`
-- **Denomination** - The underlying token (e.g., USDC, ETH)
-- **TVL** - Total Value Locked (if available) - `current_nav`
+The example uses `order_by="one_month_cagr_net"` and `direction="desc"` to get the highest performing vault by 30-day net annualized return.
 
-The example uses the `/v2/earn/vaults` endpoint with `order_by="one_month_cagr_net"` and `direction="desc"` to get the highest performing vaults by 30-day net APY.
+## Endpoint Overview
+
+The `/v2/earn/vaults` endpoint provides access to all available Earn vaults with comprehensive metrics. You can:
+
+- **Sort by different metrics**: `lifetime_return`, `one_month_cagr_net`, `three_months_cagr_net`, `three_months_sharpe_net`, `current_nav` (TVL)
+- **Filter by chain**: `ETHEREUM`, `BASE`, `ARBITRUM`
+- **Paginate results**: Use `offset` and `limit` to fetch multiple vaults
