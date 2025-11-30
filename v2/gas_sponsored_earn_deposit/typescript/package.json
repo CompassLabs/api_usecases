@@ -1,0 +1,26 @@
+{
+  "name": "gas_sponsored_earn_deposit_typescript_example",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/index.js",
+    "dev": "ts-node --esm src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "Example: Gas-Sponsored Earn Deposit using Compass API",
+  "dependencies": {
+    "@compass-labs/api-sdk": "^1.3.5",
+    "dotenv": "^16.5.0",
+    "viem": "^2.31.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
+

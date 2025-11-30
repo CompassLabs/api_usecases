@@ -1,0 +1,11 @@
+[project]
+name = "gas_sponsored_earn_deposit_python_example"
+version = "1.0.0"
+description = "Example: Gas-Sponsored Earn Deposit using Compass API"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+    "web3",
+    "eth-account",
+]
+

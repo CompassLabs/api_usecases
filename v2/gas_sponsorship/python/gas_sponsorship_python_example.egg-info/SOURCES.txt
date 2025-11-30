@@ -1,0 +1,8 @@
+README.md
+main.py
+pyproject.toml
+gas_sponsorship_python_example.egg-info/PKG-INFO
+gas_sponsorship_python_example.egg-info/SOURCES.txt
+gas_sponsorship_python_example.egg-info/dependency_links.txt
+gas_sponsorship_python_example.egg-info/requires.txt
+gas_sponsorship_python_example.egg-info/top_level.txt
