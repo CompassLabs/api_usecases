@@ -1,15 +1,17 @@
 /**
  * CCTP Bridge Example: Base -> Arbitrum using Compass API Earn Accounts
+ * WITH GAS SPONSORSHIP
  *
  * This example demonstrates how to bridge USDC from Base to Arbitrum using
  * Circle's Cross-Chain Transfer Protocol (CCTP) via Compass API's Earn Accounts.
+ * Gas fees are paid by a sponsor wallet using EIP-712 signed messages.
  *
  * Flow:
  * 1. Create Earn Accounts on both source (Base) and destination (Arbitrum) chains
- * 2. Call /v2/cctp/burn to create a burn transaction on Base (source chain)
- * 3. Sign and submit the burn transaction
+ * 2. Call /v2/cctp/burn with gasSponsorship=true to get EIP-712 typed data
+ * 3. User signs the EIP-712 message, sponsor submits the burn transaction
  * 4. Poll /v2/cctp/mint until attestation is ready
- * 5. Sign and submit the mint transaction on Arbitrum (destination chain)
+ * 5. User signs EIP-712 for mint, sponsor submits on Arbitrum (destination chain)
  */
 
 import { CompassApiSDK } from "@compass-labs/api-sdk";
@@ -28,41 +30,60 @@ const PRIVATE_KEY = (
     ? process.env.PRIVATE_KEY
     : `0x${process.env.PRIVATE_KEY}`
 ) as `0x${string}`;
+// Sponsor wallet - pays gas fees on behalf of the user
+const GAS_SPONSOR_PK = (
+  process.env.GAS_SPONSOR_PK?.startsWith("0x")
+    ? process.env.GAS_SPONSOR_PK
+    : `0x${process.env.GAS_SPONSOR_PK}`
+) as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 const ARBITRUM_RPC_URL = process.env.ARBITRUM_RPC_URL as string;
 const SERVER_URL = process.env.SERVER_URL as string | undefined;
 
 // Bridge configuration
-const AMOUNT_TO_BRIDGE = "5"; // 5 USDC
+const AMOUNT_TO_BRIDGE = "1"; // 1 USDC
 const SOURCE_CHAIN = "base";
 const DESTINATION_CHAIN = "arbitrum";
 
 // Polling configuration for attestation
 const ATTESTATION_POLL_INTERVAL_MS = 10000; // 10 seconds
-const ATTESTATION_MAX_ATTEMPTS = 600; // 10 minutes max wait time
+const ATTESTATION_MAX_ATTEMPTS = 60; // 10 minutes max wait time
+
+// Helper function to sleep
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function main() {
   console.log("=== CCTP Bridge: Base -> Arbitrum via Compass Earn Accounts ===\n");
 
   // Validate environment variables
-  if (!COMPASS_API_KEY || !WALLET_ADDRESS || !PRIVATE_KEY || !BASE_RPC_URL || !ARBITRUM_RPC_URL) {
+  if (!COMPASS_API_KEY || !WALLET_ADDRESS || !PRIVATE_KEY || !GAS_SPONSOR_PK || !BASE_RPC_URL || !ARBITRUM_RPC_URL) {
     throw new Error(
-      "Missing required environment variables. Please check your .env file."
+      "Missing required environment variables. Please check your .env file. " +
+      "Required: COMPASS_API_KEY, WALLET_ADDRESS, PRIVATE_KEY, GAS_SPONSOR_PK, BASE_RPC_URL, ARBITRUM_RPC_URL"
     );
   }
 
-  // Initialize SDK
+  // Initialize SDK with debug logging
   const compass = new CompassApiSDK({
     apiKeyAuth: COMPASS_API_KEY,
     serverURL: SERVER_URL,
+    debugLogger: console,
   });
 
-  // Create account from private key
+  console.log(`Using SERVER_URL: ${SERVER_URL}`);
+
+  // Create account from private key (user who owns the Earn Account)
   const account = privateKeyToAccount(PRIVATE_KEY);
   console.log(`Owner wallet: ${account.address}`);
+
+  // Create sponsor account (pays gas fees)
+  const sponsorAccount = privateKeyToAccount(GAS_SPONSOR_PK);
+  console.log(`Sponsor wallet: ${sponsorAccount.address}`);
   console.log(`Bridging ${AMOUNT_TO_BRIDGE} USDC from ${SOURCE_CHAIN} to ${DESTINATION_CHAIN}\n`);
 
-  // Create wallet clients for both chains
+  // Create wallet clients for user (for signing EIP-712 messages)
   const baseWalletClient = createWalletClient({
     account,
     chain: base,
@@ -81,6 +102,19 @@ async function main() {
   });
 
   const arbitrumPublicClient = createPublicClient({
+    chain: arbitrum,
+    transport: http(ARBITRUM_RPC_URL),
+  });
+
+  // Create sponsor wallet clients (for submitting transactions and paying gas)
+  const baseSponsorWalletClient = createWalletClient({
+    account: sponsorAccount,
+    chain: base,
+    transport: http(BASE_RPC_URL),
+  });
+
+  const arbitrumSponsorWalletClient = createWalletClient({
+    account: sponsorAccount,
     chain: arbitrum,
     transport: http(ARBITRUM_RPC_URL),
   });
@@ -151,50 +185,84 @@ async function main() {
   console.log("\nEarn Accounts ready on both chains.\n");
 
   // ============================================
-  // STEP 2: Build and execute burn transaction
+  // STEP 2: Build and execute burn transaction (gas sponsored)
   // ============================================
-  console.log("Step 2: Building burn transaction on Base...");
+//   console.log("Step 2: Building gas-sponsored burn transaction on Base...");
 
-  const burnResponse = await compass.cctp.cctpBurn({
-    owner: WALLET_ADDRESS,
-    chain: SOURCE_CHAIN,
-    amount: AMOUNT_TO_BRIDGE,
-    destinationChain: DESTINATION_CHAIN,
-    destinationAddress: WALLET_ADDRESS, // Bridging to the same owner's earn account on destination
-    gasSponsorship: false,
-  });
+//   const burnResponse = await compass.bridge.cctpBurn({
+//     owner: WALLET_ADDRESS,
+//     chain: SOURCE_CHAIN,
+//     amount: AMOUNT_TO_BRIDGE,
+//     destinationChain: DESTINATION_CHAIN,
+//     gasSponsorship: true,
+//     transferMode: "fast"
+//   });
 
-  const bridgeId = burnResponse.bridgeId;
-  if (!bridgeId) {
-    throw new Error("No bridge ID returned from burn transaction");
-  }
-  console.log(`Bridge ID: ${bridgeId}`);
-  console.log(`Burn transaction built successfully\n`);
+//   const bridgeId = burnResponse.bridgeId;
+//   if (!bridgeId) {
+//     throw new Error("No bridge ID returned from burn transaction");
+//   }
+//   console.log(`Bridge ID: ${bridgeId}`);
 
-  // Sign and submit burn transaction
-  console.log("Signing and submitting burn transaction...");
-  const burnTransaction = burnResponse.transaction as any;
+//   // With gas sponsorship, we receive EIP-712 typed data to sign
+//   const burnEip712 = burnResponse.eip712;
+//   if (!burnEip712) {
+//     throw new Error("No EIP-712 data returned for gas-sponsored burn");
+//   }
+//   console.log("Received EIP-712 typed data for burn transaction\n");
 
-  const burnTxHash = await baseWalletClient.sendTransaction({
-    ...burnTransaction,
-    value: BigInt(burnTransaction.value || 0),
-    gas: BigInt(burnTransaction.gas),
-    maxFeePerGas: BigInt(burnTransaction.maxFeePerGas),
-    maxPriorityFeePerGas: BigInt(burnTransaction.maxPriorityFeePerGas),
-  });
+//   // Normalize types for viem compatibility (SDK returns camelCase keys)
+//   const burnNormalizedTypes = {
+//     SafeTx: (burnEip712.types as any).safeTx,
+//   };
 
-  console.log(`Burn transaction hash: ${burnTxHash}`);
-  console.log(`View on BaseScan: https://basescan.org/tx/${burnTxHash}`);
+//   // User signs the EIP-712 message
+//   console.log("User signing EIP-712 message for burn...");
+//   const burnSignature = await baseWalletClient.signTypedData({
+//     domain: burnEip712.domain as any,
+//     types: burnNormalizedTypes,
+//     primaryType: "SafeTx",
+//     message: burnEip712.message as any,
+//   });
+//   console.log("Burn EIP-712 signature obtained\n");
 
-  // Wait for burn transaction confirmation
-  console.log("Waiting for burn transaction confirmation...");
-  const burnReceipt = await basePublicClient.waitForTransactionReceipt({
-    hash: burnTxHash,
-  });
-  console.log(`Burn transaction confirmed in block: ${burnReceipt.blockNumber}\n`);
+//   // Prepare gas-sponsored transaction with user's signature
+//   console.log("Preparing gas-sponsored burn transaction...");
+//   const burnSponsorResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
+//     owner: WALLET_ADDRESS,
+//     chain: SOURCE_CHAIN,
+//     eip712: burnEip712 as any,
+//     signature: burnSignature,
+//     sender: sponsorAccount.address,
+//   });
+
+//   const burnSponsoredTx = burnSponsorResponse.transaction as any;
+//   if (!burnSponsoredTx) {
+//     throw new Error("No transaction returned from gasSponsorshipPrepare for burn");
+//   }
+
+//   // Sponsor signs and submits the burn transaction
+//   console.log("Sponsor submitting burn transaction...");
+//   const burnTxHash = await baseSponsorWalletClient.sendTransaction({
+//     ...burnSponsoredTx,
+//     value: BigInt(burnSponsoredTx.value || 0),
+//     gas: burnSponsoredTx.gas ? BigInt(burnSponsoredTx.gas) : undefined,
+//     maxFeePerGas: BigInt(burnSponsoredTx.maxFeePerGas),
+//     maxPriorityFeePerGas: BigInt(burnSponsoredTx.maxPriorityFeePerGas),
+//   });
+
+//   console.log(`Burn transaction hash: ${burnTxHash}`);
+//   console.log(`View on BaseScan: https://basescan.org/tx/${burnTxHash}`);
+
+//   // Wait for burn transaction confirmation
+//   console.log("Waiting for burn transaction confirmation...");
+//   const burnReceipt = await basePublicClient.waitForTransactionReceipt({
+//     hash: burnTxHash,
+//   });
+//   console.log(`Burn transaction confirmed in block: ${burnReceipt.blockNumber}\n`);
 
   // ============================================
-  // STEP 3: Wait for Circle attestation
+  // STEP 3: Wait for Circle attestation (gas sponsored)
   // ============================================
   console.log("Step 3: Waiting for Circle attestation...");
   console.log("(This typically takes 10-20 minutes for finality)\n");
@@ -203,20 +271,24 @@ async function main() {
   let attestationReady = false;
   let attempts = 0;
 
+  const bridgeId = 'br_cc56cfd407cc'
+  const burnTxHash = '0x946c4cc7c19e46dd0b80ee1ada9b1472bf171edf171955825985e54b0d1dac28'
+
   while (!attestationReady && attempts < ATTESTATION_MAX_ATTEMPTS) {
     attempts++;
     console.log(`Polling for attestation (attempt ${attempts}/${ATTESTATION_MAX_ATTEMPTS})...`);
 
     try {
-      mintResponse = await compass.cctp.cctpMint({
+      mintResponse = await compass.bridge.cctpMint({
         bridgeId: bridgeId,
         owner: WALLET_ADDRESS,
-        gasSponsorship: false,
+        burnTxHash: burnTxHash,
+        gasSponsorship: true,
       });
 
       // Check if response indicates attestation is ready
-      // The SDK might throw on 202 or return a status field
-      if (mintResponse.status === "ready" || mintResponse.transaction) {
+      // With gas sponsorship, we check for eip712 data instead of transaction
+      if (mintResponse.status === "ready" || mintResponse.eip712) {
         attestationReady = true;
         console.log("Attestation received! Ready to mint.\n");
       } else if (mintResponse.status === "pending") {
@@ -246,18 +318,54 @@ async function main() {
   }
 
   // ============================================
-  // STEP 4: Execute mint transaction
+  // STEP 4: Execute mint transaction (gas sponsored)
   // ============================================
-  console.log("Step 4: Executing mint transaction on Arbitrum...");
+  console.log("Step 4: Executing gas-sponsored mint transaction on Arbitrum...");
 
-  const mintTransaction = mintResponse.transaction as any;
+  // With gas sponsorship, we receive EIP-712 typed data to sign
+  const mintEip712 = mintResponse.eip712;
+  if (!mintEip712) {
+    throw new Error("No EIP-712 data returned for gas-sponsored mint");
+  }
 
-  const mintTxHash = await arbitrumWalletClient.sendTransaction({
-    ...mintTransaction,
-    value: BigInt(mintTransaction.value || 0),
-    gas: BigInt(mintTransaction.gas),
-    maxFeePerGas: BigInt(mintTransaction.maxFeePerGas),
-    maxPriorityFeePerGas: BigInt(mintTransaction.maxPriorityFeePerGas),
+  // Normalize types for viem compatibility (SDK returns camelCase keys)
+  const mintNormalizedTypes = {
+    SafeTx: (mintEip712.types as any).safeTx,
+  };
+
+  // User signs the EIP-712 message for mint
+  console.log("User signing EIP-712 message for mint...");
+  const mintSignature = await arbitrumWalletClient.signTypedData({
+    domain: mintEip712.domain as any,
+    types: mintNormalizedTypes,
+    primaryType: "SafeTx",
+    message: mintEip712.message as any,
+  });
+  console.log("Mint EIP-712 signature obtained\n");
+
+  // Prepare gas-sponsored transaction with user's signature
+  console.log("Preparing gas-sponsored mint transaction...");
+  const mintSponsorResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
+    owner: WALLET_ADDRESS,
+    chain: DESTINATION_CHAIN,
+    eip712: mintEip712 as any,
+    signature: mintSignature,
+    sender: sponsorAccount.address,
+  });
+
+  const mintSponsoredTx = mintSponsorResponse.transaction as any;
+  if (!mintSponsoredTx) {
+    throw new Error("No transaction returned from gasSponsorshipPrepare for mint");
+  }
+
+  // Sponsor signs and submits the mint transaction
+  console.log("Sponsor submitting mint transaction...");
+  const mintTxHash = await arbitrumSponsorWalletClient.sendTransaction({
+    ...mintSponsoredTx,
+    value: BigInt(mintSponsoredTx.value || 0),
+    gas: mintSponsoredTx.gas ? BigInt(mintSponsoredTx.gas) : undefined,
+    maxFeePerGas: BigInt(mintSponsoredTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(mintSponsoredTx.maxPriorityFeePerGas),
   });
 
   console.log(`Mint transaction hash: ${mintTxHash}`);
@@ -273,16 +381,12 @@ async function main() {
   // ============================================
   // Summary
   // ============================================
-  console.log("=== Bridge Complete ===");
+  console.log("=== Bridge Complete (Gas Sponsored) ===");
   console.log(`Successfully bridged ${AMOUNT_TO_BRIDGE} USDC from Base to Arbitrum`);
   console.log(`Bridge ID: ${bridgeId}`);
   console.log(`Burn TX: https://basescan.org/tx/${burnTxHash}`);
   console.log(`Mint TX: https://arbiscan.io/tx/${mintTxHash}`);
-}
-
-// Helper function to sleep
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  console.log(`\nGas fees were paid by sponsor: ${sponsorAccount.address}`);
 }
 
 // Run the main function
