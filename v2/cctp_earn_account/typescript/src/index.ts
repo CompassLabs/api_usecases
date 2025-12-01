@@ -4,14 +4,15 @@
  *
  * This example demonstrates how to bridge USDC from Base to Arbitrum using
  * Circle's Cross-Chain Transfer Protocol (CCTP) via Compass API's Earn Accounts.
- * Gas fees are paid by a sponsor wallet using EIP-712 signed messages.
+ * Gas fees are paid by a sponsor wallet using EIP-712 signed messages for burn,
+ * and direct transaction submission for mint.
  *
  * Flow:
  * 1. Create Earn Accounts on both source (Base) and destination (Arbitrum) chains
  * 2. Call /v2/cctp/burn with gasSponsorship=true to get EIP-712 typed data
  * 3. User signs the EIP-712 message, sponsor submits the burn transaction
- * 4. Poll /v2/cctp/mint until attestation is ready
- * 5. User signs EIP-712 for mint, sponsor submits on Arbitrum (destination chain)
+ * 4. Poll /v2/cctp/mint until attestation is ready (uses statusUrl for efficient polling)
+ * 5. Sponsor submits the mint transaction directly on Arbitrum (destination chain)
  */
 
 import { CompassApiSDK } from "@compass-labs/api-sdk";
@@ -262,48 +263,54 @@ async function main() {
   console.log(`Burn transaction confirmed in block: ${burnReceipt.blockNumber}\n`);
 
   // ============================================
-  // STEP 3: Wait for Circle attestation (gas sponsored)
+  // STEP 3: Wait for Circle attestation
   // ============================================
   console.log("Step 3: Waiting for Circle attestation...");
-  console.log("(This typically takes 10-20 minutes for finality)\n");
 
   let mintResponse: any;
   let attestationReady = false;
+  let completed = false;
   let attempts = 0;
 
+  // Initial call to cctpMint to start the attestation process
+  console.log("Initiating mint preparation...");
+  mintResponse = await compass.bridge.cctpMint({
+    bridgeId: bridgeId,
+    burnTxHash: burnTxHash,
+    sender: sponsorAccount.address,
+  });
+
+  // Check if attestation is already ready
+  if (mintResponse.status === "completed"){
+    completed = true
+  } else if (mintResponse.status === "ready" || mintResponse.transaction) {
+    attestationReady = true;
+    console.log("Attestation already ready!\n");
+  }
+
+  // Poll for attestation using statusUrl if available
   while (!attestationReady && attempts < ATTESTATION_MAX_ATTEMPTS) {
     attempts++;
     console.log(`Polling for attestation (attempt ${attempts}/${ATTESTATION_MAX_ATTEMPTS})...`);
 
-    try {
-      mintResponse = await compass.bridge.cctpMint({
-        bridgeId: bridgeId,
-        owner: WALLET_ADDRESS,
-        burnTxHash: burnTxHash,
-        gasSponsorship: true,
-      });
+    await sleep(ATTESTATION_POLL_INTERVAL_MS);
+      
+    mintResponse = await compass.bridge.cctpMint({
+      bridgeId: bridgeId,
+      burnTxHash: burnTxHash,
+      sender: sponsorAccount.address,
+    });
 
-      // Check if response indicates attestation is ready
-      // With gas sponsorship, we check for eip712 data instead of transaction
-      if (mintResponse.status === "ready" || mintResponse.eip712) {
-        attestationReady = true;
-        console.log("Attestation received! Ready to mint.\n");
-      } else if (mintResponse.status === "pending") {
-        console.log(`Status: pending. Waiting ${ATTESTATION_POLL_INTERVAL_MS / 1000}s before retry...`);
-        await sleep(ATTESTATION_POLL_INTERVAL_MS);
-      } else {
-        // Unknown status, treat as pending
-        console.log(`Status: ${mintResponse.status || "unknown"}. Waiting...`);
-        await sleep(ATTESTATION_POLL_INTERVAL_MS);
-      }
-    } catch (error: any) {
-      // Handle 202 Accepted response (attestation pending)
-      if (error.statusCode === 202 || error.status === 202) {
-        console.log(`Attestation pending (202). Waiting ${ATTESTATION_POLL_INTERVAL_MS / 1000}s before retry...`);
-        await sleep(ATTESTATION_POLL_INTERVAL_MS);
-      } else {
-        throw error;
-      }
+    // Check if attestation is ready
+    if (mintResponse.status === "completed"){
+        completed = true
+    } else if (mintResponse.status === "ready" || mintResponse.transaction) {
+      attestationReady = true;
+      console.log("Attestation received! Ready to mint.\n");
+    } else if (mintResponse.status === "pending") {
+      console.log(`Status: pending. Waiting ${ATTESTATION_POLL_INTERVAL_MS / 1000}s before retry...`);
+    } else {
+      console.log(`Status: ${mintResponse.status || "unknown"}. Waiting...`);
     }
   }
 
@@ -315,75 +322,51 @@ async function main() {
   }
 
   // ============================================
-  // STEP 4: Execute mint transaction (gas sponsored)
+  // STEP 4: Execute mint transaction on Arbitrum
   // ============================================
-  console.log("Step 4: Executing gas-sponsored mint transaction on Arbitrum...");
+  console.log("Step 4: Executing mint transaction on Arbitrum...");
 
-  // With gas sponsorship, we receive EIP-712 typed data to sign
-  const mintEip712 = mintResponse.eip712;
-  if (!mintEip712) {
-    throw new Error("No EIP-712 data returned for gas-sponsored mint");
+  const mintTx = mintResponse.transaction as any;
+  if (!mintTx) {
+    throw new Error("No transaction returned for mint");
   }
 
-  // Normalize types for viem compatibility (SDK returns camelCase keys)
-  const mintNormalizedTypes = {
-    SafeTx: (mintEip712.types as any).safeTx,
-  };
+  if (!completed) {
+    // Sponsor submits the mint transaction
+    console.log("Sponsor submitting mint transaction...");
+    const mintTxHash = await arbitrumSponsorWalletClient.sendTransaction({
+        ...mintTx,
+        value: BigInt(mintTx.value || 0),
+        gas: mintTx.gas ? BigInt(mintTx.gas) : undefined,
+        maxFeePerGas: BigInt(mintTx.maxFeePerGas),
+        maxPriorityFeePerGas: BigInt(mintTx.maxPriorityFeePerGas),
+    });
 
-  // User signs the EIP-712 message for mint
-  console.log("User signing EIP-712 message for mint...");
-  const mintSignature = await arbitrumWalletClient.signTypedData({
-    domain: mintEip712.domain as any,
-    types: mintNormalizedTypes,
-    primaryType: "SafeTx",
-    message: mintEip712.message as any,
-  });
-  console.log("Mint EIP-712 signature obtained\n");
+    console.log(`Mint transaction hash: ${mintTxHash}`);
+    console.log(`View on Arbiscan: https://arbiscan.io/tx/${mintTxHash}`);
 
-  // Prepare gas-sponsored transaction with user's signature
-  console.log("Preparing gas-sponsored mint transaction...");
-  const mintSponsorResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
-    owner: WALLET_ADDRESS,
-    chain: DESTINATION_CHAIN,
-    eip712: mintEip712 as any,
-    signature: mintSignature,
-    sender: sponsorAccount.address,
-  });
+    // Wait for mint transaction confirmation
+    console.log("Waiting for mint transaction confirmation...");
+    const mintReceipt = await arbitrumPublicClient.waitForTransactionReceipt({
+        hash: mintTxHash,
+    });
+    console.log(`Mint transaction confirmed in block: ${mintReceipt.blockNumber}\n`);
 
-  const mintSponsoredTx = mintSponsorResponse.transaction as any;
-  if (!mintSponsoredTx) {
-    throw new Error("No transaction returned from gasSponsorshipPrepare for mint");
+    // ============================================
+    // Summary
+    // ============================================
+    console.log("=== Bridge Complete (Gas Sponsored) ===");
+    console.log(`Successfully bridged ${AMOUNT_TO_BRIDGE} USDC from Base to Arbitrum`);
+    console.log(`Bridge ID: ${bridgeId}`);
+    console.log(`Burn TX: https://basescan.org/tx/${burnTxHash}`);
+    console.log(`Mint TX: https://arbiscan.io/tx/${mintTxHash}`);
+    console.log(`\nGas fees were paid by sponsor: ${sponsorAccount.address}`);
+  } else {
+    console.log("=== Bridge Complete (Gas Sponsored) ===");
+    console.log(`Successfully bridged ${AMOUNT_TO_BRIDGE} USDC from Base to Arbitrum`);
+    console.log(`Bridge ID: ${bridgeId}`);
+    console.log(`Burn TX: https://basescan.org/tx/${burnTxHash}`);
   }
-
-  // Sponsor signs and submits the mint transaction
-  console.log("Sponsor submitting mint transaction...");
-  const mintTxHash = await arbitrumSponsorWalletClient.sendTransaction({
-    ...mintSponsoredTx,
-    value: BigInt(mintSponsoredTx.value || 0),
-    gas: mintSponsoredTx.gas ? BigInt(mintSponsoredTx.gas) : undefined,
-    maxFeePerGas: BigInt(mintSponsoredTx.maxFeePerGas),
-    maxPriorityFeePerGas: BigInt(mintSponsoredTx.maxPriorityFeePerGas),
-  });
-
-  console.log(`Mint transaction hash: ${mintTxHash}`);
-  console.log(`View on Arbiscan: https://arbiscan.io/tx/${mintTxHash}`);
-
-  // Wait for mint transaction confirmation
-  console.log("Waiting for mint transaction confirmation...");
-  const mintReceipt = await arbitrumPublicClient.waitForTransactionReceipt({
-    hash: mintTxHash,
-  });
-  console.log(`Mint transaction confirmed in block: ${mintReceipt.blockNumber}\n`);
-
-  // ============================================
-  // Summary
-  // ============================================
-  console.log("=== Bridge Complete (Gas Sponsored) ===");
-  console.log(`Successfully bridged ${AMOUNT_TO_BRIDGE} USDC from Base to Arbitrum`);
-  console.log(`Bridge ID: ${bridgeId}`);
-  console.log(`Burn TX: https://basescan.org/tx/${burnTxHash}`);
-  console.log(`Mint TX: https://arbiscan.io/tx/${mintTxHash}`);
-  console.log(`\nGas fees were paid by sponsor: ${sponsorAccount.address}`);
 }
 
 // Run the main function
