@@ -187,79 +187,79 @@ async function main() {
   // ============================================
   // STEP 2: Build and execute burn transaction (gas sponsored)
   // ============================================
-//   console.log("Step 2: Building gas-sponsored burn transaction on Base...");
+  console.log("Step 2: Building gas-sponsored burn transaction on Base...");
 
-//   const burnResponse = await compass.bridge.cctpBurn({
-//     owner: WALLET_ADDRESS,
-//     chain: SOURCE_CHAIN,
-//     amount: AMOUNT_TO_BRIDGE,
-//     destinationChain: DESTINATION_CHAIN,
-//     gasSponsorship: true,
-//     transferMode: "fast"
-//   });
+  const burnResponse = await compass.bridge.cctpBurn({
+    owner: WALLET_ADDRESS,
+    chain: SOURCE_CHAIN,
+    amount: AMOUNT_TO_BRIDGE,
+    destinationChain: DESTINATION_CHAIN,
+    gasSponsorship: true,
+    transferMode: "fast"
+  });
 
-//   const bridgeId = burnResponse.bridgeId;
-//   if (!bridgeId) {
-//     throw new Error("No bridge ID returned from burn transaction");
-//   }
-//   console.log(`Bridge ID: ${bridgeId}`);
+  const bridgeId = burnResponse.bridgeId;
+  if (!bridgeId) {
+    throw new Error("No bridge ID returned from burn transaction");
+  }
+  console.log(`Bridge ID: ${bridgeId}`);
 
-//   // With gas sponsorship, we receive EIP-712 typed data to sign
-//   const burnEip712 = burnResponse.eip712;
-//   if (!burnEip712) {
-//     throw new Error("No EIP-712 data returned for gas-sponsored burn");
-//   }
-//   console.log("Received EIP-712 typed data for burn transaction\n");
+  // With gas sponsorship, we receive EIP-712 typed data to sign
+  const burnEip712 = burnResponse.eip712;
+  if (!burnEip712) {
+    throw new Error("No EIP-712 data returned for gas-sponsored burn");
+  }
+  console.log("Received EIP-712 typed data for burn transaction\n");
 
-//   // Normalize types for viem compatibility (SDK returns camelCase keys)
-//   const burnNormalizedTypes = {
-//     SafeTx: (burnEip712.types as any).safeTx,
-//   };
+  // Normalize types for viem compatibility (SDK returns camelCase keys)
+  const burnNormalizedTypes = {
+    SafeTx: (burnEip712.types as any).safeTx,
+  };
 
-//   // User signs the EIP-712 message
-//   console.log("User signing EIP-712 message for burn...");
-//   const burnSignature = await baseWalletClient.signTypedData({
-//     domain: burnEip712.domain as any,
-//     types: burnNormalizedTypes,
-//     primaryType: "SafeTx",
-//     message: burnEip712.message as any,
-//   });
-//   console.log("Burn EIP-712 signature obtained\n");
+  // User signs the EIP-712 message
+  console.log("User signing EIP-712 message for burn...");
+  const burnSignature = await baseWalletClient.signTypedData({
+    domain: burnEip712.domain as any,
+    types: burnNormalizedTypes,
+    primaryType: "SafeTx",
+    message: burnEip712.message as any,
+  });
+  console.log("Burn EIP-712 signature obtained\n");
 
-//   // Prepare gas-sponsored transaction with user's signature
-//   console.log("Preparing gas-sponsored burn transaction...");
-//   const burnSponsorResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
-//     owner: WALLET_ADDRESS,
-//     chain: SOURCE_CHAIN,
-//     eip712: burnEip712 as any,
-//     signature: burnSignature,
-//     sender: sponsorAccount.address,
-//   });
+  // Prepare gas-sponsored transaction with user's signature
+  console.log("Preparing gas-sponsored burn transaction...");
+  const burnSponsorResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
+    owner: WALLET_ADDRESS,
+    chain: SOURCE_CHAIN,
+    eip712: burnEip712 as any,
+    signature: burnSignature,
+    sender: sponsorAccount.address,
+  });
 
-//   const burnSponsoredTx = burnSponsorResponse.transaction as any;
-//   if (!burnSponsoredTx) {
-//     throw new Error("No transaction returned from gasSponsorshipPrepare for burn");
-//   }
+  const burnSponsoredTx = burnSponsorResponse.transaction as any;
+  if (!burnSponsoredTx) {
+    throw new Error("No transaction returned from gasSponsorshipPrepare for burn");
+  }
 
-//   // Sponsor signs and submits the burn transaction
-//   console.log("Sponsor submitting burn transaction...");
-//   const burnTxHash = await baseSponsorWalletClient.sendTransaction({
-//     ...burnSponsoredTx,
-//     value: BigInt(burnSponsoredTx.value || 0),
-//     gas: burnSponsoredTx.gas ? BigInt(burnSponsoredTx.gas) : undefined,
-//     maxFeePerGas: BigInt(burnSponsoredTx.maxFeePerGas),
-//     maxPriorityFeePerGas: BigInt(burnSponsoredTx.maxPriorityFeePerGas),
-//   });
+  // Sponsor signs and submits the burn transaction
+  console.log("Sponsor submitting burn transaction...");
+  const burnTxHash = await baseSponsorWalletClient.sendTransaction({
+    ...burnSponsoredTx,
+    value: BigInt(burnSponsoredTx.value || 0),
+    gas: burnSponsoredTx.gas ? BigInt(burnSponsoredTx.gas) : undefined,
+    maxFeePerGas: BigInt(burnSponsoredTx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(burnSponsoredTx.maxPriorityFeePerGas),
+  });
 
-//   console.log(`Burn transaction hash: ${burnTxHash}`);
-//   console.log(`View on BaseScan: https://basescan.org/tx/${burnTxHash}`);
+  console.log(`Burn transaction hash: ${burnTxHash}`);
+  console.log(`View on BaseScan: https://basescan.org/tx/${burnTxHash}`);
 
-//   // Wait for burn transaction confirmation
-//   console.log("Waiting for burn transaction confirmation...");
-//   const burnReceipt = await basePublicClient.waitForTransactionReceipt({
-//     hash: burnTxHash,
-//   });
-//   console.log(`Burn transaction confirmed in block: ${burnReceipt.blockNumber}\n`);
+  // Wait for burn transaction confirmation
+  console.log("Waiting for burn transaction confirmation...");
+  const burnReceipt = await basePublicClient.waitForTransactionReceipt({
+    hash: burnTxHash,
+  });
+  console.log(`Burn transaction confirmed in block: ${burnReceipt.blockNumber}\n`);
 
   // ============================================
   // STEP 3: Wait for Circle attestation (gas sponsored)
@@ -270,9 +270,6 @@ async function main() {
   let mintResponse: any;
   let attestationReady = false;
   let attempts = 0;
-
-  const bridgeId = 'br_cc56cfd407cc'
-  const burnTxHash = '0x946c4cc7c19e46dd0b80ee1ada9b1472bf171edf171955825985e54b0d1dac28'
 
   while (!attestationReady && attempts < ATTESTATION_MAX_ATTEMPTS) {
     attempts++;
