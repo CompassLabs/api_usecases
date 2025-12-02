@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "Example: Bridge USDC from Base to Arbitrum using CCTP via Compass API Earn Accounts",
   "dependencies": {
-    "@compass-labs/api-sdk": "2.1.10-rc.9",
+    "@compass-labs/api-sdk": "^2.1.10",
     "dotenv": "^16.5.0",
     "viem": "^2.31.0"
   },
