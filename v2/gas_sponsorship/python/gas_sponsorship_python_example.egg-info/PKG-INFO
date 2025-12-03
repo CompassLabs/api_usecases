@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: gas_sponsorship_python_example
-Version: 1.0.0
-Summary: Example: Gas Sponsorship for Earn Account Funding and Position Management using Compass API
-Requires-Dist: compass-api-sdk
-Requires-Dist: python-dotenv
-Requires-Dist: web3
-Requires-Dist: eth-account

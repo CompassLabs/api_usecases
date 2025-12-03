@@ -9,18 +9,52 @@ dotenv.config();
 
 const COMPASS_API_KEY = process.env.COMPASS_API_KEY as string;
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS as `0x${string}`;
-const OWNER_PRIVATE_KEY = (process.env.OWNER_PRIVATE_KEY?.startsWith("0x") 
-  ? process.env.OWNER_PRIVATE_KEY 
-  : `0x${process.env.OWNER_PRIVATE_KEY}`) as `0x${string}`;
-const SENDER_PRIVATE_KEY = (process.env.SENDER_PRIVATE_KEY?.startsWith("0x") 
-  ? process.env.SENDER_PRIVATE_KEY 
-  : `0x${process.env.SENDER_PRIVATE_KEY}`) as `0x${string}`;
 const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
+
+const normalizePrivateKey = (key: string | undefined): `0x${string}` => {
+  if (!key) throw new Error("Private key not set");
+  return (key.startsWith("0x") ? key : `0x${key}`) as `0x${string}`;
+};
+
+const OWNER_PRIVATE_KEY = normalizePrivateKey(process.env.OWNER_PRIVATE_KEY);
+const SENDER_PRIVATE_KEY = normalizePrivateKey(process.env.SENDER_PRIVATE_KEY);
+
+const sendTransaction = async (tx: any, walletClient: any, publicClient: any) => {
+  const txHash = await walletClient.sendTransaction({
+    ...tx,
+    value: BigInt(tx.value || 0),
+    gas: BigInt(tx.gas),
+    maxFeePerGas: BigInt(tx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(tx.maxPriorityFeePerGas),
+  });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  console.log(`Transaction hash: ${txHash}`);
+  console.log(`View on BaseScan: https://basescan.org/tx/0x${txHash}`);
+  console.log(`Confirmed in block: ${receipt.blockNumber}`);
+  return txHash;
+};
 // SNIPPET END 1
 
 // SNIPPET START 2
-const compass = new CompassApiSDK({
-  apiKeyAuth: COMPASS_API_KEY,
+const compass = new CompassApiSDK({ apiKeyAuth: COMPASS_API_KEY });
+const ownerAccount = privateKeyToAccount(OWNER_PRIVATE_KEY);
+const senderAccount = privateKeyToAccount(SENDER_PRIVATE_KEY);
+
+const ownerWalletClient = createWalletClient({
+  account: ownerAccount,
+  chain: base,
+  transport: http(BASE_RPC_URL),
+});
+
+const senderWalletClient = createWalletClient({
+  account: senderAccount,
+  chain: base,
+  transport: http(BASE_RPC_URL),
+});
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http(BASE_RPC_URL),
 });
 // SNIPPET END 2
 
@@ -29,8 +63,7 @@ const compass = new CompassApiSDK({
 // ============================================================================
 
 // SNIPPET START 3
-// Step 1: Get EIP-712 typed data for Permit2 approval (gas-sponsored)
-// Returns EIP-712 typed data that must be signed by the owner off-chain
+// Get EIP-712 typed data for Permit2 approval
 let approveResponse;
 try {
   approveResponse = await compass.gasSponsorship.gasSponsorshipApproveTransfer({
@@ -41,7 +74,7 @@ try {
   });
 } catch (error: any) {
   if (error.body?.includes("Token allowance already set")) {
-    console.log("Permit2 approval already exists - skipping to Example 2 (Manage Position)");
+    console.log("Permit2 approval already exists - skipping to Example 2");
     approveResponse = null;
   } else {
     throw error;
@@ -50,16 +83,9 @@ try {
 // SNIPPET END 3
 
 // SNIPPET START 4
-// Step 2: Sign EIP-712 typed data with owner's private key (off-chain, no gas)
-// This signature from Step 2 is required as input for Step 3
-const ownerAccount = privateKeyToAccount(OWNER_PRIVATE_KEY);
-const ownerWalletClient = createWalletClient({
-  account: ownerAccount,
-  chain: base,
-  transport: http(BASE_RPC_URL),
-});
+// Sign EIP-712 typed data with owner's private key
 let approveEip712, approveSignature;
-if (approveResponse && approveResponse.eip712) {
+if (approveResponse?.eip712) {
   approveEip712 = approveResponse.eip712;
   approveSignature = await ownerWalletClient.signTypedData({
     domain: approveEip712.domain as any,
@@ -68,70 +94,34 @@ if (approveResponse && approveResponse.eip712) {
     message: approveEip712.message as any,
   });
 } else {
-  console.log("Skipping Example 1 - Permit2 approval already exists");
   approveEip712 = null;
   approveSignature = null;
 }
 // SNIPPET END 4
 
 // SNIPPET START 5
-// Step 3: Prepare gas-sponsored Permit2 approval transaction
-// Uses the signature from Step 2 as input. The sender will pay for gas to execute the Permit2 approval
-const senderAccount = privateKeyToAccount(SENDER_PRIVATE_KEY);
-let prepareApproveResponse;
+// Prepare and send Permit2 approval transaction
 if (approveEip712 && approveSignature) {
-  prepareApproveResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
+  const prepareResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
     owner: WALLET_ADDRESS,
     chain: "base",
     eip712: approveEip712,
-    signature: approveSignature, // Signature from Step 2
+    signature: approveSignature,
     sender: senderAccount.address,
   });
-} else {
-  prepareApproveResponse = null;
-}
-// SNIPPET END 5
-
-// SNIPPET START 6
-// Step 4: Sign and broadcast Permit2 approval transaction with sender's private key
-const walletClient = createWalletClient({
-  account: senderAccount,
-  chain: base,
-  transport: http(BASE_RPC_URL),
-});
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(BASE_RPC_URL),
-});
-
-if (prepareApproveResponse) {
-  const approveTransaction = prepareApproveResponse.transaction as any;
-  const approveTxHash = await walletClient.sendTransaction({
-    ...approveTransaction,
-    value: BigInt(approveTransaction.value || 0),
-    gas: BigInt(approveTransaction.gas),
-    maxFeePerGas: BigInt(approveTransaction.maxFeePerGas),
-    maxPriorityFeePerGas: BigInt(approveTransaction.maxPriorityFeePerGas),
-  });
-
-  console.log(`Permit2 approval transaction hash: ${approveTxHash}`);
-  console.log(`View on BaseScan: https://basescan.org/tx/${approveTxHash}`);
-
-  const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: approveTxHash });
-  console.log(`Permit2 approval confirmed in block: ${approveReceipt.blockNumber}`);
+  await sendTransaction(prepareResponse.transaction as any, senderWalletClient, publicClient);
   console.log("Earn Account can now be funded with gas sponsorship");
 } else {
   console.log("Skipping Example 1 transaction - Permit2 approval already exists");
 }
-// SNIPPET END 6
+// SNIPPET END 5
 
 // ============================================================================
 // EXAMPLE 2: Manage Earn Position (Deposit) with Gas Sponsorship
 // ============================================================================
 
-// SNIPPET START 7
-// Step 1: Get EIP-712 typed data for gas-sponsored deposit
-// Returns EIP-712 typed data that must be signed by the owner off-chain
+// SNIPPET START 6
+// Get EIP-712 typed data for deposit
 const manageResponse = await compass.earn.earnManage({
   owner: WALLET_ADDRESS,
   chain: "base",
@@ -144,48 +134,35 @@ const manageResponse = await compass.earn.earnManage({
   gasSponsorship: true,
   fee: null,
 } as any);
+// SNIPPET END 6
+
+// SNIPPET START 7
+// Sign EIP-712 typed data with owner's private key
+const manageEip712 = manageResponse.eip712!;
+// Normalize types: API returns types with "safeTx" (lowercase) but primaryType "SafeTx" (capital)
+// We need to ensure the types object has the key matching the primaryType for viem
+const types = { ...manageEip712.types } as any;
+if (types.safeTx && !types.SafeTx) {
+  // Add SafeTx key if it doesn't exist (for viem compatibility)
+  types.SafeTx = types.safeTx;
+}
+const manageSignature = await ownerWalletClient.signTypedData({
+  domain: manageEip712.domain as any,
+  types: types,
+  primaryType: manageEip712.primaryType as string, // Use "SafeTx" from API
+  message: manageEip712.message as any,
+});
 // SNIPPET END 7
 
 // SNIPPET START 8
-// Step 2: Sign EIP-712 typed data with owner's private key (off-chain, no gas)
-// This signature from Step 2 is required as input for Step 3
-const manageEip712 = manageResponse.eip712!;
-const manageSignature = await ownerWalletClient.signTypedData({
-  domain: manageEip712.domain as any,
-  types: manageEip712.types as any,
-  primaryType: manageEip712.primaryType as string,
-  message: manageEip712.message as any,
-});
-// SNIPPET END 8
-
-// SNIPPET START 9
-// Step 3: Prepare gas-sponsored deposit transaction
-// Uses the signature from Step 2 as input. The sender will pay for gas to execute the deposit
-const prepareManageResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
+// Prepare and send deposit transaction
+const prepareResponse = await compass.gasSponsorship.gasSponsorshipPrepare({
   owner: WALLET_ADDRESS,
   chain: "base",
   eip712: manageEip712,
-  signature: manageSignature, // Signature from Step 2
+  signature: manageSignature,
   sender: senderAccount.address,
 });
-// SNIPPET END 9
-
-// SNIPPET START 10
-// Step 4: Sign and broadcast deposit transaction with sender's private key
-const manageTransaction = prepareManageResponse.transaction as any;
-const manageTxHash = await walletClient.sendTransaction({
-  ...manageTransaction,
-  value: BigInt(manageTransaction.value || 0),
-  gas: BigInt(manageTransaction.gas),
-  maxFeePerGas: BigInt(manageTransaction.maxFeePerGas),
-  maxPriorityFeePerGas: BigInt(manageTransaction.maxPriorityFeePerGas),
-});
-
-console.log(`Deposit transaction hash: ${manageTxHash}`);
-console.log(`View on BaseScan: https://basescan.org/tx/${manageTxHash}`);
-
-const manageReceipt = await publicClient.waitForTransactionReceipt({ hash: manageTxHash });
-console.log(`Deposit confirmed in block: ${manageReceipt.blockNumber}`);
+await sendTransaction(prepareResponse.transaction as any, senderWalletClient, publicClient);
 console.log("Gas-sponsored deposit transaction confirmed");
-// SNIPPET END 10
-
+// SNIPPET END 8
