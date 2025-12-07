@@ -5,6 +5,8 @@ import {
   EarnPositionsResponse,
   VaultInfo,
   CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition,
+  MorphoGetVaultsResponse,
+  MorphoVault,
 } from "@compass-labs/api-sdk/models/components";
 import { Loading } from "@geist-ui/core";
 import React from "react";
@@ -16,6 +18,8 @@ import Skeleton from "./primitives/Skeleton";
 // Merged data type combining vault info and user position
 export type EnrichedVaultData = VaultInfo & {
   userPosition?: CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition;
+  isMorphoVault?: boolean;
+  morphoVault?: MorphoVault;
 };
 
 export default function TokenScreen({
@@ -25,6 +29,8 @@ export default function TokenScreen({
   vaultsListData,
   positionsData,
   handleRefresh,
+  ausdMorphoVaults,
+  allTokenData,
 }: {
   setScreen: (screen: Screen) => void;
   tokenSymbol: Token;
@@ -32,12 +38,44 @@ export default function TokenScreen({
   vaultsListData?: VaultsListResponse;
   positionsData?: EarnPositionsResponse;
   handleRefresh: () => void;
+  ausdMorphoVaults?: MorphoGetVaultsResponse;
+  allTokenData?: TokenData[];
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
   // Filter vaults for this specific token and merge with user positions
   const enrichedVaults = React.useMemo<EnrichedVaultData[]>(() => {
+    // For AUSD, use morpho vaults instead
+    if (tokenSymbol === Token.AUSD) {
+      if (!ausdMorphoVaults?.vaults) return [];
+
+      return ausdMorphoVaults.vaults.map((morphoVault: MorphoVault) => {
+        // Find user position for this vault
+        const userPosition = positionsData?.userPositions?.find(
+          (pos) => pos.type === "VAULT" && pos.vaultAddress === morphoVault.address
+        ) as CompassApiBackendV2ModelsEarnReadResponsePositionsVaultPosition | undefined;
+
+        // Create a VaultInfo-like structure from MorphoVault
+        const vaultInfo: EnrichedVaultData = {
+          address: morphoVault.address,
+          name: morphoVault.name || "AUSD Morpho Vault",
+          denomination: morphoVault.asset?.symbol || "AUSD",
+          oneMonthReturns: morphoVault.state?.netApy?.toString() || "0",
+          threeMonthsReturns: morphoVault.state?.netApy?.toString() || "0",
+          cagr: morphoVault.state?.apy?.toString() || "0",
+          lifetimeReturn: morphoVault.state?.netApy?.toString() || "0",
+          protocol: "Morpho",
+          shareToken: morphoVault.symbol || "morpho-AUSD",
+          stablecoinish: true,
+          isMorphoVault: true,
+          morphoVault,
+          userPosition,
+        };
+        return vaultInfo;
+      });
+    }
+
     if (!vaultsListData) return [];
 
     const tokenVaults = vaultsListData.vaults.filter(
@@ -55,7 +93,7 @@ export default function TokenScreen({
         userPosition,
       };
     });
-  }, [vaultsListData, positionsData, tokenSymbol]);
+  }, [vaultsListData, positionsData, tokenSymbol, ausdMorphoVaults]);
 
   // Filter vaults based on search query
   const filteredVaults = React.useMemo<EnrichedVaultData[]>(() => {
@@ -137,6 +175,7 @@ export default function TokenScreen({
                   key={vault.address}
                   setIsOpen={setIsOpen}
                   handleRefresh={handleRefresh}
+                  allTokenData={allTokenData}
                 />
               ))}
             </ul>

@@ -8,6 +8,7 @@ import {
   TokenPriceResponse,
   VaultsListResponse,
   EarnPositionsResponse,
+  MorphoGetVaultsResponse,
 } from "@compass-labs/api-sdk/models/components";
 import { AnimatePresence, motion } from "motion/react";
 import { useWallet } from "@/lib/hooks/use-wallet";
@@ -43,6 +44,7 @@ export default function Screens() {
   const [positionsData, setPositionsData] = React.useState<EarnPositionsResponse>();
 
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  const [ausdMorphoVaults, setAusdMorphoVaults] = React.useState<MorphoGetVaultsResponse>();
 
   const handleRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -94,16 +96,34 @@ export default function Screens() {
     setPositionsData(positions);
   };
 
+  const getAusdMorphoVaults = async (chain: string) => {
+    setAusdMorphoVaults(undefined);
+    try {
+      const response = await fetch(`/api/morpho-vaults?chain=${chain}&deposit_token=AUSD`);
+      const morphoVaults: MorphoGetVaultsResponse = await response.json();
+      setAusdMorphoVaults(morphoVaults);
+
+      // If AUSD morpho vaults exist, add AUSD to vaultsByToken
+      if (morphoVaults.vaults && morphoVaults.vaults.length > 0) {
+        vaultsByToken["AUSD"] = morphoVaults.vaults.map((vault: { address: string }) => vault.address);
+      }
+    } catch (error) {
+      console.error("Error fetching AUSD morpho vaults:", error);
+    }
+  };
+
   // Fetch data when earn account is available or chain changes
   React.useEffect(() => {
     if (hasEarnAccount && earnAccountAddress) {
       getTokenData(earnAccountAddress, chainId);
       getVaultsListData(chainId);
       getPositionsData(earnAccountAddress, chainId);
+      getAusdMorphoVaults(chainId);
     } else {
       // Clear data when not connected
       setTokenData(undefined);
       setPositionsData(undefined);
+      setAusdMorphoVaults(undefined);
     }
   }, [hasEarnAccount, earnAccountAddress, refreshTrigger, chainId]);
 
@@ -163,6 +183,8 @@ export default function Screens() {
               vaultsListData={vaultsListData}
               positionsData={positionsData}
               handleRefresh={handleRefresh}
+              ausdMorphoVaults={ausdMorphoVaults}
+              allTokenData={tokenData}
             />
           </motion.div>
         );

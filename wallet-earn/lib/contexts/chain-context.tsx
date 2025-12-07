@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
 import {
@@ -12,6 +13,8 @@ import {
   DEFAULT_CHAIN,
   type SupportedChainId,
 } from "@/utils/constants";
+
+const CHAIN_STORAGE_KEY = "compass-earn-chain";
 
 interface ChainContextValue {
   chainId: SupportedChainId;
@@ -22,11 +25,32 @@ interface ChainContextValue {
 
 const ChainContext = createContext<ChainContextValue | null>(null);
 
+// Helper to get stored chain from localStorage
+function getStoredChain(): SupportedChainId {
+  if (typeof window === "undefined") return DEFAULT_CHAIN;
+
+  const stored = localStorage.getItem(CHAIN_STORAGE_KEY);
+  if (stored && stored in SUPPORTED_CHAINS) {
+    return stored as SupportedChainId;
+  }
+  return DEFAULT_CHAIN;
+}
+
 export function ChainProvider({ children }: { children: ReactNode }) {
   const [chainId, setChainId] = useState<SupportedChainId>(DEFAULT_CHAIN);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load persisted chain on mount (client-side only)
+  useEffect(() => {
+    const storedChain = getStoredChain();
+    setChainId(storedChain);
+    setIsHydrated(true);
+  }, []);
 
   const setChain = useCallback((newChainId: SupportedChainId) => {
     setChainId(newChainId);
+    // Persist to localStorage
+    localStorage.setItem(CHAIN_STORAGE_KEY, newChainId);
   }, []);
 
   const value: ChainContextValue = {

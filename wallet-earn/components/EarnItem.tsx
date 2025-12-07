@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { TokenData } from "./Screens";
+import { TokenData, Token } from "./Screens";
 import { EnrichedVaultData } from "./TokenScreen";
 import { TrendingUp, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
@@ -15,11 +15,13 @@ export default function EarnItem({
   token,
   setIsOpen,
   handleRefresh,
+  allTokenData,
 }: {
   vaultData: EnrichedVaultData;
   token: TokenData;
   setIsOpen: (value: boolean) => void;
   handleRefresh: () => void;
+  allTokenData?: TokenData[];
 }) {
   const [open, setOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
@@ -115,6 +117,7 @@ export default function EarnItem({
             setIsLoading={setIsLoading}
             isLoading={isLoading}
             setIsClosing={setIsClosing}
+            allTokenData={allTokenData}
           />
         )}
       </div>
@@ -129,6 +132,7 @@ function EarnForm({
   setIsLoading,
   isLoading,
   setIsClosing,
+  allTokenData,
 }: {
   vaultData: EnrichedVaultData;
   token: TokenData;
@@ -136,6 +140,7 @@ function EarnForm({
   setIsLoading: (v: boolean) => void;
   isLoading: boolean;
   setIsClosing: (v: boolean) => void;
+  allTokenData?: TokenData[];
 }) {
   const { signTypedData } = usePrivy();
   const { wallets } = useWallets();
@@ -147,11 +152,24 @@ function EarnForm({
   const [amount, setAmount] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
 
+  // Check if this is an AUSD Morpho vault (uses bundle flow with USDC swap)
+  const isAusdMorphoVault = vaultData.isMorphoVault && token.tokenSymbol === Token.AUSD;
+
+  // Get USDC token data for bundle deposits
+  const usdcTokenData = allTokenData?.find((t) => t.tokenSymbol === Token.USDC);
+
+  // For AUSD morpho vault deposits, use USDC balance; otherwise use the token balance
+  const depositToken = isAusdMorphoVault && activeTab === 'deposit' ? usdcTokenData : token;
+  const depositTokenSymbol = isAusdMorphoVault && activeTab === 'deposit' ? Token.USDC : token.tokenSymbol;
+  const depositTokenDecimals = depositToken?.decimals || 6;
+
   // Find the wallet matching the owner address to switch chains if needed
   const activeWallet = wallets.find(w => w.address.toLowerCase() === ownerAddress?.toLowerCase());
 
   const currentPosition = Number(vaultData.userPosition?.amountInUnderlyingToken || 0);
-  const availableBalance = Number(token.amount);
+  const availableBalance = isAusdMorphoVault && activeTab === 'deposit'
+    ? Number(usdcTokenData?.amount || 0)
+    : Number(token.amount);
   const maxAmount = activeTab === 'deposit' ? availableBalance : currentPosition;
 
   const numericAmount = Number(amount) || 0;
@@ -176,24 +194,47 @@ function EarnForm({
         }
       }
 
-      const formattedAmount = numericAmount.toFixed(token.decimals);
+      const formattedAmount = numericAmount.toFixed(depositTokenDecimals);
       const isDeposit = activeTab === 'deposit';
-      const prepareEndpoint = isDeposit ? '/api/deposit/prepare' : '/api/withdraw/prepare';
-      const executeEndpoint = isDeposit ? '/api/deposit/execute' : '/api/withdraw/execute';
 
-      // Step 1: Get EIP-712 typed data from backend
-      // owner is the wallet that owns the earn account (external wallet or embedded wallet)
-      const prepareResponse = await fetch(prepareEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // For AUSD Morpho vault deposits, use bundle flow (swap USDC to AUSD + deposit)
+      const useBundle = isAusdMorphoVault && isDeposit;
+
+      let prepareEndpoint: string;
+      let executeEndpoint: string;
+      let prepareBody: any;
+
+      if (useBundle) {
+        prepareEndpoint = '/api/bundle/prepare';
+        executeEndpoint = '/api/bundle/execute';
+        prepareBody = {
+          vaultAddress: vaultData.address,
+          amountIn: formattedAmount,
+          tokenIn: Token.USDC,
+          tokenOut: Token.AUSD,
+          slippage: 0.5,
+          owner: ownerAddress,
+          chain: chainId,
+        };
+      } else {
+        prepareEndpoint = isDeposit ? '/api/deposit/prepare' : '/api/withdraw/prepare';
+        executeEndpoint = isDeposit ? '/api/deposit/execute' : '/api/withdraw/execute';
+        prepareBody = {
           vaultAddress: vaultData.address,
           amount: formattedAmount,
           token: token.tokenSymbol,
           owner: ownerAddress,
           chain: chainId,
           ...(activeTab === 'withdraw' && { isAll: numericAmount === currentPosition }),
-        }),
+        };
+      }
+
+      // Step 1: Get EIP-712 typed data from backend
+      // owner is the wallet that owns the earn account (external wallet or embedded wallet)
+      const prepareResponse = await fetch(prepareEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(prepareBody),
       });
 
       if (!prepareResponse.ok) {
@@ -206,6 +247,10 @@ function EarnForm({
       // Step 2: Sign with the owner wallet
       // If user connected with external wallet, sign with that wallet
       // Otherwise, sign with embedded wallet (for social login users)
+      const actionDescription = useBundle
+        ? `Swap ${formattedAmount} USDC to AUSD and deposit`
+        : `${isDeposit ? "Deposit" : "Withdraw"} ${formattedAmount} ${token.tokenSymbol}`;
+
       const signatureResult = await signTypedData(
         {
           domain,
@@ -218,8 +263,8 @@ function EarnForm({
           // This ensures external wallets (MetaMask, etc.) are used when connected
           address: ownerAddress as `0x${string}`,
           uiOptions: {
-            title: isDeposit ? "Sign Deposit" : "Sign Withdrawal",
-            description: `${isDeposit ? "Deposit" : "Withdraw"} ${formattedAmount} ${token.tokenSymbol}`,
+            title: useBundle ? "Sign Swap & Deposit" : (isDeposit ? "Sign Deposit" : "Sign Withdrawal"),
+            description: actionDescription,
             buttonText: "Sign",
           },
         }
@@ -259,7 +304,7 @@ function EarnForm({
 
   const setQuickAmount = (percentage: number) => {
     const value = maxAmount * percentage;
-    setAmount(value.toFixed(token.decimals));
+    setAmount(value.toFixed(depositTokenDecimals));
   };
 
   const [copied, setCopied] = React.useState(false);
@@ -372,12 +417,17 @@ function EarnForm({
         </div>
 
         <div className="flex flex-col gap-3 px-1">
+          {isAusdMorphoVault && activeTab === 'deposit' && (
+            <div className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+              Deposits use USDC which is automatically swapped to AUSD
+            </div>
+          )}
           <div className="flex justify-between items-center text-xs">
             <span className="text-neutral-500">
               {activeTab === 'deposit' ? 'Available' : 'Deposited'}
             </span>
             <span className="font-medium text-neutral-700">
-              {maxAmount.toFixed(4)} {token.tokenSymbol}
+              {maxAmount.toFixed(4)} {depositTokenSymbol}
             </span>
           </div>
 
@@ -394,10 +444,10 @@ function EarnForm({
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <img
                 className="w-5 h-5"
-                src={`${token.tokenSymbol}.${token.tokenSymbol === "cbBTC" ? "webp" : token.tokenSymbol === "AUSD" ? "png" : "svg"}`}
+                src={`${depositTokenSymbol}.${depositTokenSymbol === "cbBTC" ? "webp" : depositTokenSymbol === "AUSD" ? "png" : "svg"}`}
               />
               <span className="text-sm font-medium text-neutral-600">
-                {token.tokenSymbol}
+                {depositTokenSymbol}
               </span>
             </div>
           </div>
@@ -449,13 +499,13 @@ function EarnForm({
           onClick={() => !isLoading && submitTransaction()}
         >
           {!isLoading ? (
-            activeTab === 'deposit' ? 'Deposit' : 'Withdraw'
+            isAusdMorphoVault && activeTab === 'deposit' ? 'Swap & Deposit' : (activeTab === 'deposit' ? 'Deposit' : 'Withdraw')
           ) : (
             <>
               <span className="mr-2.5">
                 <Spinner className="[&_*_span]:!bg-white" scale={0.8} />
               </span>
-              {activeTab === 'deposit' ? 'Depositing...' : 'Withdrawing...'}
+              {isAusdMorphoVault && activeTab === 'deposit' ? 'Swapping & Depositing...' : (activeTab === 'deposit' ? 'Depositing...' : 'Withdrawing...')}
             </>
           )}
         </button>
