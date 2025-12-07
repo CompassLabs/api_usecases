@@ -20,6 +20,7 @@ import { usePrivy, useSendTransaction } from "@privy-io/react-auth";
 import { type Address, type Hex, createPublicClient, http } from "viem";
 import { useQuery } from "@tanstack/react-query";
 import { useChain } from "./chain-context";
+import { getClientRpcUrl } from "@/utils/constants";
 
 // Types
 interface WalletContextValue {
@@ -63,9 +64,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { chainId, chain } = useChain();
 
   // Create public client for reading blockchain data (dynamic based on chain)
+  // Uses chain-specific RPC URL or falls back to viem's default public RPC
   const publicClient = createPublicClient({
     chain: chain.viemChain,
-    transport: http(process.env.NEXT_PUBLIC_RPC_URL || "https://mainnet.base.org"),
+    transport: http(getClientRpcUrl(chainId)),
   });
 
   // Embedded wallet state (created by Privy for social logins)

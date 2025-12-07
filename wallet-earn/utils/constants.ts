@@ -24,7 +24,7 @@ export const SUPPORTED_CHAINS = {
 
 export type SupportedChainId = keyof typeof SUPPORTED_CHAINS;
 
-// Helper to get chain-specific RPC URL
+// Helper to get chain-specific RPC URL (server-side)
 export function getRpcUrl(chainId: SupportedChainId): string {
   const envKeys: Record<SupportedChainId, string> = {
     base: "RPC_URL_BASE",
@@ -34,6 +34,20 @@ export function getRpcUrl(chainId: SupportedChainId): string {
 
   // Try chain-specific env var first, then fall back to generic RPC_URL
   return process.env[envKeys[chainId]] || process.env.RPC_URL || "";
+}
+
+// Helper to get chain-specific RPC URL (client-side)
+// Uses NEXT_PUBLIC_ prefixed env vars which are exposed to the browser
+export function getClientRpcUrl(chainId: SupportedChainId): string | undefined {
+  const envKeys: Record<SupportedChainId, string | undefined> = {
+    base: process.env.NEXT_PUBLIC_RPC_URL_BASE,
+    ethereum: process.env.NEXT_PUBLIC_RPC_URL_ETHEREUM,
+    arbitrum: process.env.NEXT_PUBLIC_RPC_URL_ARBITRUM,
+  };
+
+  // Try chain-specific env var first, then fall back to generic NEXT_PUBLIC_RPC_URL
+  // Return undefined to let viem use the chain's default public RPC
+  return envKeys[chainId] || process.env.NEXT_PUBLIC_RPC_URL || undefined;
 }
 
 // Default chain

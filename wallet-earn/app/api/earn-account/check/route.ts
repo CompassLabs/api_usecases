@@ -1,4 +1,4 @@
-import { DEFAULT_CHAIN, SUPPORTED_CHAINS, type SupportedChainId } from "@/utils/constants";
+import { DEFAULT_CHAIN, SUPPORTED_CHAINS, getRpcUrl, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { createPublicClient, http } from "viem";
 
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     const publicClient = createPublicClient({
       chain: chainConfig.viemChain,
-      transport: http(process.env.RPC_URL),
+      transport: http(getRpcUrl(chainId)),
     });
 
     const compassApiSDK = new CompassApiSDK({
