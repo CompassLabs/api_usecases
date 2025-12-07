@@ -1,9 +1,10 @@
 "use client";
 
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
-import { base } from "viem/chains";
+import { base, mainnet, arbitrum } from "viem/chains";
 import { QueryProvider } from "./query-provider";
 import { WalletProvider } from "@/lib/contexts/wallet-context";
+import { ChainProvider } from "@/lib/contexts/chain-context";
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
@@ -14,7 +15,9 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
     console.warn("NEXT_PUBLIC_PRIVY_APP_ID not set - wallet features disabled");
     return (
       <QueryProvider>
-        {children}
+        <ChainProvider>
+          {children}
+        </ChainProvider>
       </QueryProvider>
     );
   }
@@ -34,13 +37,15 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
           },
         },
         defaultChain: base,
-        supportedChains: [base],
+        supportedChains: [base, mainnet, arbitrum],
       }}
     >
       <QueryProvider>
-        <WalletProvider>
-          {children}
-        </WalletProvider>
+        <ChainProvider>
+          <WalletProvider>
+            {children}
+          </WalletProvider>
+        </ChainProvider>
       </QueryProvider>
     </PrivyProviderBase>
   );

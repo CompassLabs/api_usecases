@@ -1,13 +1,14 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, SUPPORTED_CHAINS, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { type UnsignedTransaction } from "@compass-labs/api-sdk/models/components";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
 
 export async function POST(request: Request) {
   try {
-    const { owner, eip712, signature } = await request.json();
+    const { owner, eip712, signature, chain: requestChain } = await request.json();
+    const chainId = (requestChain || DEFAULT_CHAIN) as SupportedChainId;
+    const chainConfig = SUPPORTED_CHAINS[chainId];
 
     if (!owner || !eip712 || !signature) {
       return Response.json(
@@ -22,12 +23,12 @@ export async function POST(request: Request) {
 
     const sponsorWalletClient = createWalletClient({
       account: sponsorAccount,
-      chain: base,
+      chain: chainConfig.viemChain,
       transport: http(process.env.RPC_URL),
     });
 
     const publicClient = createPublicClient({
-      chain: base,
+      chain: chainConfig.viemChain,
       transport: http(process.env.RPC_URL),
     });
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 
     const sponsorGasResponse = await compassApiSDK.gasSponsorship.gasSponsorshipPrepare({
       owner,
-      chain: CHAIN,
+      chain: chainId,
       eip712: eip712 as any,
       signature,
       sender: sponsorAccount.address,

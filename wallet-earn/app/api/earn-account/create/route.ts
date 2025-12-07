@@ -1,9 +1,10 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
 export async function POST(request: Request) {
   try {
-    const { owner } = await request.json();
+    const { owner, chain: requestChain } = await request.json();
+    const chain = (requestChain || DEFAULT_CHAIN) as SupportedChainId;
 
     if (!owner) {
       return Response.json(
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     // Call Compass API to create earn account
     // The owner will also be the sender (they sign and submit the tx)
     const response = await compassApiSDK.earn.earnCreateAccount({
-      chain: CHAIN,
+      chain,
       owner,
       sender: owner, // Owner sends the transaction themselves
       estimateGas: true,

@@ -1,9 +1,10 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
 export async function POST(request: Request) {
   try {
-    const { vaultAddress, amount, token, owner, isAll } = await request.json();
+    const { vaultAddress, amount, token, owner, isAll, chain: requestChain } = await request.json();
+    const chain = (requestChain || DEFAULT_CHAIN) as SupportedChainId;
 
     if (!vaultAddress || !amount || !token || !owner || typeof isAll !== "boolean") {
       return Response.json(
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     // Call earnManage with gas sponsorship enabled
     const withdraw = await compassApiSDK.earn.earnManage({
       owner,
-      chain: CHAIN,
+      chain,
       venue: {
         type: "VAULT",
         vaultAddress,

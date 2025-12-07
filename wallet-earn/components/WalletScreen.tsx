@@ -6,10 +6,11 @@ import { VaultsListResponse } from "@compass-labs/api-sdk/models/components";
 import Skeleton from "./primitives/Skeleton";
 import { useWallet } from "@/lib/hooks/use-wallet";
 import { useFundWallet } from "@privy-io/react-auth";
-import { base } from "viem/chains";
 import { LogOut, Loader2, ArrowLeftRight, Copy, Check } from "lucide-react";
 import { cn } from "@/utils/utils";
 import SwapModal from "./SwapModal";
+import ChainSwitcher from "./ChainSwitcher";
+import { useChain } from "@/lib/contexts/chain-context";
 
 export default function WalletScreen({
   setScreen,
@@ -36,6 +37,7 @@ export default function WalletScreen({
   } = useWallet();
 
   const { fundWallet } = useFundWallet();
+  const { chain } = useChain();
   const [isSwapOpen, setIsSwapOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
 
@@ -56,7 +58,7 @@ export default function WalletScreen({
     await fundWallet({
       address: earnAccountAddress,
       options: {
-        chain: base,
+        chain: chain.viemChain,
         asset: "USDC",
         amount: "10",
       },
@@ -143,25 +145,10 @@ export default function WalletScreen({
   // Connected with earn account - show main wallet view
   return (
     <div className="flex flex-col h-full">
-      {/* Header with address, fund, swap and logout */}
+      {/* Header with chain switcher, swap and logout */}
       <div className="flex items-center px-2 py-2 gap-2">
-        {/* Earn Account Address */}
-        {earnAccountAddress && (
-          <button
-            onClick={handleCopyAddress}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors"
-            title={earnAccountAddress}
-          >
-            <span className="text-xs font-mono text-neutral-600">
-              {truncateAddress(earnAccountAddress)}
-            </span>
-            {copied ? (
-              <Check className="w-3 h-3 text-green-600" />
-            ) : (
-              <Copy className="w-3 h-3 text-neutral-400" />
-            )}
-          </button>
-        )}
+        {/* Chain Switcher */}
+        <ChainSwitcher />
         <div className="flex items-center gap-2 ml-auto">
           <button
             onClick={() => setIsSwapOpen(true)}
@@ -208,6 +195,23 @@ export default function WalletScreen({
           )}
         </div>
         <div className="text-neutral-400 -mt-0.5">Total value</div>
+        {/* Earn Account Address */}
+        {earnAccountAddress && (
+          <button
+            onClick={handleCopyAddress}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 mt-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors"
+            title={earnAccountAddress}
+          >
+            <span className="text-xs font-mono text-neutral-500">
+              {truncateAddress(earnAccountAddress)}
+            </span>
+            {copied ? (
+              <Check className="w-3 h-3 text-green-600" />
+            ) : (
+              <Copy className="w-3 h-3 text-neutral-400" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Token list */}

@@ -6,7 +6,7 @@ import { cn } from "@/utils/utils";
 import { Spinner } from "@geist-ui/core";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useWallet } from "@/lib/hooks/use-wallet";
-import { base } from "viem/chains";
+import { useChain } from "@/lib/contexts/chain-context";
 import { ArrowDownUp, X } from "lucide-react";
 
 const SWAP_TOKENS = ["USDC", "WETH", "ETH", "cbBTC", "wstETH"] as const;
@@ -26,6 +26,7 @@ export default function SwapModal({
   const { signTypedData } = usePrivy();
   const { wallets } = useWallets();
   const { ownerAddress } = useWallet();
+  const { chainId, chain } = useChain();
 
   const [tokenIn, setTokenIn] = React.useState<SwapToken>("USDC");
   const [tokenOut, setTokenOut] = React.useState<SwapToken>("WETH");
@@ -95,6 +96,7 @@ export default function SwapModal({
             tokenOut,
             amountIn: amount,
             slippage: Number(slippage),
+            chain: chainId,
           }),
         });
 
@@ -114,7 +116,7 @@ export default function SwapModal({
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [amount, tokenIn, tokenOut, ownerAddress, slippage]);
+  }, [amount, tokenIn, tokenOut, ownerAddress, slippage, chainId]);
 
   const submitSwap = async () => {
     if (!isValidAmount || !ownerAddress) return;
@@ -125,11 +127,11 @@ export default function SwapModal({
     try {
       if (activeWallet) {
         const currentChainId = activeWallet.chainId;
-        if (currentChainId !== `eip155:${base.id}`) {
+        if (currentChainId !== `eip155:${chain.viemChain.id}`) {
           try {
-            await activeWallet.switchChain(base.id);
+            await activeWallet.switchChain(chain.viemChain.id);
           } catch (switchError) {
-            throw new Error("Please switch to Base network to continue");
+            throw new Error(`Please switch to ${chain.name} network to continue`);
           }
         }
       }
@@ -143,6 +145,7 @@ export default function SwapModal({
           tokenOut,
           amountIn: amount,
           slippage: Number(slippage),
+          chain: chainId,
         }),
       });
 
@@ -183,6 +186,7 @@ export default function SwapModal({
           owner: ownerAddress,
           eip712,
           signature,
+          chain: chainId,
         }),
       });
 

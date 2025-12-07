@@ -1,4 +1,4 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
 export async function GET(
@@ -8,6 +8,7 @@ export async function GET(
   const { token } = await params;
   const { searchParams } = new URL(request.url);
   const walletAddress = searchParams.get("wallet");
+  const chain = (searchParams.get("chain") || DEFAULT_CHAIN) as SupportedChainId;
 
   if (!walletAddress) {
     return new Response(
@@ -21,13 +22,13 @@ export async function GET(
   });
 
   const tokenBalance = compassApiSDK.token.tokenBalance({
-    chain: CHAIN,
+    chain,
     token,
     user: walletAddress,
   });
 
   const tokenPrice = compassApiSDK.token.tokenPrice({
-    chain: CHAIN,
+    chain,
     token,
   });
 

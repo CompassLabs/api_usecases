@@ -8,7 +8,7 @@ import { cn } from "@/utils/utils";
 import { Spinner } from "@geist-ui/core";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useWallet } from "@/lib/hooks/use-wallet";
-import { base } from "viem/chains";
+import { useChain } from "@/lib/contexts/chain-context";
 
 export default function EarnItem({
   vaultData,
@@ -37,13 +37,16 @@ export default function EarnItem({
   return (
     <>
       <li
-        className="w-full bg-white rounded-xl border border-neutral-100 flex items-center px-4 py-2 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
+        className="w-full bg-white rounded-xl border border-neutral-100 flex flex-col px-4 py-3 shadow shadow-neutral-100 hover:scale-[1.01] duration-300 cursor-pointer hover:shadow-neutral-200"
         onClick={() => {
           setOpen(true);
           setIsOpen(true);
         }}
         key={vaultData.address}
       >
+        <div className="text-sm font-semibold text-zinc-800 mb-2 px-2 truncate">
+          {vaultData.name}
+        </div>
         <div className="flex justify-between w-full px-6">
           <div className="flex flex-col">
             <h3 className="self-center text-sm font-medium flex items-center gap-1.5 text-zinc-500">
@@ -137,6 +140,7 @@ function EarnForm({
   const { signTypedData } = usePrivy();
   const { wallets } = useWallets();
   const { ownerAddress } = useWallet();
+  const { chainId, chain } = useChain();
 
   type TabType = 'deposit' | 'withdraw';
   const [activeTab, setActiveTab] = React.useState<TabType>('deposit');
@@ -160,14 +164,14 @@ function EarnForm({
     setError(null);
 
     try {
-      // Step 0: Ensure wallet is on Base network before signing
+      // Step 0: Ensure wallet is on correct network before signing
       if (activeWallet) {
         const currentChainId = activeWallet.chainId;
-        if (currentChainId !== `eip155:${base.id}`) {
+        if (currentChainId !== `eip155:${chain.viemChain.id}`) {
           try {
-            await activeWallet.switchChain(base.id);
+            await activeWallet.switchChain(chain.viemChain.id);
           } catch (switchError) {
-            throw new Error("Please switch to Base network to continue");
+            throw new Error(`Please switch to ${chain.name} network to continue`);
           }
         }
       }
@@ -187,6 +191,7 @@ function EarnForm({
           amount: formattedAmount,
           token: token.tokenSymbol,
           owner: ownerAddress,
+          chain: chainId,
           ...(activeTab === 'withdraw' && { isAll: numericAmount === currentPosition }),
         }),
       });
@@ -232,6 +237,7 @@ function EarnForm({
           owner: ownerAddress,
           eip712,
           signature,
+          chain: chainId,
         }),
       });
 

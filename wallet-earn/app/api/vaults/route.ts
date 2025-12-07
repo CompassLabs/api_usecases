@@ -1,8 +1,11 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const chain = (searchParams.get("chain") || DEFAULT_CHAIN) as SupportedChainId;
+
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,
     });
@@ -10,7 +13,7 @@ export async function GET() {
     // Call the SDK method - it will validate the response
     // SNIPPET START 1
     const vaultsResponse = await compassApiSDK.earn.earnVaults({
-      chain: CHAIN,
+      chain,
       orderBy: "one_month_returns",
       direction: "desc",
       offset: 0,

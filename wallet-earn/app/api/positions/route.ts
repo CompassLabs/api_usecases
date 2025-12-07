@@ -1,10 +1,11 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const walletAddress = searchParams.get("wallet");
+    const chain = (searchParams.get("chain") || DEFAULT_CHAIN) as SupportedChainId;
 
     if (!walletAddress) {
       return new Response(
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
     // Fetch user's earn positions
     const positionsResponse = await compassApiSDK.earn.earnPositions({
-      chain: CHAIN,
+      chain,
       userAddress: walletAddress,
       offset: 0,
       limit: 100,

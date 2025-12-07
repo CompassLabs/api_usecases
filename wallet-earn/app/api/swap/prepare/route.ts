@@ -1,9 +1,10 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 
 export async function POST(request: Request) {
   try {
-    const { owner, tokenIn, tokenOut, amountIn, slippage } = await request.json();
+    const { owner, tokenIn, tokenOut, amountIn, slippage, chain: requestChain } = await request.json();
+    const chain = (requestChain || DEFAULT_CHAIN) as SupportedChainId;
 
     if (!owner || !tokenIn || !tokenOut || !amountIn || slippage === undefined) {
       return Response.json(
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
 
     const swap = await compassApiSDK.earn.earnSwap({
       owner,
-      chain: CHAIN,
+      chain,
       tokenIn,
       tokenOut,
       amountIn,

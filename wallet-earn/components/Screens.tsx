@@ -11,6 +11,7 @@ import {
 } from "@compass-labs/api-sdk/models/components";
 import { AnimatePresence, motion } from "motion/react";
 import { useWallet } from "@/lib/hooks/use-wallet";
+import { useChain } from "@/lib/contexts/chain-context";
 
 export enum Screen {
   Wallet,
@@ -32,6 +33,7 @@ export let vaultsByToken: { [key: string]: string[] } = {};
 
 export default function Screens() {
   const { earnAccountAddress, hasEarnAccount } = useWallet();
+  const { chainId } = useChain();
 
   const [screen, setScreen] = React.useState<Screen>(Screen.Wallet);
   const [token, setToken] = React.useState<Token>(Token.ETH);
@@ -45,18 +47,18 @@ export default function Screens() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const getTokenData = async (walletAddress: string) => {
+  const getTokenData = async (walletAddress: string, chain: string) => {
     setTokenData(undefined);
     const tokenDataPromises = Object.keys(Token).map((token) =>
-      fetch(`/api/token/${token}?wallet=${walletAddress}`).then((res) => res.json())
+      fetch(`/api/token/${token}?wallet=${walletAddress}&chain=${chain}`).then((res) => res.json())
     );
     const tokenData: TokenData[] = await Promise.all(tokenDataPromises);
     setTokenData(tokenData);
   };
 
-  const getVaultsListData = async () => {
+  const getVaultsListData = async (chain: string) => {
     setVaultsListData(undefined);
-    const response = await fetch(`/api/vaults`);
+    const response = await fetch(`/api/vaults?chain=${chain}`);
     const vaultsData: VaultsListResponse = await response.json();
 
     // Filter to only show USDC vaults
@@ -84,25 +86,25 @@ export default function Screens() {
     });
   };
 
-  const getPositionsData = async (walletAddress: string) => {
+  const getPositionsData = async (walletAddress: string, chain: string) => {
     setPositionsData(undefined);
-    const response = await fetch(`/api/positions?wallet=${walletAddress}`);
+    const response = await fetch(`/api/positions?wallet=${walletAddress}&chain=${chain}`);
     const positions: EarnPositionsResponse = await response.json();
     setPositionsData(positions);
   };
 
-  // Fetch data when earn account is available
+  // Fetch data when earn account is available or chain changes
   React.useEffect(() => {
     if (hasEarnAccount && earnAccountAddress) {
-      getTokenData(earnAccountAddress);
-      getVaultsListData();
-      getPositionsData(earnAccountAddress);
+      getTokenData(earnAccountAddress, chainId);
+      getVaultsListData(chainId);
+      getPositionsData(earnAccountAddress, chainId);
     } else {
       // Clear data when not connected
       setTokenData(undefined);
       setPositionsData(undefined);
     }
-  }, [hasEarnAccount, earnAccountAddress, refreshTrigger]);
+  }, [hasEarnAccount, earnAccountAddress, refreshTrigger, chainId]);
 
   const renderScreen = () => {
     switch (screen) {

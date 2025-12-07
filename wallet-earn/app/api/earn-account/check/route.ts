@@ -1,17 +1,13 @@
-import { CHAIN } from "@/utils/constants";
+import { DEFAULT_CHAIN, SUPPORTED_CHAINS, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(process.env.RPC_URL),
-});
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const owner = searchParams.get("owner");
+    const chainId = (searchParams.get("chain") || DEFAULT_CHAIN) as SupportedChainId;
+    const chainConfig = SUPPORTED_CHAINS[chainId];
 
     if (!owner) {
       return Response.json(
@@ -20,6 +16,11 @@ export async function GET(request: Request) {
       );
     }
 
+    const publicClient = createPublicClient({
+      chain: chainConfig.viemChain,
+      transport: http(process.env.RPC_URL),
+    });
+
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,
     });
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     // Try to create account - if it returns 400, account already exists
     try {
       const response = await compassApiSDK.earn.earnCreateAccount({
-        chain: CHAIN,
+        chain: chainId,
         owner,
         sender: owner,
         estimateGas: false,

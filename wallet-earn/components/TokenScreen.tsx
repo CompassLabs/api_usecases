@@ -1,4 +1,4 @@
-import { ChevronLeft, Inbox } from "lucide-react";
+import { ChevronLeft, Inbox, Search } from "lucide-react";
 import { Screen, Token, TokenData } from "./Screens";
 import {
   VaultsListResponse,
@@ -34,6 +34,7 @@ export default function TokenScreen({
   handleRefresh: () => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   // Filter vaults for this specific token and merge with user positions
   const enrichedVaults = React.useMemo<EnrichedVaultData[]>(() => {
@@ -55,6 +56,15 @@ export default function TokenScreen({
       };
     });
   }, [vaultsListData, positionsData, tokenSymbol]);
+
+  // Filter vaults based on search query
+  const filteredVaults = React.useMemo<EnrichedVaultData[]>(() => {
+    if (!searchQuery.trim()) return enrichedVaults;
+    const query = searchQuery.toLowerCase();
+    return enrichedVaults.filter((vault) =>
+      vault.name.toLowerCase().includes(query)
+    );
+  }, [enrichedVaults, searchQuery]);
 
   const totalAmount = React.useMemo(
     () => calculateTokenAmount(tokenData, enrichedVaults),
@@ -105,18 +115,39 @@ export default function TokenScreen({
             You can earn yield on your idle crypto!
           </p>
         </div>
+        {enrichedVaults && enrichedVaults.length > 0 && (
+          <div className="relative mt-3 mb-2 px-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search vaults..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent bg-white"
+            />
+          </div>
+        )}
         {tokenData && enrichedVaults && enrichedVaults.length > 0 ? (
-          <ul className="flex flex-col gap-2 -mx-3 pt-3 pb-3 px-3">
-            {enrichedVaults.map((vault) => (
-              <EarnItem
-                vaultData={vault}
-                token={tokenData}
-                key={vault.address}
-                setIsOpen={setIsOpen}
-                handleRefresh={handleRefresh}
-              />
-            ))}
-          </ul>
+          filteredVaults.length > 0 ? (
+            <ul className="flex flex-col gap-2 -mx-3 pt-3 pb-3 px-3">
+              {filteredVaults.map((vault) => (
+                <EarnItem
+                  vaultData={vault}
+                  token={tokenData}
+                  key={vault.address}
+                  setIsOpen={setIsOpen}
+                  handleRefresh={handleRefresh}
+                />
+              ))}
+            </ul>
+          ) : (
+            <div className="w-full flex flex-col justify-center items-center my-auto">
+              <Search className="stroke-[0.4] text-zinc-400/70" size={48} />
+              <div className="text-[13px] text-zinc-400 text-center mt-2">
+                No vaults found matching "{searchQuery}"
+              </div>
+            </div>
+          )
         ) : (
           <div className="w-full flex flex-col justify-center items-center my-auto">
             {enrichedVaults?.length === 0 ? (

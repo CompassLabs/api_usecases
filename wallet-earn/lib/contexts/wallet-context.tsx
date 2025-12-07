@@ -18,8 +18,8 @@ import {
 } from "react";
 import { usePrivy, useSendTransaction } from "@privy-io/react-auth";
 import { type Address, type Hex, createPublicClient, http } from "viem";
-import { base } from "viem/chains";
 import { useQuery } from "@tanstack/react-query";
+import { useChain } from "./chain-context";
 
 // Types
 interface WalletContextValue {
@@ -57,27 +57,16 @@ interface WalletContextValue {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-// Create public client for reading blockchain data
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(process.env.NEXT_PUBLIC_RPC_URL || "https://mainnet.base.org"),
-});
-
-/**
- * Check if an earn account is deployed at the given address
- */
-async function isAccountDeployed(address: Address): Promise<boolean> {
-  try {
-    const bytecode = await publicClient.getCode({ address });
-    return bytecode !== undefined && bytecode !== "0x";
-  } catch {
-    return false;
-  }
-}
-
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const { authenticated, user, login, logout } = usePrivy();
   const { sendTransaction } = useSendTransaction();
+  const { chainId, chain } = useChain();
+
+  // Create public client for reading blockchain data (dynamic based on chain)
+  const publicClient = createPublicClient({
+    chain: chain.viemChain,
+    transport: http(process.env.NEXT_PUBLIC_RPC_URL || "https://mainnet.base.org"),
+  });
 
   // Embedded wallet state (created by Privy for social logins)
   const [embeddedWalletAddress, setEmbeddedWalletAddress] =
@@ -158,12 +147,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
    * Uses ownerAddress (external wallet if connected, otherwise embedded wallet)
    */
   const { data: earnAccountData, refetch: refetchEarnAccount } = useQuery({
-    queryKey: ["earn-account", ownerAddress],
+    queryKey: ["earn-account", ownerAddress, chainId],
     queryFn: async () => {
       if (!ownerAddress) return null;
 
       const response = await fetch(
-        `/api/earn-account/check?owner=${ownerAddress}`
+        `/api/earn-account/check?owner=${ownerAddress}&chain=${chainId}`
       );
       if (!response.ok) return null;
 
@@ -204,6 +193,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           owner: ownerAddress,
+          chain: chainId,
         }),
       });
 
@@ -220,7 +210,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         {
           to: transaction.to as Address,
           data: transaction.data as Hex,
-          chainId: base.id,
+          chainId: chain.viemChain.id,
           value: BigInt(transaction.value || "0"),
         },
         {
@@ -261,6 +251,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     isEarnAccountCreated,
     sendTransaction,
     refetchEarnAccount,
+    chainId,
+    chain,
+    publicClient,
   ]);
 
   const handleLogout = useCallback(async () => {
