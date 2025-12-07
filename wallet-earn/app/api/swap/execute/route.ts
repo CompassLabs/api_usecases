@@ -1,4 +1,4 @@
-import { DEFAULT_CHAIN, SUPPORTED_CHAINS, type SupportedChainId } from "@/utils/constants";
+import { DEFAULT_CHAIN, SUPPORTED_CHAINS, getRpcUrl, type SupportedChainId } from "@/utils/constants";
 import { CompassApiSDK } from "@compass-labs/api-sdk";
 import { type UnsignedTransaction } from "@compass-labs/api-sdk/models/components";
 import { createPublicClient, createWalletClient, http } from "viem";
@@ -21,15 +21,17 @@ export async function POST(request: Request) {
       process.env.GAS_SPONSOR_PK as `0x${string}`
     );
 
+    const rpcUrl = getRpcUrl(chainId);
+
     const sponsorWalletClient = createWalletClient({
       account: sponsorAccount,
       chain: chainConfig.viemChain,
-      transport: http(process.env.RPC_URL),
+      transport: http(rpcUrl),
     });
 
     const publicClient = createPublicClient({
       chain: chainConfig.viemChain,
-      transport: http(process.env.RPC_URL),
+      transport: http(rpcUrl),
     });
 
     const compassApiSDK = new CompassApiSDK({
