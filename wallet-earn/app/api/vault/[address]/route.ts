@@ -12,6 +12,7 @@ export async function GET(
 
   const compassApiSDK = new CompassApiSDK({
     apiKeyAuth: process.env.COMPASS_API_KEY,
+    serverURL: process.env.COMPASS_API_SERVER_URL,
   });
 
   const vaultResponse = await compassApiSDK.erc4626Vaults.vaultsVault({

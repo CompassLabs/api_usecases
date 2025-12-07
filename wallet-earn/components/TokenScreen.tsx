@@ -94,7 +94,7 @@ export default function TokenScreen({
       <div className="flex-[0.9] flex flex-col items-center justify-center mt-4 relative">
         <div className="p-px shadow-inner shadow-neutral-300 rounded-full mb-2">
           <img
-            src={`/${tokenSymbol}.${tokenSymbol !== "cbBTC" ? "svg" : "webp"}`}
+            src={`/${tokenSymbol}.${tokenSymbol === "cbBTC" ? "webp" : tokenSymbol === "AUSD" ? "png" : "svg"}`}
             className="w-14 h-14 rounded-full outline outline-offset-[-1px] outline-neutral-900/20"
           />
         </div>

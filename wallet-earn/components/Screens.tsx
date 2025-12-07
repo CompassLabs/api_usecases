@@ -24,6 +24,7 @@ export enum Token {
   USDC = "USDC",
   cbBTC = "cbBTC",
   wstETH = "wstETH",
+  AUSD = "AUSD",
 }
 
 export type TokenData = TokenBalanceResponse & TokenPriceResponse;

@@ -328,9 +328,7 @@ function EarnForm({
           <div className="flex items-center gap-1.5 mt-1">
             <img
               className="w-4 h-4"
-              src={`${token.tokenSymbol}.${
-                token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
-              }`}
+              src={`${token.tokenSymbol}.${token.tokenSymbol === "cbBTC" ? "webp" : token.tokenSymbol === "AUSD" ? "png" : "svg"}`}
             />
             <div className="text-neutral-500 text-sm">
               {currentPosition.toFixed(4)} {token.tokenSymbol}
@@ -396,9 +394,7 @@ function EarnForm({
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <img
                 className="w-5 h-5"
-                src={`${token.tokenSymbol}.${
-                  token.tokenSymbol !== "cbBTC" ? "svg" : "webp"
-                }`}
+                src={`${token.tokenSymbol}.${token.tokenSymbol === "cbBTC" ? "webp" : token.tokenSymbol === "AUSD" ? "png" : "svg"}`}
               />
               <span className="text-sm font-medium text-neutral-600">
                 {token.tokenSymbol}

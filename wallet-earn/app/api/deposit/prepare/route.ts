@@ -15,6 +15,7 @@ export async function POST(request: Request) {
 
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,
+      serverURL: process.env.COMPASS_API_SERVER_URL,
     });
 
     // Call earnManage with gas sponsorship enabled

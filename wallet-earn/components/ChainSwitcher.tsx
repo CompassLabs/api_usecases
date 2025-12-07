@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { ChevronDown, Check } from "lucide-react";
 import { useChain } from "@/lib/contexts/chain-context";
 import { cn } from "@/utils/utils";
-import type { SupportedChainId } from "@/utils/constants";
+import { SUPPORTED_CHAINS, type SupportedChainId } from "@/utils/constants";
 
 export default function ChainSwitcher() {
   const { chainId, chain, setChain, supportedChains } = useChain();
@@ -80,14 +81,15 @@ export default function ChainSwitcher() {
 }
 
 function ChainIcon({ chainId }: { chainId: SupportedChainId }) {
-  // Using colored circles as fallback icons
-  const colors: Record<SupportedChainId, string> = {
-    base: "bg-blue-500",
-    ethereum: "bg-indigo-500",
-    arbitrum: "bg-sky-400",
-  };
+  const chain = SUPPORTED_CHAINS[chainId];
 
   return (
-    <div className={cn("w-5 h-5 rounded-full", colors[chainId])} />
+    <Image
+      src={chain.icon}
+      alt={chain.name}
+      width={20}
+      height={20}
+      className="rounded-full"
+    />
   );
 }

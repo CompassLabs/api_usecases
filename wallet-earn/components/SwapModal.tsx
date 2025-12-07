@@ -9,7 +9,7 @@ import { useWallet } from "@/lib/hooks/use-wallet";
 import { useChain } from "@/lib/contexts/chain-context";
 import { ArrowDownUp, X } from "lucide-react";
 
-const SWAP_TOKENS = ["USDC", "WETH", "ETH", "cbBTC", "wstETH"] as const;
+const SWAP_TOKENS = ["USDC", "WETH", "ETH", "cbBTC", "wstETH", "AUSD"] as const;
 type SwapToken = (typeof SWAP_TOKENS)[number];
 
 export default function SwapModal({
@@ -255,7 +255,7 @@ export default function SwapModal({
                     className="flex items-center gap-2 px-5 py-2 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-colors whitespace-nowrap"
                   >
                     <img
-                      src={`/${tokenIn}.${tokenIn !== "cbBTC" ? "svg" : "webp"}`}
+                      src={`/${tokenIn}.${tokenIn === "cbBTC" ? "webp" : tokenIn === "AUSD" ? "png" : "svg"}`}
                       className="w-5 h-5 flex-shrink-0"
                     />
                     <span className="font-medium">{tokenIn}</span>
@@ -336,7 +336,7 @@ export default function SwapModal({
                     className="flex items-center gap-2 px-5 py-2 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-colors whitespace-nowrap"
                   >
                     <img
-                      src={`/${tokenOut}.${tokenOut !== "cbBTC" ? "svg" : "webp"}`}
+                      src={`/${tokenOut}.${tokenOut === "cbBTC" ? "webp" : tokenOut === "AUSD" ? "png" : "svg"}`}
                       className="w-5 h-5 flex-shrink-0"
                     />
                     <span className="font-medium">{tokenOut}</span>
@@ -448,7 +448,7 @@ function TokenSelect({
             )}
           >
             <img
-              src={`/${token}.${token !== "cbBTC" ? "svg" : "webp"}`}
+              src={`/${token}.${token === "cbBTC" ? "webp" : token === "AUSD" ? "png" : "svg"}`}
               className="w-5 h-5"
             />
             <span className="font-medium">{token}</span>

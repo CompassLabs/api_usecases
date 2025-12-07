@@ -23,6 +23,7 @@ export async function GET(request: Request) {
 
     const compassApiSDK = new CompassApiSDK({
       apiKeyAuth: process.env.COMPASS_API_KEY,
+      serverURL: process.env.COMPASS_API_SERVER_URL,
     });
 
     // Try to create account - if it returns 400, account already exists

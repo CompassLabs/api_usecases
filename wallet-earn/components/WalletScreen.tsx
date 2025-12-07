@@ -251,7 +251,7 @@ function TokenCard({
     >
       <div className="p-px border border-neutral-200 rounded-full">
         <img
-          src={`/${tokenSymbol}.${tokenSymbol !== "cbBTC" ? "svg" : "webp"}`}
+          src={`/${tokenSymbol}.${tokenSymbol === "cbBTC" ? "webp" : tokenSymbol === "AUSD" ? "png" : "svg"}`}
           className="w-9 h-9 rounded-full"
         />
       </div>

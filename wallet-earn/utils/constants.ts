@@ -6,7 +6,7 @@ export const SUPPORTED_CHAINS = {
     id: "base",
     name: "Base",
     viemChain: base,
-    icon: "/chains/base.svg",
+    icon: "/chains/base.png",
   },
   ethereum: {
     id: "ethereum",
@@ -18,7 +18,7 @@ export const SUPPORTED_CHAINS = {
     id: "arbitrum",
     name: "Arbitrum",
     viemChain: arbitrum,
-    icon: "/chains/arbitrum.svg",
+    icon: "/chains/arbitrum.png",
   },
 } as const;
 
