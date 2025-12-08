@@ -37,8 +37,17 @@ export default function WalletScreen({
   } = useWallet();
 
   const { fundWallet } = useFundWallet();
-  const { chain } = useChain();
+  const { chain, chainId } = useChain();
   const [isSwapOpen, setIsSwapOpen] = React.useState(false);
+
+  // Filter tokens based on chain:
+  // - AUSD only available on Ethereum mainnet
+  // - cbBTC not available on Arbitrum
+  const availableTokens = Object.keys(Token).filter((tokenSymbol) => {
+    if (tokenSymbol === "AUSD" && chainId !== "ethereum") return false;
+    if (tokenSymbol === "cbBTC" && chainId === "arbitrum") return false;
+    return true;
+  });
   const [copied, setCopied] = React.useState(false);
 
   const handleCopyAddress = async () => {
@@ -216,7 +225,7 @@ export default function WalletScreen({
 
       {/* Token list */}
       <ul className="flex flex-col gap-2 mt-auto w-full pb-4">
-        {Object.keys(Token).map((tokenSymbol) => (
+        {availableTokens.map((tokenSymbol) => (
           <TokenCard
             tokenSymbol={tokenSymbol}
             token={tokenData?.find((tD) => tD.tokenSymbol === tokenSymbol)}

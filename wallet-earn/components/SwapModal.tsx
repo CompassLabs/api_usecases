@@ -9,8 +9,8 @@ import { useWallet } from "@/lib/hooks/use-wallet";
 import { useChain } from "@/lib/contexts/chain-context";
 import { ArrowDownUp, X } from "lucide-react";
 
-const SWAP_TOKENS = ["USDC", "WETH", "ETH", "cbBTC", "wstETH", "AUSD"] as const;
-type SwapToken = (typeof SWAP_TOKENS)[number];
+const ALL_SWAP_TOKENS = ["USDC", "WETH", "ETH", "cbBTC", "wstETH", "AUSD"] as const;
+type SwapToken = (typeof ALL_SWAP_TOKENS)[number];
 
 export default function SwapModal({
   isOpen,
@@ -28,8 +28,34 @@ export default function SwapModal({
   const { ownerAddress } = useWallet();
   const { chainId, chain } = useChain();
 
+  // Filter tokens based on chain:
+  // - AUSD only available on Ethereum mainnet
+  // - cbBTC not available on Arbitrum
+  const availableSwapTokens = ALL_SWAP_TOKENS.filter((token) => {
+    if (token === "AUSD" && chainId !== "ethereum") return false;
+    if (token === "cbBTC" && chainId === "arbitrum") return false;
+    return true;
+  });
+
   const [tokenIn, setTokenIn] = React.useState<SwapToken>("USDC");
   const [tokenOut, setTokenOut] = React.useState<SwapToken>("WETH");
+
+  // Reset token selection if unavailable token is selected on current chain
+  React.useEffect(() => {
+    const isTokenInUnavailable =
+      (tokenIn === "AUSD" && chainId !== "ethereum") ||
+      (tokenIn === "cbBTC" && chainId === "arbitrum");
+    const isTokenOutUnavailable =
+      (tokenOut === "AUSD" && chainId !== "ethereum") ||
+      (tokenOut === "cbBTC" && chainId === "arbitrum");
+
+    if (isTokenInUnavailable) {
+      setTokenIn("USDC");
+    }
+    if (isTokenOutUnavailable) {
+      setTokenOut("WETH");
+    }
+  }, [chainId, tokenIn, tokenOut]);
   const [amount, setAmount] = React.useState("");
   const [slippage, setSlippage] = React.useState("0.5");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -262,7 +288,7 @@ export default function SwapModal({
                   </button>
                   {showTokenInSelect && (
                     <TokenSelect
-                      tokens={SWAP_TOKENS}
+                      tokens={availableSwapTokens}
                       selectedToken={tokenIn}
                       onSelect={(token) => {
                         setTokenIn(token);
@@ -343,7 +369,7 @@ export default function SwapModal({
                   </button>
                   {showTokenOutSelect && (
                     <TokenSelect
-                      tokens={SWAP_TOKENS}
+                      tokens={availableSwapTokens}
                       selectedToken={tokenOut}
                       onSelect={(token) => {
                         setTokenOut(token);

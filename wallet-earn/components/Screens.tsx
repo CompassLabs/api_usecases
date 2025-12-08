@@ -52,7 +52,15 @@ export default function Screens() {
 
   const getTokenData = async (walletAddress: string, chain: string) => {
     setTokenData(undefined);
-    const tokenDataPromises = Object.keys(Token).map((token) =>
+    // Filter tokens based on chain:
+    // - AUSD only available on Ethereum mainnet
+    // - cbBTC not available on Arbitrum
+    const tokensToFetch = Object.keys(Token).filter((token) => {
+      if (token === "AUSD" && chain !== "ethereum") return false;
+      if (token === "cbBTC" && chain === "arbitrum") return false;
+      return true;
+    });
+    const tokenDataPromises = tokensToFetch.map((token) =>
       fetch(`/api/token/${token}?wallet=${walletAddress}&chain=${chain}`).then((res) => res.json())
     );
     const tokenData: TokenData[] = await Promise.all(tokenDataPromises);
@@ -118,7 +126,12 @@ export default function Screens() {
       getTokenData(earnAccountAddress, chainId);
       getVaultsListData(chainId);
       getPositionsData(earnAccountAddress, chainId);
-      getAusdMorphoVaults(chainId);
+      // Only fetch AUSD Morpho vaults on Ethereum mainnet
+      if (chainId === "ethereum") {
+        getAusdMorphoVaults(chainId);
+      } else {
+        setAusdMorphoVaults(undefined);
+      }
     } else {
       // Clear data when not connected
       setTokenData(undefined);
