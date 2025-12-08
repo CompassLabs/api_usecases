@@ -29,6 +29,9 @@ export async function POST(request: Request) {
     // Create a bundle with two actions:
     // 1. Swap tokenIn (e.g., USDC) to tokenOut (e.g., AUSD)
     // 2. Deposit tokenOut into the vault
+    const slippagePercent = Number(slippage) || 1; // Default 1% slippage
+    const slippageMultiplier = 1 - slippagePercent / 100;
+
     const bundleResponse = await compassApiSDK.earn.earnBundle({
       owner,
       chain,
@@ -40,7 +43,7 @@ export async function POST(request: Request) {
             tokenIn,
             tokenOut,
             amountIn,
-            slippage: String(slippage || 0.5), // Default 0.5% slippage
+            slippage: String(slippagePercent),
           },
         },
         {
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
               vaultAddress,
             },
             action: "DEPOSIT",
-            amount: String(Number(amountIn) * 0.99) // Deposit all the swapped tokens
+            amount: String(Number(amountIn) * slippageMultiplier),
           },
         },
       ],
