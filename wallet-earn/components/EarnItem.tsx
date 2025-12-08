@@ -54,15 +54,12 @@ export default function EarnItem({
             <h3 className="self-center text-sm font-medium flex items-center gap-1.5 text-zinc-500">
               APY
             </h3>
-            <div className="flex flex-col items-center">
-              <div className="relative font-bold flex items-center gap-1 font-sans text-lg">
-                <TrendingUp
-                  className="absolute -translate-x-full -left-1 text-green-600"
-                  size={14}
-                />
-                {(Number(vaultData.oneMonthReturns) * 100).toFixed(2)}%
-              </div>
-              <div className="text-[13px] text-neutral-500 -mt-0.5">1 month</div>
+            <div className="relative font-bold flex items-center gap-1 font-sans text-lg">
+              <TrendingUp
+                className="absolute -translate-x-full -left-1 text-green-600"
+                size={14}
+              />
+              {(Number(vaultData.oneMonthReturns) * 100).toFixed(2)}%
             </div>
           </div>
           <div className="flex.">

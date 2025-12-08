@@ -34,6 +34,7 @@ export function useWallet() {
     earnAccountAddress: earnAccount.address,
     hasEarnAccount: earnAccount.isCreated,
     isCreatingEarnAccount: earnAccount.isCreating,
+    isCheckingEarnAccount: earnAccount.isChecking,
     createEarnAccount: earnAccount.createAccount,
 
     // Auth state

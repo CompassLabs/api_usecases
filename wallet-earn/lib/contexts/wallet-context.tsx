@@ -44,6 +44,7 @@ interface WalletContextValue {
     address: Address | null;
     isCreated: boolean;
     isCreating: boolean;
+    isChecking: boolean;
     createAccount: () => Promise<Address>;
   };
 
@@ -148,7 +149,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
    * Check if earn account exists when wallet is connected
    * Uses ownerAddress (external wallet if connected, otherwise embedded wallet)
    */
-  const { data: earnAccountData, refetch: refetchEarnAccount } = useQuery({
+  const { data: earnAccountData, refetch: refetchEarnAccount, isLoading: isCheckingEarnAccount, isFetching: isFetchingEarnAccount } = useQuery({
     queryKey: ["earn-account", ownerAddress, chainId],
     queryFn: async () => {
       if (!ownerAddress) return null;
@@ -163,7 +164,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     },
     enabled: !!ownerAddress && authenticated,
     staleTime: 60 * 1000, // 1 minute
+    refetchOnMount: true, // Refetch when component mounts
   });
+
+  // Clear earn account state when chain changes (before refetch completes)
+  useEffect(() => {
+    setEarnAccountAddress(null);
+    setIsEarnAccountCreated(false);
+  }, [chainId]);
 
   // Update earn account state from query
   useEffect(() => {
@@ -281,6 +289,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       address: earnAccountAddress,
       isCreated: isEarnAccountCreated,
       isCreating: isCreatingAccount,
+      isChecking: isCheckingEarnAccount || isFetchingEarnAccount,
       createAccount: createEarnAccount,
     },
     isConnected,
@@ -309,6 +318,7 @@ const defaultContextValue: WalletContextValue = {
     address: null,
     isCreated: false,
     isCreating: false,
+    isChecking: false,
     createAccount: async () => {
       throw new Error("Wallet provider not available");
     },

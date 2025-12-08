@@ -32,6 +32,7 @@ export default function WalletScreen({
     logout,
     hasEarnAccount,
     isCreatingEarnAccount,
+    isCheckingEarnAccount,
     createEarnAccount,
     earnAccountAddress,
   } = useWallet();
@@ -106,6 +107,16 @@ export default function WalletScreen({
       <div className="flex flex-col h-full items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
         <p className="text-neutral-500">Loading...</p>
+      </div>
+    );
+  }
+
+  // Checking earn account state (e.g., after chain switch)
+  if (isCheckingEarnAccount) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
+        <p className="text-neutral-500">Loading earn account...</p>
       </div>
     );
   }
