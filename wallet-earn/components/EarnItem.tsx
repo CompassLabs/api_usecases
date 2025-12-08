@@ -209,7 +209,7 @@ function EarnForm({
           amountIn: formattedAmount,
           tokenIn: Token.USDC,
           tokenOut: Token.AUSD,
-          slippage: 0.5,
+          slippage: 1,
           owner: ownerAddress,
           chain: chainId,
         };
