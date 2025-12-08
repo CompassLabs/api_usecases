@@ -51,7 +51,7 @@ export async function POST(request: Request) {
               vaultAddress,
             },
             action: "DEPOSIT",
-            amount: String(Number(amountIn) * 0.997) // Deposit all the swapped tokens
+            amount: String(Number(amountIn) * 0.99) // Deposit all the swapped tokens
           },
         },
       ],

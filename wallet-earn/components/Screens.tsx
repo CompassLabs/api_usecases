@@ -124,7 +124,7 @@ export default function Screens() {
   React.useEffect(() => {
     if (hasEarnAccount && earnAccountAddress) {
       getTokenData(earnAccountAddress, chainId);
-      getVaultsListData(chainId);
+    //   getVaultsListData(chainId);
       getPositionsData(earnAccountAddress, chainId);
       // Only fetch AUSD Morpho vaults on Ethereum mainnet
       if (chainId === "ethereum") {
