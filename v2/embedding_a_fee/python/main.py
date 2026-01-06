@@ -27,7 +27,7 @@ with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
             "vault_address": "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
         },
         action=models.EarnManageRequestAction.WITHDRAW,
-        amount="0.009",  # Amount to withdraw
+        amount="10",  # Amount to withdraw
         gas_sponsorship=False,
         fee={
             "recipient": FEE_RECIPIENT,

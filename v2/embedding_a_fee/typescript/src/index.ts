@@ -32,7 +32,7 @@ const manageResponse = await compass.earn.earnManage({
     vaultAddress: "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
   },
   action: "WITHDRAW",
-  amount: "0.01",  // Amount to withdraw
+  amount: "10",  // Amount to withdraw
   gasSponsorship: false,
   fee: {
     recipient: FEE_RECIPIENT,
