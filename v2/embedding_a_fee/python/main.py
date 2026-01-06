@@ -27,7 +27,7 @@ with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
             "vault_address": "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
         },
         action=models.EarnManageRequestAction.WITHDRAW,
-        amount="0.01",  # Amount to withdraw
+        amount="0.009",  # Amount to withdraw
         gas_sponsorship=False,
         fee={
             "recipient": FEE_RECIPIENT,
@@ -44,8 +44,8 @@ with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
     signed_tx = w3.eth.account.sign_transaction(tx_dict["transaction"], PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
-    print(f"Transaction hash: {tx_hash.hex()}")
-    print(f"View on BaseScan: https://basescan.org/tx/{tx_hash.hex()}")
+    print(f"Transaction hash: {w3.to_hex(tx_hash)}")
+    print(f"View on BaseScan: https://basescan.org/tx/{w3.to_hex(tx_hash)}")
 
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     print(f"Transaction confirmed in block: {receipt.blockNumber}")
