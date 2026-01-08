@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: gasless_fund_earn_account_python_example
+Version: 1.0.0
+Summary: Example: Fund Earn Account with Gas Sponsorship using Compass API
+Requires-Dist: compass-api-sdk
+Requires-Dist: python-dotenv
+Requires-Dist: web3
+Requires-Dist: eth-account
