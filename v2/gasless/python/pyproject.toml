@@ -1,0 +1,10 @@
+[project]
+name = "gasless_fund_earn_account_python_example"
+version = "1.0.0"
+description = "Example: Fund Earn Account with Gas Sponsorship using Compass API"
+dependencies = [
+    "compass-api-sdk",
+    "python-dotenv",
+    "web3",
+    "eth-account",
+]
