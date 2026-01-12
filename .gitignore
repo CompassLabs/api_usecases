@@ -57,3 +57,5 @@ next-env.d.ts
 .next/
 
 **/dist/
+# Python build artifacts
+*.egg-info/
