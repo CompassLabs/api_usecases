@@ -14,6 +14,20 @@ BASE_RPC_URL = os.getenv("BASE_RPC_URL")
 
 # SNIPPET START 2
 with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
+    # Find active Pendle markets on Base with best fixed rates
+    markets = compass_api.earn.earn_pendle_markets(
+        chain=models.Chain.BASE,
+        underlying_symbol="USDC",
+        order_by="tvl_usd",
+        limit=10
+    )
+
+    # Filter for active markets (not expired)
+    import time
+    current_timestamp = int(time.time())
+    active_markets = [m for m in markets if m.expiry > current_timestamp]
+
+    print(f"Active Pendle markets: {active_markets}")
 # SNIPPET END 2
 
 # SNIPPET START 3
