@@ -19,6 +19,21 @@ const BASE_RPC_URL = process.env.BASE_RPC_URL as string;
 const compass = new CompassApiSDK({
   apiKeyAuth: COMPASS_API_KEY,
 });
+
+// Find active Pendle markets on Base with best fixed rates
+const markets = await compass.earn.earnPendleMarkets({
+  chain: "base",
+  underlyingSymbol: "USDC",
+  orderBy: "tvl_usd",
+  limit: 10,
+});
+
+// Filter for active markets (not expired)
+const activeMarkets = markets.filter(
+  (market) => market.expiry > Math.floor(Date.now() / 1000)
+);
+
+console.log("Active Pendle markets:", activeMarkets);
 // SNIPPET END 2
 
 // SNIPPET START 3
