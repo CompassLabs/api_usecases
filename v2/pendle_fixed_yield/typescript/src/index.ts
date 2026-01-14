@@ -28,12 +28,7 @@ const markets = await compass.earn.earnPendleMarkets({
   limit: 10,
 });
 
-// Filter for active markets (not expired)
-const activeMarkets = markets.filter(
-  (market) => market.expiry > Math.floor(Date.now() / 1000)
-);
-
-console.log("Active Pendle markets:", activeMarkets);
+console.log("Active Pendle markets:", markets);
 // SNIPPET END 2
 
 // SNIPPET START 3

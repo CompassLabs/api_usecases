@@ -22,12 +22,7 @@ with CompassAPI(api_key_auth=COMPASS_API_KEY) as compass_api:
         limit=10
     )
 
-    # Filter for active markets (not expired)
-    import time
-    current_timestamp = int(time.time())
-    active_markets = [m for m in markets if m.expiry > current_timestamp]
-
-    print(f"Active Pendle markets: {active_markets}")
+    print(f"Active Pendle markets: {markets}")
 # SNIPPET END 2
 
 # SNIPPET START 3
